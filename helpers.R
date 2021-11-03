@@ -282,9 +282,10 @@ compute_num_tests <- function(this_phi, this_VE_I, this_VE_S, theta = 0, freq, i
   df <- run_leaky_model(this_phi, this_VE_I, this_VE_S, theta, q, psi, X_I, X_S)
   df <- df[df$time %% 1 == 0, ] # only consider daily time steps
   prob_test <- 1/freq
-  prob_not_caught <- 1 - min((1/freq)*inf_period*compliance, 1)
+  prob_not_caught <- 1 #- min((1/freq)*inf_period*compliance, 1)
   
-  df$tests_u <- (df$S_u + df$E_u + df$I_u)*prob_test*compliance + df$R_u*prob_test*compliance*prob_not_caught
+  df$tests_u <- (df$S_u + df$E_u + df$I_u + df$S_x + df$E_x + df$I_x)*prob_test*compliance +
+      (df$R_u + df$R_x)*prob_test*compliance*prob_not_caught
   num_tests <- sum(df$tests_u)
 }
 
