@@ -3,34 +3,43 @@ calculate_derivatives_leaky <- function(t, x, parameters){
     # alpha = probability of infection given contact
     # phi = percent vaccinated
     
+    # per capita contact rates
     rates_vec <- get_contact_rates_with_homophily(phi, q)
-    vv <- rates_vec[1]
-    vu <- rates_vec[2]
-    uv <- rates_vec[3]
-    uu <- rates_vec[4]
+    rate_v_and_v <- rates_vec[1]
+    rate_u_and_v <- rates_vec[2]
+    rate_u_and_u <- rates_vec[3]
     
     # if no one is susceptible or everyone/no one is vaccinated, lambda = 0
     if (S_v > 0 && phi != 0){
-      # lambda_v <- alpha*(uv*I_u + vv*I_v*(1-VE_I))*(1-VE_S) + ext_forcing*(1-VE_S)*phi/S_v
-      lambda_v <- alpha*(uv*I_u + vv*I_v*(1-VE_I))*(1-VE_S) + ext_forcing*(1-VE_S)/N
+      lambda_v <- alpha*(rate_u_and_v*I_u + rate_u_and_v*I_x*(1-X_I) + rate_v_and_v*I_v*(1-VE_I))*(1-VE_S) + ext_forcing*(1-VE_S)/N
     } else {
       lambda_v <- 0
+    }
+    
+    if (S_x > 0 && psi != 0){
+      lambda_x <- alpha*(rate_u_and_u*I_u + rate_u_and_u*I_x*(1-X_I) + rate_u_and_v*I_v*(1-VE_I))*(1-X_S) + ext_forcing*(1-X_S)/N
+    } else {
+      lambda_x <- 0
     }
     
     if (S_u > 0 && phi != 1){
-      # lambda_u <- alpha*(uu*I_u + vu*I_v*(1-VE_I)) + ext_forcing*(1-phi)/S_u
-      lambda_u <- alpha*(uu*I_u + vu*I_v*(1-VE_I)) + ext_forcing/N
+      lambda_u <- alpha*(rate_u_and_u*I_u + rate_u_and_u*I_x*(1-X_I) + rate_u_and_v*I_v*(1-VE_I)) + ext_forcing/N
     } else {
       lambda_u <- 0
     }
-
+    
     dS_v  <- -lambda_v*S_v
+    dS_x  <- -lambda_x*S_x
     dS_u  <- -lambda_u*S_u
     
-    # make sure S can't go negative
+    # make sure S doesn't go negative
     if ((S_v - lambda_v*S_v) < 0){
       dS_v <- -S_v
       lambda_v <- 0
+    }
+    if ((S_x - lambda_x*S_x) < 0){
+      dS_x <- -S_x
+      lambda_x <- 0
     }
     if ((S_u - lambda_u*S_u) < 0){
       dS_u <- -S_u
@@ -38,19 +47,35 @@ calculate_derivatives_leaky <- function(t, x, parameters){
     }
     
     dE_v  <- -dS_v - sigma*E_v
+    dE_x  <- -dS_x - sigma*E_x
     dE_u  <- -dS_u - sigma*E_u
+    
     dI_v  <- sigma*E_v - gamma*I_v 
+    dI_x  <- sigma*E_x - (gamma/(1-theta))*I_x
     dI_u  <- sigma*E_u - (gamma/(1-theta))*I_u
+    
     dR_v  <- gamma*I_v
+    dR_x  <- (gamma/(1-theta))*I_x 
     dR_u  <- (gamma/(1-theta))*I_u 
     
-    return(list(c(dS_v, dS_u, dE_v, dE_u, dI_v, dI_u, dR_v, dR_u)))
+    return(list(c(dS_v, dS_x, dS_u, 
+                  dE_v, dE_x, dE_u, 
+                  dI_v, dI_x, dI_u, 
+                  dR_v, dR_x, dR_u)))
   }
   )
 }
 
-run_leaky_model <- function(phi, VE_I, VE_S, theta = 0, ext_forcing = 1, q = 0){
+run_leaky_model <- function(phi, VE_I, VE_S, theta = 0, q = 0,
+                            psi = 0, X_I = 0, X_S = 0){
+  # phi = fraction vaccinated
+  # psi = fraction SARS-CoV-2 experienced
+  # theta = impact of testing
   # q = homophily term. 0 is well-mixed, 1 is no mixing
+  # v = vaccinated & vaccinated + prior infection
+  # x = unvaccinated + prior infection
+  # u = unvaccinated
+  
   if (ext_forcing == 0){
     I <- 0.0005*N
     E <- 0.0005*N
@@ -61,19 +86,24 @@ run_leaky_model <- function(phi, VE_I, VE_S, theta = 0, ext_forcing = 1, q = 0){
   
   I_v_0 <- I*phi
   E_v_0 <- E*phi
-  I_u_0 <- I*(1-phi) 
-  E_u_0 <- E*(1-phi) 
+  
+  I_x_0 <- I*(1-phi)*psi
+  E_x_0 <- E*(1-phi)*psi
+  
+  I_u_0 <- I*(1-phi)*(1-psi)
+  E_u_0 <- E*(1-phi)*(1-psi)
   
   S_v_0 <- phi*N - I_v_0 - E_v_0  
-  S_u_0 <- (1-phi)*N - I_u_0 - E_u_0
+  S_x_0 <- (1-phi)*psi*N - I_x_0 - E_x_0
+  S_u_0 <- (1-phi)*(1-psi)*N - I_u_0 - E_u_0
   
-  inits <- c(S_v=S_v_0, S_u = S_u_0, 
-                  E_v=E_v_0, E_u=E_u_0, 
-                  I_v=I_v_0, I_u=I_u_0, 
-                  R_v=0, R_u=0)
+  inits <- c(S_v=S_v_0, S_x = S_x_0, S_u = S_u_0, 
+             E_v=E_v_0, E_x = E_x_0, E_u=E_u_0, 
+             I_v=I_v_0, I_x = I_x_0, I_u=I_u_0, 
+             R_v=0,     R_x=0,       R_u=0)
   
-  parameters <- c(gamma=gamma, alpha=alpha, sigma=sigma, N=N, phi=phi,
-                  VE_I=VE_I, VE_S=VE_S, theta=theta, ext_forcing=ext_forcing, q=q)
+  parameters <- c(gamma=gamma, alpha=alpha, sigma=sigma, N=N, phi=phi, psi=psi, X_I=X_I, X_S=X_S,
+                  VE_I=VE_I, VE_S=VE_S, theta=theta, q=q)
   
   sim_df <- as.data.frame(lsoda(inits, t, calculate_derivatives_leaky, parameters))
   
@@ -81,64 +111,76 @@ run_leaky_model <- function(phi, VE_I, VE_S, theta = 0, ext_forcing = 1, q = 0){
 }
 
 get_contact_rates_with_homophily <- function(phi, q){
+  # INPUTS:
+  # phi = fraction vaccinated
+  # q = homophily parameter (q = 0 is well-mixed)
+  #
+  # OUTPUTS:
+  # Elements of the contact rate matrix with homophily (units of per capita per day) -- weighted average between well-mixed and homophily scenario, depending on q
+  # i.e. j_to_i is the element (i,j): the average rate at which a j individual contacts an i individual per day
+  #
+  # NOTE: this matrix is symmetric (but the contact matrix is not!)
+  # NOTE: here, X and U are indistinguishable 
+  # See supp material for derivation
   
-  vv <- 2 - phi
+  homophily_rate_btwn_v_and_v <- (phi - 1)^2 + 1
+  rate_v_and_v <- (1-q) + q*homophily_rate_btwn_v_and_v  
   
   if (phi < 1){
-    vu <- (1-phi*vv)/(1-phi)
-    uv <- vu*phi/(1-phi)
-    uu <- (1-phi*uv)/(1-phi)
+    homophily_rate_btwn_u_and_v <- (1-phi*homophily_rate_btwn_v_and_v)/(1-phi)
+    homophily_rate_btwn_u_and_u <- (1 - 2*phi + phi^2*homophily_rate_btwn_v_and_v)/((1-phi)^2)
+    
+    rate_u_and_v <- (1-q) + q*homophily_rate_btwn_u_and_v
+    rate_u_and_u <- (1-q) + q*homophily_rate_btwn_u_and_u
   } else {
-    vu <- 0
-    uv <- 0
-    uu <- 1
+    # Hard code the edge case when phi=1 because 0's in the denominator
+    # when phi=1 everyone is vaccinated so v_to_v is the only relevant contact rate
+    rate_u_and_v <- 0
+    rate_u_and_u <- 0
   }
   
-  vv <- (1-q) + q*vv # v to v
-  vu <- (1-q) + q*vu # v to u
-  uv <- (1-q) + q*uv # u to v
-  uu <- (1-q) + q*uu # u to u
-  
-  return(c(vv, vu, uv, uu))
+  return(c(rate_v_and_v, rate_u_and_v, rate_u_and_u))
 }
 
 compute_who_caused_daily_infections <- function(phi, this_VE_I, this_VE_S, theta = 0, 
-                                                ext_forcing = 1, q = 0){
-  # Returns # of infections that were caused each day by u, v and external
+                                                q = 0, psi = 0, 
+                                                X_I = 0, X_S = 0){
+  # OUTPUT: Number of infections that were caused each day by U, V, and external
+  # NOTE: Here we consider X (unvaccinated + prior infection) as part of U
   
-  df <- run_leaky_model(phi, this_VE_I, this_VE_S, theta, ext_forcing, q)
+  df <- run_leaky_model(phi, this_VE_I, this_VE_S, theta, q, psi, X_I, X_S)
   I_u <- df$I_u
+  I_x <- df$I_x
   I_v <- df$I_v
-  S_v <- df$S_v
   S_u <- df$S_u
+  S_x <- df$S_x
+  S_v <- df$S_v
   
   rates_vec <- get_contact_rates_with_homophily(phi, q)
-  vv <- rates_vec[1]
-  vu <- rates_vec[2]
-  uv <- rates_vec[3]
-  uu <- rates_vec[4]
-
-  cases_in_v_by_v <- alpha*vv*I_v*(1-VE_I)*(1-VE_S)*S_v*dt
-  cases_in_v_by_external <- phi*(1-VE_S)*ext_forcing*dt # independent of the size of S_v
+  rate_v_and_v <- rates_vec[1]
+  rate_u_and_v <- rates_vec[2]
+  rate_u_and_u <- rates_vec[3]
   
-  cases_in_u_by_u <- alpha*uu*I_u*S_u*dt
-  cases_in_u_by_external <- (1-phi)*ext_forcing*dt # independent of the size of S_u
-
-  cases_in_v_by_u <- alpha*uv*I_u*(1-VE_S)*S_v*dt
-  cases_in_u_by_v <- alpha*vu*I_v*(1-VE_I)*S_u*dt
-
- 
+  cases_in_v_by_v <- alpha*rate_v_and_v*I_v*(1-VE_I)*(1-VE_S)*S_v*dt
+  cases_in_v_by_external <- ext_forcing*(1-VE_S)*S_v/N*dt
+  
+  cases_in_u_by_u <- alpha*rate_u_and_u*dt*(I_u*S_u + I_x*(1-X_S)*(1-X_I)*S_x)
+  cases_in_u_by_external <- ext_forcing*(S_u + (1-X_S)*S_x)/N*dt
+  
+  cases_in_v_by_u <- alpha*rate_u_and_v*(I_u + I_x*(1-X_I))*(1-VE_S)*S_v*dt
+  cases_in_u_by_v <- alpha*rate_u_and_v*(S_u + (1-X_S)*S_x)*I_v*(1-VE_I)*dt
+  
   list(cases_in_v_by_v, cases_in_v_by_u, cases_in_u_by_v, cases_in_u_by_u, cases_in_v_by_external, cases_in_u_by_external)
 }
 
 
 compute_who_caused_cases_tot <- function(this_phi, this_VE_I, this_VE_S, theta = 0,
-                                         ext_forcing = 1, q = 0){
-  # Returns % of who caused cases over the entire simulation by u, v and external
+                                         q = 0, psi = 0, X_I = 0, X_S = 0){
+  # OUTPUT: Percent of who caused cases (U, V, external) over the entire simulation
   
   mylist <- compute_who_caused_daily_infections(this_phi, this_VE_I, this_VE_S, theta,
-                                                ext_forcing, q)
-
+                                                q, psi, X_I, X_S)
+  
   df <- data.frame(time = t)
   
   df$cases_in_v_by_v <- unlist(mylist[[1]])
@@ -163,23 +205,23 @@ compute_who_caused_cases_tot <- function(this_phi, this_VE_I, this_VE_S, theta =
   list(prop_cases_in_v_by_v, prop_cases_in_v_by_u, prop_cases_in_u_by_v, prop_cases_in_u_by_u, prop_cases_in_v_by_ext, prop_cases_in_u_by_ext)
 }
 
-compute_Reff <- function(phi, VE_S, VE_I, theta=0, q=0){
-  # OLD - without homophily
-  # Reff <- R0*(phi*(1-VE_S)*(1-VE_I) + (1-theta)*(1-phi)) 
+compute_Reff <- function(phi, VE_S, VE_I, theta=0, q=0, psi=0, X_I=0, X_S=0){
+  # Numerically compute R_effective as the dominant eigenvalue of the next generation matrix
+  # OUTPUT: R_effective 
   
   rates_vec <- get_contact_rates_with_homophily(phi, q)
-  vv <- rates_vec[1]
-  vu <- rates_vec[2]
-  uv <- rates_vec[3]
-  uu <- rates_vec[4]
-
-  C <- matrix(c(phi*N*vv, phi*N*vu, (1-phi)*N*uv, (1-phi)*N*uu), 
-              nrow = 2, ncol = 2)
-
-  D_susceptibility <- matrix(c(alpha*(1-VE_S), 0, 0, alpha), 
-                             nrow = 2, ncol = 2)
-  D_infectiousness <- matrix(c((1-VE_I)/gamma, 0, 0, (1-theta)/gamma), 
-                             nrow = 2, ncol = 2)
+  rate_v_and_v <- rates_vec[1]
+  rate_u_and_v <- rates_vec[2]
+  rate_u_and_u <- rates_vec[3]
+  
+  C <- matrix(c(phi*N*rate_v_and_v, (1-phi)*psi*N*rate_u_and_v, (1-phi)*(1-psi)*N*rate_u_and_v,
+                phi*N*rate_u_and_v, (1-phi)*psi*N*rate_u_and_u, (1-phi)*(1-psi)*N*rate_u_and_u,
+                phi*N*rate_u_and_v, (1-phi)*psi*N*rate_u_and_u, (1-phi)*(1-psi)*N*rate_u_and_u),
+                nrow = 3, ncol = 3,
+                byrow = TRUE)
+  
+  D_susceptibility <- diag(c(alpha*(1-VE_S), alpha*(1-X_S), alpha))
+  D_infectiousness <- diag(c((1-VE_I)/gamma, (1-X_I)*(1-theta)/gamma, (1-theta)/gamma))
   
   NGM <- D_susceptibility %*% C %*% D_infectiousness
   eigs <- eigen(NGM)$values
@@ -187,43 +229,57 @@ compute_Reff <- function(phi, VE_S, VE_I, theta=0, q=0){
   Reff <- max(eigs)
 }
 
-compute_tot_infections <- function(this_phi, this_VE_I, this_VE_S, theta = 0, ext_forcing = 1, q = 0){
-  # total number of infections at t_final (recovered - IC)
-  df <- run_leaky_model(this_phi, this_VE_I, this_VE_S, theta, ext_forcing, q)
-  end <- length(df$R_v)
-  tot_infections <- df$R_v[end] + df$R_u[end] - df$E_v[1] - df$E_u[1] - df$I_u[1] - df$I_v[1]  
+compute_tot_infections <- function(this_phi, this_VE_I, this_VE_S, theta = 0, q = 0, psi=0, X_I=0, X_S=0){
+  # OUTPUT: total number of infections at t_final (recovered - IC) including infections caused by external forcing
+  df <- run_leaky_model(this_phi, this_VE_I, this_VE_S, theta, q, psi, X_I, X_S)
+  lastrow <- df[length(df$R_v),]
+  
+  tot_infections <- lastrow$R_v + lastrow$R_x + lastrow$R_u  - 
+                    df$E_v[1] - df$E_x[1] - df$E_u[1] -
+                    df$I_v[1] - df$I_x[1] - df$I_v[1] 
 }
 
-compute_percent_v_infections_withext <- function(this_phi, this_VE_I, this_VE_S, theta = 0, ext_forcing = 1, q = 0){
-  # percent of infections that are in the vaccinated population
-  df <- run_leaky_model(this_phi, this_VE_I, this_VE_S, theta, ext_forcing, q)
-  end <- length(df$R_v)
-  tot_infections <- df$R_v[end] + df$R_u[end] - df$E_v[1] - df$E_u[1] - df$I_u[1] - df$I_v[1]  
-  tot_v_infections <- df$R_v[end] - df$E_v[1] - df$I_v[1]
+compute_percent_breakthrough_infections <- function(this_phi, this_VE_I, this_VE_S, theta = 0, q = 0, 
+                                                    psi=0, X_I=0, X_S=0){
+  # OUTPUT: percent of total infections in the vaccinated population
+  df <- run_leaky_model(this_phi, this_VE_I, this_VE_S, theta, q, psi, X_I, X_S)
+  lastrow <- df[length(df$R_v),]
+  
+  tot_infections <- lastrow$R_v + lastrow$R_x + lastrow$R_u - 
+                    df$E_v[1] - df$E_x[1] - df$E_u[1] - 
+                    df$I_v[1] - df$I_x[1] - df$I_v[1]
+  
+  tot_v_infections <- lastrow$R_v - df$E_v[1] - df$I_v[1]
   percent_breakthrough_infections <- tot_v_infections/tot_infections*100
 }
 
-compute_u_infections <- function(this_phi, this_VE_I, this_VE_S, theta = 0, ext_forcing = 1, q = 0){
-  # number of infections that are in the unvaccinated population
-  df <- run_leaky_model(this_phi, this_VE_I, this_VE_S, theta, ext_forcing, q)
-  end <- length(df$R_u)
-  tot_u_infections <- df$R_u[end] - df$E_u[1] - df$I_u[1]
+compute_u_infections <- function(this_phi, this_VE_I, this_VE_S, theta = 0, q = 0,
+                                 psi=0, X_I=0, X_S=0){
+  # OUTPUT: total number of infections in the unvaccinated population
+  df <- run_leaky_model(this_phi, this_VE_I, this_VE_S, theta, q, psi, X_I, X_S)
+  lastrow <- df[length(df$R_v),]
+  tot_u_infections <- lastrow$R_x + lastrow$R_u - df$E_x[1] - df$E_u[1] - df$I_x[1] - df$I_u[1]
 }
 
-compute_v_infections <- function(this_phi, this_VE_I, this_VE_S, theta = 0, ext_forcing = 1, q = 0){
-  # number of infections that are in the unvaccinated population
-  df <- run_leaky_model(this_phi, this_VE_I, this_VE_S, theta, ext_forcing, q)
-  end <- length(df$R_v)
-  tot_u_infections <- df$R_v[end] - df$E_v[1] - df$I_v[1]
+compute_v_infections <- function(this_phi, this_VE_I, this_VE_S, theta = 0, q = 0,
+                                 psi=0, X_I=0, X_S=0){
+  # OUTPUT: total number of infections in the vaccinated population
+  df <- run_leaky_model(this_phi, this_VE_I, this_VE_S, theta, q, psi, X_I, X_S)
+  lastrow <- df[length(df$R_v),]
+  tot_v_infections <- lastrow$R_v - df$E_v[1] - df$I_v[1]
 }
 
-compute_num_tests <- function(this_phi, this_VE_I, this_VE_S, theta = 0, freq, inf_period, compliance, ext_forcing = 1,
-                              q = 0){
+compute_num_tests <- function(this_phi, this_VE_I, this_VE_S, theta = 0, freq, inf_period, compliance,
+                              q = 0, psi=0, X_I=0, X_S=0){
+  # INPUTS:
   # total number of tests administered
   # freq = frequency of testing (in days)
   # inf_period = days spend infectious 
   # compliance = [0,1] testing compliance rate 
-  df <- run_leaky_model(this_phi, this_VE_I, this_VE_S, theta, ext_forcing, q)
+  #
+  # OUTPUT: total number of tests administered over the simulation
+  
+  df <- run_leaky_model(this_phi, this_VE_I, this_VE_S, theta, q, psi, X_I, X_S)
   df <- df[df$time %% 1 == 0, ] # only consider daily time steps
   prob_test <- 1/freq
   prob_not_caught <- 1 - min((1/freq)*inf_period*compliance, 1)
@@ -231,50 +287,4 @@ compute_num_tests <- function(this_phi, this_VE_I, this_VE_S, theta = 0, freq, i
   df$tests_u <- (df$S_u + df$E_u + df$I_u)*prob_test*compliance + df$R_u*prob_test*compliance*prob_not_caught
   num_tests <- sum(df$tests_u)
 }
-
-# compute_percent_transmission_by_vaxxed <- function(this_phi, this_VE_I, this_VE_S){
-#   df <- run_leaky_model(this_phi, this_VE_I, this_VE_S)
-#   
-#   t_final <- t[length(t)]
-#   # only consider ongoing transmission, not ICs 
-#   percent_transmission_by_vaxxed <- (df$R_v[t_final] - df$I_v[1] - df$E_v[1])/(df$R_v[t_final] 
-#                                                                                + df$R_u[t_final] 
-#                                                                                - df$I_v[1] - df$E_v[1]
-#                                                                                - df$I_u[1] - df$E_u[1])
-#   if (all.equal(df$R_v[t_final], (df$I_v[1] + df$E_v[1])) == TRUE){
-#     percent_transmission_by_vaxxed <- 0 # no ongoing transmission by vaccinated
-#   }
-# 
-#   return(percent_transmission_by_vaxxed)
-# }
-
-# compute_lambda_v_by_u <- function(this_phi, this_VE_I, this_VE_S){
-#   df <- run_leaky_model(this_phi, this_VE_I, this_VE_S)
-#   I_u <- df$I_u
-#   I_v <- df$I_v
-#   S_v <- df$S_v
-#   S_u <- df$S_u
-#   
-#   frac_lambda_v_by_u <- I_u/(I_u + I_v*(1-this_VE_I))
-# }
-
-# compute_lambda_tot_by_u <- function(this_phi, this_VE_I, this_VE_S){
-#   df <- run_leaky_model(this_phi, this_VE_I, this_VE_S)
-#   I_u <- df$I_u
-#   I_v <- df$I_v
-#   S_v <- df$S_v
-#   S_u <- df$S_u
-#   
-#   frac_lambda_tot_by_u <- (I_u*(1-this_VE_S)*S_v + I_u*S_u)/((I_u + I_v*(1-this_VE_I))*((1-this_VE_S)*S_v + S_u))
-# }
-
-# compute_frac_cases_by_u <- function(this_phi, this_VE_I, this_VE_S){
-#   df <- run_leaky_model(this_phi, this_VE_I, this_VE_S)
-#   I_u <- df$I_u
-#   I_v <- df$I_v
-#   S_v <- df$S_v
-#   S_u <- df$S_u
-#   
-#   frac_cases_by_u <- (dot(I_u,(1-this_VE_S)*S_v + S_u))/(dot(I_u + I_v*(1-this_VE_I),((1-this_VE_S)*S_v + S_u)))
-# }
 

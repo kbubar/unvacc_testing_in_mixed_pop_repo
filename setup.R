@@ -18,7 +18,7 @@ library(extrafont)
 # loadfonts(device = "win")
 # fonts()
 
-source("student_testing_helpers.R")
+source("helpers.R")
 
 # SETUP ####
 mydarkteal <- "#205066" #"#27627B"
@@ -67,10 +67,14 @@ scientific <- function(x){
 N <- 20000
 
 phi_vec <- seq(0, 1, by = 0.01)
+this_psi <- 0
+this_X_S <- 0
+this_X_I <- 0
 
 # Simulation parameters - time span and homophily
 dt <- 1 
 t <- seq(from=1, to=270, by=dt)
+ext_forcing = 1 # imported cases
 
 q0 <- 0
 qhigh <- 0.8
