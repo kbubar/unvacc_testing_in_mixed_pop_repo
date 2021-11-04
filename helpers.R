@@ -209,10 +209,16 @@ compute_Reff <- function(phi, VE_S, VE_I, theta=0, q=0, psi=0, X_I=0, X_S=0){
   # Numerically compute R_effective as the dominant eigenvalue of the next generation matrix
   # OUTPUT: R_effective 
   
-  rates_vec <- get_contact_rates_with_homophily(phi, q)
-  rate_v_and_v <- rates_vec[1]
-  rate_u_and_v <- rates_vec[2]
-  rate_u_and_u <- rates_vec[3]
+  if (q > 0){
+    rates_vec <- get_contact_rates_with_homophily(phi, q)
+    rate_v_and_v <- rates_vec[1]
+    rate_u_and_v <- rates_vec[2]
+    rate_u_and_u <- rates_vec[3]
+  } else {
+    rate_v_and_v <- 1
+    rate_u_and_v <- 1
+    rate_u_and_u <- 1
+  }
   
   C <- matrix(c(phi*N*rate_v_and_v, (1-phi)*psi*N*rate_u_and_v, (1-phi)*(1-psi)*N*rate_u_and_v,
                 phi*N*rate_u_and_v, (1-phi)*psi*N*rate_u_and_u, (1-phi)*(1-psi)*N*rate_u_and_u,
@@ -226,7 +232,7 @@ compute_Reff <- function(phi, VE_S, VE_I, theta=0, q=0, psi=0, X_I=0, X_S=0){
   NGM <- D_susceptibility %*% C %*% D_infectiousness
   eigs <- eigen(NGM)$values
   
-  Reff <- max(eigs)
+  Reff <- max(Re(eigs))
 }
 
 compute_tot_infections <- function(this_phi, this_VE_I, this_VE_S, theta = 0, q = 0, psi=0, X_I=0, X_S=0){

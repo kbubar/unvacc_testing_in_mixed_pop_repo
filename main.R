@@ -10,7 +10,7 @@ source("setup.R")
 # for loop to run fig 1
 for (i in 1){
   #* Panel B - infected over time ####
-  this_phi <- 0.55
+  this_phi <- 0.58 # fully vacc. in US as of 11/4
   this_theta <- 0 # no testing
   this_q <- 0
   
@@ -29,7 +29,8 @@ for (i in 1){
   #*  Panel D - transmission mode over time (i.e. who caused new daily cases) ####
   df <- data.frame(time = t)
   
-  list_who_caused <- compute_who_caused_daily_infections(this_phi, VE_I, VE_S, q = this_q)
+  list_who_caused <- compute_who_caused_daily_infections(this_phi, VE_I, VE_S, q = this_q,
+                                                         this_psi, this_X_I, this_X_S)
   
   df$cases_in_v_by_v <- unlist(list_who_caused[[1]])
   df$cases_in_v_by_u <- unlist(list_who_caused[[2]])
@@ -124,7 +125,7 @@ ggarrange(B, NULL, C, NULL, NULL, NULL, D, NULL, E,
           widths = c(1, -0.1, 1),
           heights = c(1, -0.13, 1))
 
-ggsave("fig1_new.pdf", device = cairo_pdf, width = 8, height = 5.5)
+ggsave("fig1_test.pdf", device = cairo_pdf, width = 8, height = 5.5)
 
 # _____________________________________________________________________
 # TABLE1 - when transmission is no longer dominated by unvaccinated ####
@@ -317,7 +318,7 @@ annotate_figure(fig2,
                 bottom = text_grob("Population vaccination rate (%)", size = 14, family = "Arial",
                                    vjust = -1.2))
 
-ggsave("fig2.pdf", device = cairo_pdf, width = 8, height = 5)
+ggsave("fig2_psi50.pdf", device = cairo_pdf, width = 8, height = 5)
 
 # _____________________________________________________________________
 # FIG3 - w/homophily ####
@@ -334,13 +335,15 @@ for (i in 1){
   #* 
   df <- data.frame(time = t)
   
-  list_who_caused <- compute_who_caused_daily_infections(this_phi, VE_I, VE_S, q = q0)
+  list_who_caused <- compute_who_caused_daily_infections(this_phi, VE_I, VE_S, q = q0,
+                                                         this_psi, this_X_I, this_X_S)
   df$cases_in_v_by_v_q0 <- unlist(list_who_caused[[1]])
   df$cases_in_v_by_u_q0 <- unlist(list_who_caused[[2]])
   df$cases_in_u_by_v_q0 <- unlist(list_who_caused[[3]])
   df$cases_in_u_by_u_q0 <- unlist(list_who_caused[[4]])
   
-  list_who_caused <- compute_who_caused_daily_infections(this_phi, VE_I, VE_S, q = qhigh)
+  list_who_caused <- compute_who_caused_daily_infections(this_phi, VE_I, VE_S, q = qhigh,
+                                                         this_psi, this_X_I, this_X_S)
   df$cases_in_v_by_v_qhigh <- unlist(list_who_caused[[1]])
   df$cases_in_v_by_u_qhigh <- unlist(list_who_caused[[2]])
   df$cases_in_u_by_v_qhigh <- unlist(list_who_caused[[3]])
@@ -589,6 +592,12 @@ fig3 <- ggarrange(A, NULL, B, NULL, C, NULL, D, NULL, E, NULL,
                     labels = c(' a', NA, ' b', NA,'     c',NA, '     d', NA,'   e', NA),
                     label.y = 0.79)
 
+annotate_figure(fig3,
+                bottom = text_grob("Population vaccination rate (%)", size = 14, family = "Arial", 
+                                   vjust = -1.2, hjust = 0))
+
+ggsave("fig3_psi50.pdf", device = cairo_pdf, width = 10, height = 3.5)
+
 # fig3 <- ggarrange(A, NULL, B, NULL, C, NULL, 
 #                   NULL, NULL, NULL, NULL, NULL, NULL,
 #                   NULL, NULL, D, NULL, E, NULL,
@@ -601,9 +610,4 @@ fig3 <- ggarrange(A, NULL, B, NULL, C, NULL, D, NULL, E, NULL,
 #            NA, NA, ' d', NA,'   e', NA),
 # label.y = 0.79)
 
-annotate_figure(fig3,
-                bottom = text_grob("Population vaccination rate (%)", size = 14, family = "Arial", 
-                                   vjust = -1.2, hjust = 0))
-
-ggsave("fig3test.pdf", device = cairo_pdf, width = 10, height = 3.5)
 #ggsave("fig3test2.pdf", device = cairo_pdf, width = 8, height = 5)

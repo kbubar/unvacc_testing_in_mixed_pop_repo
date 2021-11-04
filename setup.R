@@ -11,8 +11,8 @@ library(scales)
 library(RColorBrewer)
 
 ## Run all these lines (14-18) if you haven't already installed fonts 
-#library(remotes)
-#remotes::install_version("Rttf2pt1", version = "1.3.8")
+library(remotes)
+remotes::install_version("Rttf2pt1", version = "1.3.8")
 library(extrafont)
 # font_import()
 # loadfonts(device = "win")
@@ -67,9 +67,9 @@ scientific <- function(x){
 N <- 20000
 
 phi_vec <- seq(0, 1, by = 0.01)
-this_psi <- 0
-this_X_S <- 0
-this_X_I <- 0
+this_psi <- 0.55 # Set 11/4. may need to change. Need ref.
+this_X_S <- 0.627 # Gardner 2021
+this_X_I <- 0.125 # Gardner 2021
 
 # Simulation parameters - time span and homophily
 dt <- 1 
@@ -85,8 +85,8 @@ sigma <- 1/3 # 1/latent period
 
 R0 <- 4
 alpha <- R0*gamma/N # transmissibility
-VE_S <- 0.80
-VE_I <- 0.62
+VE_S <- 0.70 # best guess from lots of sources including Gardner 
+VE_I <- 0.20 # best guess from lots of sources including Gardner 
 
 # Testing parameters
 ideal_theta <- 0.808 # ideal testing: twice weekly, PCR, 99% compliance
