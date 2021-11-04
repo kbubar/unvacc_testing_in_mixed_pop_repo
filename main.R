@@ -22,8 +22,8 @@ for (i in 1){
     geom_line(aes(y = I_v + I_u + I_x), col = myblack, size = my_linesize) +
     ylab("Infected (#)") + 
     xlab("Time (days)") +
-    scale_x_continuous(expand = c(0, 0), limits = c(0, 200)) + 
-    scale_y_continuous(expand = c(0, 0), limits = c(0, 1300)) +
+    scale_x_continuous(expand = c(0, 0), limits = c(0, 270)) + 
+    scale_y_continuous(expand = c(0, 0), limits = c(0, 875)) +
     onlyy_theme 
   
   #*  Panel D - transmission mode over time (i.e. who caused new daily cases) ####
@@ -44,8 +44,8 @@ for (i in 1){
     geom_line(aes(y = cases_in_v_by_v), col = mydarkteal, size = my_linesize) + 
     ylab("New daily infections (#) ") + 
     xlab("Time (days)") +
-    scale_x_continuous(expand = c(0, 0), limits = c(0, 200)) + 
-    scale_y_continuous(expand = c(0, 0), limits = c(0, 150)) +
+    scale_x_continuous(expand = c(0, 0), limits = c(0, 270)) + 
+    scale_y_continuous(expand = c(0, 0), limits = c(0, 20)) +
     alllabels_theme
   
   #* Panel C - total infections and breakthrough cases over phi ####
@@ -166,7 +166,7 @@ this_q <- 0
 panels <- c(1,2)
 
 for (this_panel in panels){
-  R0 <- this_panel*2
+  R0 = ifelse(this_panel==1, 4, 6)
   alpha <- R0*gamma/N # transmissibility
   
   R0_ideal_theta <- alpha*N*(1-ideal_theta)/gamma 
@@ -254,18 +254,7 @@ for (this_panel in panels){
     scale_x_continuous(expand = c(0, 0), limits = c(0, 100), breaks = c(0, 50, 100)) +
     scale_y_continuous(expand = c(0, 0), limits = c(-1, 100))  
   
-  C <- ggplot(df, aes(x=phi*100)) + 
-    geom_line(aes(y=prop_cases_averted_u_ideal), col = mygreen, size = my_linesize) +
-    geom_line(aes(y=prop_cases_averted_u_mod), col = myblue, size = my_linesize) +
-    geom_line(aes(y=prop_cases_averted_u_real), col = myyellow, size = my_linesize) +
-    geom_line(aes(y=0), col = myred, size = my_linesize) +
-    ylab("") + # % of cases averted in unvax population
-    xlab("") +
-    #onlyy_theme +
-    scale_x_continuous(expand = c(0, 0), limits = c(0, 100), breaks = c(0, 50, 100)) + 
-    scale_y_continuous(expand = c(0, 0), limits = c(-1, 100)) 
-  
-  D <- ggplot(df, aes(x=phi*100)) +
+  C <- ggplot(df, aes(x=phi*100)) +
     geom_hline(yintercept = 1, size = 0.5, linetype = "dashed", alpha = 0.5) +
     geom_line(aes(y = Reff_notesting), col = myred, size = my_linesize) +
     geom_line(aes(y = Reff_modtesting), col = myblue, size = my_linesize) +
@@ -284,28 +273,24 @@ for (this_panel in panels){
     B <- B + nolabels_theme + 
       ggtitle("Infections averted\n(% of pop.)") + 
       theme(plot.title = element_text(size = 13))
-    C <- C + nolabels_theme + 
-      ggtitle("Composition of\ninfections averted\n(% unvacc.)") + 
-      theme(plot.title = element_text(size = 13))
-    D <- D + onlyy_theme + 
+    C <- C + onlyy_theme + 
       ggtitle(expression(R[eff]))+ 
       theme(plot.title = element_text(size = 13))
     
-    panel1 <- ggarrange(A, NULL, B, NULL, C, NULL, D, NULL,
+    panel1 <- ggarrange(A, NULL, B, NULL, C, NULL,
                         nrow = 1,
-                        widths = c(1, -0.2, 1, -0.2, 1, -0.1, 1, 0.1), 
+                        widths = c(1, -0.2, 1, -0.2, 1, 0.1), 
                         align = "hv",
-                        labels = c(' a', NA, '     b', NA, '     c', NA, '  d', NA),
+                        labels = c(' a', NA, '     b', NA, '     c', NA),
                         label.y = 0.82)
     
   } else {
     B <- B + onlyx_theme
-    C <- C + onlyx_theme
-    panel2 <- ggarrange(A, NULL, B, NULL, C, NULL, D, NULL,
+    panel2 <- ggarrange(A, NULL, B, NULL, C, NULL,
                         nrow = 1,
-                        widths = c(1, -0.2, 1, -0.2, 1, -0.1, 1, 0.1), 
+                        widths = c(1, -0.2, 1, -0.2, 1, 0.1), 
                         align = "hv",
-                        labels = c(' e', NA, '     f', NA, '     g', NA,'  h', NA))
+                        labels = c(' d', NA, '     e', NA, '     f', NA))
   }
 }
 
