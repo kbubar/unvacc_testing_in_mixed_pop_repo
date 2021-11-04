@@ -232,7 +232,7 @@ compute_Reff <- function(phi, VE_S, VE_I, theta=0, q=0, psi=0, X_I=0, X_S=0){
   NGM <- D_susceptibility %*% C %*% D_infectiousness
   eigs <- eigen(NGM)$values
   
-  Reff <- max(Re(eigs))
+  Reff <- max(abs(eigs))
 }
 
 compute_tot_infections <- function(this_phi, this_VE_I, this_VE_S, theta = 0, q = 0, psi=0, X_I=0, X_S=0){
