@@ -295,3 +295,39 @@ compute_num_tests <- function(this_phi, this_VE_I, this_VE_S, theta = 0, freq, i
   num_tests <- sum(df$tests_u)
 }
 
+compute_dominant_transmission <- function(this_phi, this_VE_I, this_VE_S, theta = 0, q = 0,
+                                          psi=this_psi, X_I=this_X_I, X_S=this_X_S){
+  # OUTPUT:
+  # which group (V or U or ext) is contributing most to transmission at a given phi and psi 
+  
+  who_caused <- unlist(compute_who_caused_cases_tot(this_phi, this_VE_I, this_VE_S, theta, q, psi, X_I,
+                                                    X_S))
+  
+  by_v <- who_caused[1] + who_caused[3]
+  by_u <- who_caused[2] + who_caused[4]
+  by_ext <- who_caused[5] + who_caused[6]
+  
+  out <- which.max(c(by_v, by_u, by_ext))
+  
+  if (out == 1){
+    out <- ("v")
+  } else if (out == 2){
+    out <- ("u")
+  } else {
+    out <- ("ext")
+  }
+}
+
+compute_infections_averted_per100tests <- function(this_phi, this_VE_I, this_VE_S, theta = 0, q = 0,
+                                                   psi=this_psi, X_I=this_X_I, X_S=this_X_S,
+                                                   freq, compliance){
+  tot_notesting <- compute_tot_infections(this_phi, this_VE_I, this_VE_S, theta = 0, q, psi, X_I, X_S)
+  tot_testing <- compute_tot_infections(this_phi, this_VE_I, this_VE_S, theta = theta, q, psi, X_I, X_S)
+  
+  tot_averted <- tot_notesting - tot_testing
+  
+  num_tests <- compute_num_tests(this_phi, this_VE_I, this_VE_S, theta, freq, 1/gamma, compliance,
+                                 q , psi, X_I, X_S)
+  
+  tot_averted_per100 <- tot_averted/num_tests*100
+}
