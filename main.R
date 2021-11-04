@@ -323,7 +323,7 @@ ggsave("fig2_psi50.pdf", device = cairo_pdf, width = 8, height = 5)
 # _____________________________________________________________________
 # FIG3 - w/homophily ####
 # _____________________________________________________________________
-this_phi <- 0.55
+this_phi <- 0.58 # fully vacc. in US as of 11/4
 this_theta <- 0
 
 R0 <- 4
