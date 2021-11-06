@@ -280,18 +280,18 @@ for (this_panel in panels){
     
     panel1 <- ggarrange(A, NULL, B, NULL, C, NULL,
                         nrow = 1,
-                        widths = c(1, -0.2, 1, -0.2, 1, 0.1), 
+                        widths = c(1, -0.2, 1, -0.15, 1, -0.1), 
                         align = "hv",
-                        labels = c(' a', NA, '     b', NA, '     c', NA),
+                        labels = c(' a', NA, '     b', NA, '    c', NA),
                         label.y = 0.82)
     
   } else {
     B <- B + onlyx_theme
     panel2 <- ggarrange(A, NULL, B, NULL, C, NULL,
                         nrow = 1,
-                        widths = c(1, -0.2, 1, -0.2, 1, 0.1), 
+                        widths = c(1, -0.2, 1, -0.15, 1, -0.1), 
                         align = "hv",
-                        labels = c(' d', NA, '     e', NA, '     f', NA))
+                        labels = c(' d', NA, '     e', NA, '    f', NA))
   }
 }
 
