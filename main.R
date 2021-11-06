@@ -109,7 +109,8 @@ for (i in 1){
     scale_color_manual(values = c(mygray, mylightgray, mydarkteal, mylightteal, mylightorange,
                                   mydarkorange)) +
     #labels = c("v to v", "v to u", "u to v", "u to u")) + 
-    theme(legend.position = "none")
+    theme(legend.position = "none") + 
+    geom_vline(xintercept = 58)
   
   if (Reff_1 <= 100){
     E <- E + geom_vline(xintercept = Reff_1, alpha = 0.5, linetype = "dashed", size = 0.5)

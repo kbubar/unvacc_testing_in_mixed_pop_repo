@@ -156,19 +156,30 @@ compute_who_caused_daily_infections <- function(phi, this_VE_I, this_VE_S, theta
   S_x <- df$S_x
   S_v <- df$S_v
   
-  rates_vec <- get_contact_rates_with_homophily(phi, q)
-  rate_v_and_v <- rates_vec[1]
-  rate_u_and_v <- rates_vec[2]
-  rate_u_and_u <- rates_vec[3]
+  if (q > 0){
+    rates_vec <- get_contact_rates_with_homophily(phi, q)
+    rate_v_and_v <- rates_vec[1]
+    rate_u_and_v <- rates_vec[2]
+    rate_u_and_u <- rates_vec[3]
+  } else {
+    rate_v_and_v <- 1
+    rate_u_and_v <- 1
+    rate_u_and_u <- 1
+  }
   
   cases_in_v_by_v <- alpha*rate_v_and_v*I_v*(1-VE_I)*(1-VE_S)*S_v*dt
   cases_in_v_by_external <- ext_forcing*(1-VE_S)*S_v/N*dt
   
-  cases_in_u_by_u <- alpha*rate_u_and_u*dt*(I_u*S_u + I_x*(1-X_S)*(1-X_I)*S_x)
+  # in u by u includes u to u, u to x, x to x, x to u
+  cases_in_u_by_u <- alpha*rate_u_and_u*dt*(I_u*S_u + 
+                                              I_x*(1 - X_S)*(1 - X_I)*S_x + 
+                                              I_u*(1 - X_S)*S_x + 
+                                              I_x*(1 - X_I)*S_u)
   cases_in_u_by_external <- ext_forcing*(S_u + (1-X_S)*S_x)/N*dt
   
+  # in v by u includes u to v and x to v
   cases_in_v_by_u <- alpha*rate_u_and_v*(I_u + I_x*(1-X_I))*(1-VE_S)*S_v*dt
-  cases_in_u_by_v <- alpha*rate_u_and_v*(S_u + (1-X_S)*S_x)*I_v*(1-VE_I)*dt
+  cases_in_u_by_v <- alpha*rate_u_and_v*I_v*(1-VE_I)*(S_u + (1-X_S)*S_x)*dt
   
   list(cases_in_v_by_v, cases_in_v_by_u, cases_in_u_by_v, cases_in_u_by_u, cases_in_v_by_external, cases_in_u_by_external)
 }

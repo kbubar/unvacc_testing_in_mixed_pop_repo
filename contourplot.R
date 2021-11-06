@@ -1,8 +1,8 @@
 # TEST of contour plot
 source("setup.R") 
 
-phi_vec <- seq(0, 1, by = 0.05)
-psi_vec <- seq(0, 1, by = 0.05)
+phi_vec <- seq(0, 1, by = 0.01)
+psi_vec <- seq(0, 1, by = 0.01)
 df <- expand.grid(phi = phi_vec, psi = psi_vec)
 
 # _____________________________________________________________________
@@ -27,6 +27,34 @@ p <- ggplot(df, aes(x = phi*100, y = psi*100, z = Reff, colour = ..level..)) +
 p_Reff <- direct.label(p, list(last.points, hjust = 1, vjust = -2))
 
 # _____________________________________________________________________
+# Reff - infections with testing ####
+# _____________________________________________________________________
+df$Reff_ideal <- NA
+df$Reff_mod <- NA
+df$Reff_real <- NA
+
+for (i in 1:dim(df)[1]){
+  df$Reff_ideal[i] <- compute_Reff(df$phi[i], VE_S = VE_S, VE_I = VE_I, 
+                                   theta = ideal_theta, q = 0, df$psi[i], 
+                                   X_I = this_X_I, X_S = this_X_S)
+  df$Reff_mod[i] <- compute_Reff(df$phi[i], VE_S = VE_S, VE_I = VE_I, 
+                                   theta = mod_theta, q = 0, df$psi[i], 
+                                   X_I = this_X_I, X_S = this_X_S)
+  df$Reff_real[i] <- compute_Reff(df$phi[i], VE_S = VE_S, VE_I = VE_I, 
+                                   theta = real_theta, q = 0, df$psi[i], 
+                                   X_I = this_X_I, X_S = this_X_S)
+}
+
+p <- ggplot(df, aes(x = phi*100, y = psi*100, z = Reff_ideal, colour = ..level..)) + 
+  stat_contour(size = 1) + 
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 100)) +
+  scale_x_continuous(expand = c(0, 0), limits = c(0, 100)) +
+  ylab("Infection-acquired immunity (%)") +
+  xlab("Population vaccination rate (%)") + 
+  ggtitle(expression(R[eff]), "99% compliance, 2x weekly") 
+
+p_Reff_ideal <- direct.label(p, list(last.points, hjust = 1, vjust = -2))
+# _____________________________________________________________________
 # Percent breakthrough ####
 # _____________________________________________________________________
 df$breakthrough <- NA
@@ -45,7 +73,8 @@ p_breakthrough <- ggplot(df, aes(x = phi*100, y = psi*100, z = breakthrough)) +
   ylab("Infection-acquired immunity (%)") +
   xlab("Population vaccination rate (%)") + 
   ggtitle("Breakthrough infection (%)") +
-  labs(fill = "")
+  labs(fill = "") + 
+  scale_fill_gradientn(colours = cet_pal(5, name = "inferno"))
 
 # _____________________________________________________________________
 # Dominant transmission ####
@@ -66,7 +95,7 @@ p_dom <- ggplot(df, aes(x = phi*100, y = psi*100, z = dom_transmission)) +
   ylab("Infection-acquired immunity (%)") +
   xlab("Population vaccination rate (%)") + 
   ggtitle("Dominant mode of transmission") + 
-  labs(fill = "")
+  labs(fill = "") 
 
 ggarrange(p_Reff, p_breakthrough, p_dom,
           nrow = 1,
@@ -98,36 +127,40 @@ for (i in 1:dim(df)[1]){
 
 p_ideal <- ggplot(df, aes(x = phi*100, y = psi*100, fill = infections_averted_per100_ideal)) + 
   geom_tile() +
-  # stat_contour(breaks = seq(10, 100, by = 10), size = 1) + 
+  #stat_contour(aes(z = Reff_ideal), breaks = c(1), size = 1) + 
   scale_y_continuous(expand = c(0,0)) +
   scale_x_continuous(expand = c(0,0)) +
   ylab("Infection-acquired immunity (%)") +
   xlab("Population vaccination rate (%)") + 
   ggtitle("2x weekly testing, 99% compliance") + 
-  labs(fill = "")
+  labs(fill = "") + 
+  scale_fill_gradientn(colours = cet_pal(5, name = "inferno"), limits=c(0,5))
+
 
 p_mod <- ggplot(df, aes(x = phi*100, y = psi*100, fill = infections_averted_per100_mod)) + 
   geom_tile() +
-  # stat_contour(breaks = seq(10, 100, by = 10), size = 1) + 
+  stat_contour(aes(z = Reff_mod), breaks = 1, size = 1) + 
   scale_y_continuous(expand = c(0,0)) +
   scale_x_continuous(expand = c(0,0)) +
   ylab("Infection-acquired immunity (%)") +
   xlab("Population vaccination rate (%)") + 
   ggtitle("Weekly testing, 99% compliance") + 
-  labs(fill = "")
+  labs(fill = "") + 
+  scale_fill_gradientn(colours = cet_pal(5, name = "inferno"), limits=c(0,5))
 
 p_real <- ggplot(df, aes(x = phi*100, y = psi*100, fill = infections_averted_per100_real)) + 
   geom_tile() +
-  # stat_contour(breaks = seq(10, 100, by = 10), size = 1) + 
+  stat_contour(aes(z = Reff_real), breaks = 1, size = 1) + 
   scale_y_continuous(expand = c(0,0)) +
   scale_x_continuous(expand = c(0,0)) +
   ylab("Infection-acquired immunity (%)") +
   xlab("Population vaccination rate (%)") + 
   ggtitle("Weekly testing, 50% compliance") + 
-  labs(fill = "")
+  labs(fill = "") + 
+  scale_fill_gradientn(colours = cet_pal(5, name = "inferno"), limits=c(0,5))
 
 ggarrange(p_real, p_mod, p_ideal,
           ncol = 3,
           align = "hv")
 
-ggsave("heatmaps2.pdf", device = cairo_pdf, width = 12, height = 4)
+ggsave("heatmaps3.pdf", device = cairo_pdf, width = 12, height = 4)

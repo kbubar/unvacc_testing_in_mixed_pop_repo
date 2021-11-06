@@ -10,6 +10,7 @@ library(gridExtra)
 library(scales)
 library(RColorBrewer)
 library(directlabels)
+library(cetcolor)
 
 ## Run all these lines (14-18) if you haven't already installed fonts 
 library(remotes)
