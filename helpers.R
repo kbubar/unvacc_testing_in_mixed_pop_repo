@@ -342,3 +342,21 @@ compute_infections_averted_per100tests <- function(this_phi, this_VE_I, this_VE_
   
   tot_averted_per100 <- tot_averted/num_tests*100
 }
+
+sanity_check <- function(phi_vec, this_VE_I, this_VE_S, theta = 0, q = 0,
+                         psi=this_psi, X_I=this_X_I, X_S=this_X_S,
+                         freq, compliance){
+  
+  phi_df <- data.frame(phi = phi_vec)
+
+  lists_who_caused <- lapply(phi_vec, compute_who_caused_cases_tot, 
+                             this_VE_I = 0, this_VE_S = 0, this_theta, q = this_q, 
+                             psi = 0, X_I = 0, X_S = 0)
+  mat_who_caused <- matrix(unlist(lists_who_caused), ncol=6, byrow=TRUE)
+  
+  phi_df$cases_in_v_by_u <- mat_who_caused[,2]
+  phi_df$cases_in_u_by_u <- mat_who_caused[,4]
+  
+  # get the phi value when cumulative infections by u drop below 50%
+  out <- phi_df[min(which(phi_df$cases_in_u_by_u + phi_df$cases_in_v_by_u < 0.5)), 1]*100
+}
