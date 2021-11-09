@@ -14,7 +14,8 @@ for (i in 1){
   this_q <- 0 # well-mixed
   
   df_B <- run_leaky_model(this_phi, this_VE_I, this_VE_S, this_theta, this_q, 
-                          psi = this_psi, X_I = this_X_I, X_S = this_X_S)
+                          psi = this_psi, X_I = this_X_I, X_S = this_X_S, 
+                          H_I = this_H_I, H_S = this_H_S)
   
   B <- ggplot(df_B, aes(x = time)) + 
     geom_line(aes(y = I_v), col = mylightgray, size = my_linesize) + 
@@ -31,7 +32,8 @@ for (i in 1){
   
   list_who_caused <- compute_who_caused_daily_infections(this_phi, this_VE_I, this_VE_S, 
                                                          this_theta, this_q,
-                                                         this_psi, this_X_I, this_X_S)
+                                                         this_psi, this_X_I, this_X_S,
+                                                         this_H_I, this_H_S)
   
   df$cases_in_v_by_v <- unlist(list_who_caused[[1]])
   df$cases_in_v_by_u <- unlist(list_who_caused[[2]])
@@ -54,17 +56,20 @@ for (i in 1){
   df$tot_infections <- sapply(phi_vec, compute_tot_infections, 
                               VE_I = this_VE_I, VE_S = this_VE_S, 
                               theta = this_theta, q = this_q,
-                              psi = this_psi, X_I = this_X_I, X_S = this_X_S)
+                              psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                              H_I = this_H_I, H_S = this_H_S)
   
   df$Reff <- sapply(phi_vec, compute_Reff,
                     VE_I = this_VE_I, VE_S = this_VE_S, 
                     theta = this_theta, q = this_q,
-                    psi = this_psi, X_I = this_X_I, X_S = this_X_S)
+                    psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                    H_I = this_H_I, H_S = this_H_S)
   
   df$breakthrough <- sapply(phi_vec, compute_percent_breakthrough_infections, 
                             VE_I = this_VE_I, VE_S = this_VE_S, 
                             theta = this_theta, q = this_q,
-                            psi = this_psi, X_I = this_X_I, X_S = this_X_S)
+                            psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                            H_I = this_H_I, H_S = this_H_S)
   
   C <- ggplot(df, aes(x=phi*100)) + 
     geom_line(aes(y=breakthrough), col = mylightgray, size = my_linesize) +
@@ -92,7 +97,8 @@ for (i in 1){
   lists_who_caused <- lapply(phi_vec, compute_who_caused_cases_tot, 
                              VE_I = this_VE_I, VE_S = this_VE_S, 
                              theta = this_theta, q = this_q,
-                             psi = this_psi, X_I = this_X_I, X_S = this_X_S)
+                             psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                             H_I = this_H_I, H_S = this_H_S)
   
   mat_who_caused <- matrix(unlist(lists_who_caused), ncol=6, byrow=TRUE)
   
@@ -155,7 +161,8 @@ for (i in 1:24){
   lists_who_caused <- lapply(phi_vec, compute_who_caused_cases_tot, 
                              VE_I = this_VE_I, VE_S = this_VE_S, 
                              theta = this_theta, q = this_q, 
-                             psi = this_psi, X_I = this_X_I, X_S = this_X_S)
+                             psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                             H_I = this_H_I, H_S = this_H_S)
   mat_who_caused <- matrix(unlist(lists_who_caused), ncol=6, byrow=TRUE)
   
   df$cases_in_v_by_u <- mat_who_caused[,2]
@@ -182,13 +189,16 @@ for (this_panel in panels){
   # Total infections with various testing scenarios
   df$tot_infections_notesting <- sapply(phi_vec, compute_tot_infections, 
                                         VE_I = this_VE_I, VE_S = this_VE_S, theta = 0, q = this_q,
-                                        psi = this_psi, X_I = this_X_I, X_S = this_X_S)
+                                        psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                                        H_I = this_H_I, H_S = this_H_S)
   df$tot_infections_modtesting <- sapply(phi_vec, compute_tot_infections, 
                                          VE_I = this_VE_I, VE_S = this_VE_S, theta = mod_theta, q = this_q,
-                                         psi = this_psi, X_I = this_X_I, X_S = this_X_S)
+                                         psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                                         H_I = this_H_I, H_S = this_H_S)
   df$tot_infections_realtesting <- sapply(phi_vec, compute_tot_infections, 
                                           VE_I = this_VE_I, VE_S = this_VE_S, theta = real_theta, q = this_q,
-                                          psi = this_psi, X_I = this_X_I, X_S = this_X_S)
+                                          psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                                          H_I = this_H_I, H_S = this_H_S)
   
   # Total number of cases averted 
   df$cases_averted_mod <- (df$tot_infections_notesting - df$tot_infections_modtesting)
@@ -197,13 +207,16 @@ for (this_panel in panels){
   # Proportion of infections averted in unvax class
   df$u_infections_notesting <- sapply(phi_vec, compute_u_infections, 
                                       VE_I = this_VE_I, VE_S = this_VE_S, theta = 0, q = this_q,
-                                      psi = this_psi, X_I = this_X_I, X_S = this_X_S)
+                                      psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                                      H_I = this_H_I, H_S = this_H_S)
   df$u_infections_modtesting <- sapply(phi_vec, compute_u_infections, 
                                        VE_I = this_VE_I, VE_S = this_VE_S, theta = mod_theta, q = this_q,
-                                       psi = this_psi, X_I = this_X_I, X_S = this_X_S)
+                                       psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                                       H_I = this_H_I, H_S = this_H_S)
   df$u_infections_realtesting <- sapply(phi_vec, compute_u_infections, 
                                         VE_I = this_VE_I, VE_S = this_VE_S, theta = real_theta, q = this_q,
-                                        psi = this_psi, X_I = this_X_I, X_S = this_X_S)
+                                        psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                                        H_I = this_H_I, H_S = this_H_S)
   
   df$prop_cases_averted_u_mod <- (df$u_infections_notesting - df$u_infections_modtesting) / df$cases_averted_mod * 100
   df$prop_cases_averted_u_real <- (df$u_infections_notesting - df$u_infections_realtesting) / df$cases_averted_real * 100
@@ -216,13 +229,16 @@ for (this_panel in panels){
   # Reff
   df$Reff_notesting <- sapply(phi_vec, compute_Reff, 
                               VE_I = this_VE_I, VE_S = this_VE_S, theta = 0, q = this_q, 
-                              psi = this_psi, X_I = this_X_I, X_S = this_X_S)
+                              psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                              H_I = this_H_I, H_S = this_H_S)
   df$Reff_modtesting <- sapply(phi_vec, compute_Reff, 
                                VE_I = this_VE_I, VE_S = this_VE_S, theta = mod_theta, q = this_q,
-                               psi = this_psi, X_I = this_X_I, X_S = this_X_S)
+                               psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                               H_I = this_H_I, H_S = this_H_S)
   df$Reff_realtesting <- sapply(phi_vec, compute_Reff, 
                                 VE_I = this_VE_I, VE_S = this_VE_S, theta = real_theta, q = this_q,
-                                psi = this_psi, X_I = this_X_I, X_S = this_X_S)
+                                psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                                H_I = this_H_I, H_S = this_H_S)
   
   # fix anywhere that had NaN because 0 in the denominator
   this_elem <- which(is.na(df[101,])) 
@@ -310,7 +326,8 @@ for (i in 1){
   
   list_who_caused <- compute_who_caused_daily_infections(this_phi, this_VE_I, this_VE_S, 
                                                          this_theta, q = q0,
-                                                         this_psi, this_X_I, this_X_S)
+                                                         this_psi, this_X_I, this_X_S,
+                                                         this_H_I, this_H_S)
   df$cases_in_v_by_v_q0 <- unlist(list_who_caused[[1]])
   df$cases_in_v_by_u_q0 <- unlist(list_who_caused[[2]])
   df$cases_in_u_by_v_q0 <- unlist(list_who_caused[[3]])
@@ -318,7 +335,8 @@ for (i in 1){
   
   list_who_caused <- compute_who_caused_daily_infections(this_phi, this_VE_I, this_VE_S, 
                                                          this_theta, q = qhigh,
-                                                         this_psi, this_X_I, this_X_S)
+                                                         this_psi, this_X_I, this_X_S,
+                                                         this_H_I, this_H_S)
   df$cases_in_v_by_v_qhigh <- unlist(list_who_caused[[1]])
   df$cases_in_v_by_u_qhigh <- unlist(list_who_caused[[2]])
   df$cases_in_u_by_v_qhigh <- unlist(list_who_caused[[3]])
@@ -349,7 +367,8 @@ for (i in 1){
   lists_who_caused <- lapply(phi_vec, compute_who_caused_cases_tot, 
                              VE_I = this_VE_I, VE_S = this_VE_S, 
                              theta = this_theta, q = q0,
-                             psi = this_psi, X_I = this_X_I, X_S = this_X_S)
+                             psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                             H_I = this_H_I, H_S = this_H_S)
   mat_who_caused <- matrix(unlist(lists_who_caused), ncol=6, byrow=TRUE)
   df$cases_in_v_by_ext <- mat_who_caused[,5]
   df$cases_in_u_by_ext <- mat_who_caused[,6]
@@ -361,7 +380,8 @@ for (i in 1){
   lists_who_caused_qhigh <- lapply(phi_vec, compute_who_caused_cases_tot, 
                                    VE_I = this_VE_I, VE_S = this_VE_S,
                                    theta = this_theta, q = qhigh,
-                                   psi = this_psi, X_I = this_X_I, X_S = this_X_S)
+                                   psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                                   H_I = this_H_I, H_S = this_H_S)
   mat_who_caused_qhigh <- matrix(unlist(lists_who_caused_qhigh), ncol=6, byrow=TRUE)
   df$cases_in_v_by_ext_qhigh <- mat_who_caused_qhigh[,5]
   df$cases_in_u_by_ext_qhigh <- mat_who_caused_qhigh[,6]
@@ -398,28 +418,34 @@ for (i in 1){
   df$tot_infections_notesting_q0 <- sapply(phi_vec, compute_tot_infections, 
                                            VE_I = this_VE_I, VE_S = this_VE_S, 
                                            theta = 0, q = q0,
-                                           psi = this_psi, X_I = this_X_I, X_S = this_X_S)
+                                           psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                                           H_I = this_H_I, H_S = this_H_S)
   df$tot_infections_mod_q0 <- sapply(phi_vec, compute_tot_infections, 
                                      VE_I = this_VE_I, VE_S = this_VE_S, 
                                      theta = mod_theta, q = q0,
-                                     psi = this_psi, X_I = this_X_I, X_S = this_X_S)
+                                     psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                                     H_I = this_H_I, H_S = this_H_S)
   df$tot_infections_real_q0 <- sapply(phi_vec, compute_tot_infections, 
                                       VE_I = this_VE_I, VE_S = this_VE_S, 
                                       theta = real_theta, q = q0,
-                                      psi = this_psi, X_I = this_X_I, X_S = this_X_S)
+                                      psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                                      H_I = this_H_I, H_S = this_H_S)
   
   df$tot_infections_notesting_qhigh <- sapply(phi_vec, compute_tot_infections, 
                                               VE_I = this_VE_I, VE_S = this_VE_S, 
                                               theta = 0, q = qhigh,
-                                              psi = this_psi, X_I = this_X_I, X_S = this_X_S)
+                                              psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                                              H_I = this_H_I, H_S = this_H_S)
   df$tot_infections_mod_qhigh <- sapply(phi_vec, compute_tot_infections, 
                                         VE_I = this_VE_I, VE_S = this_VE_S, 
                                         theta = mod_theta, q = qhigh,
-                                        psi = this_psi, X_I = this_X_I, X_S = this_X_S)
+                                        psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                                        H_I = this_H_I, H_S = this_H_S)
   df$tot_infections_real_qhigh <- sapply(phi_vec, compute_tot_infections, 
                                          VE_I = this_VE_I, VE_S = this_VE_S, 
                                          theta = real_theta, q = qhigh,
-                                         psi = this_psi, X_I = this_X_I, X_S = this_X_S)
+                                         psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                                         H_I = this_H_I, H_S = this_H_S)
   
   df$cases_averted_mod_q0 <- (df$tot_infections_notesting_q0 - df$tot_infections_mod_q0)
   df$cases_averted_real_q0 <- (df$tot_infections_notesting_q0 - df$tot_infections_real_q0)
@@ -446,15 +472,18 @@ for (i in 1){
   df$u_infections_notesting_q0 <- sapply(phi_vec, compute_u_infections, 
                                          VE_I = this_VE_I, VE_S = this_VE_S, 
                                          theta = 0, q = q0,
-                                         psi = this_psi, X_I = this_X_I, X_S = this_X_S)
+                                         psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                                         H_I = this_H_I, H_S = this_H_S)
   df$u_infections_modtesting_q0 <- sapply(phi_vec, compute_u_infections, 
                                           VE_I = this_VE_I, VE_S = this_VE_S, 
                                           theta = mod_theta, q = q0,
-                                          psi = this_psi, X_I = this_X_I, X_S = this_X_S)
+                                          psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                                          H_I = this_H_I, H_S = this_H_S)
   df$u_infections_realtesting_q0 <- sapply(phi_vec, compute_u_infections, 
                                            VE_I = this_VE_I, VE_S = this_VE_S, 
                                            theta = real_theta, q = q0,
-                                           psi = this_psi, X_I = this_X_I, X_S = this_X_S)
+                                           psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                                           H_I = this_H_I, H_S = this_H_S)
   
   df$prop_cases_averted_u_mod_q0 <- (df$u_infections_notesting_q0 - df$u_infections_modtesting_q0) / df$cases_averted_mod_q0 * 100
   df$prop_cases_averted_u_real_q0 <- (df$u_infections_notesting_q0 - df$u_infections_realtesting_q0) / df$cases_averted_real_q0 * 100
@@ -467,15 +496,18 @@ for (i in 1){
   df$u_infections_notesting_qhigh <- sapply(phi_vec, compute_u_infections, 
                                             VE_I = this_VE_I, VE_S = this_VE_S, 
                                             theta = 0, q = qhigh,
-                                            psi = this_psi, X_I = this_X_I, X_S = this_X_S)
+                                            psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                                            H_I = this_H_I, H_S = this_H_S)
   df$u_infections_modtesting_qhigh <- sapply(phi_vec, compute_u_infections, 
                                              VE_I = this_VE_I, VE_S = this_VE_S, 
                                              theta = mod_theta, q = qhigh,
-                                             psi = this_psi, X_I = this_X_I, X_S = this_X_S)
+                                             psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                                             H_I = this_H_I, H_S = this_H_S)
   df$u_infections_realtesting_qhigh <- sapply(phi_vec, compute_u_infections, 
                                               VE_I = this_VE_I, VE_S = this_VE_S, 
                                               theta = real_theta, q = qhigh,
-                                              psi = this_psi, X_I = this_X_I, X_S = this_X_S)
+                                              psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                                              H_I = this_H_I, H_S = this_H_S)
   
   df$prop_cases_averted_u_mod_qhigh <- (df$u_infections_notesting_qhigh - df$u_infections_modtesting_qhigh) / df$cases_averted_mod_qhigh * 100
   df$prop_cases_averted_u_real_qhigh <- (df$u_infections_notesting_qhigh - df$u_infections_realtesting_qhigh) / df$cases_averted_real_qhigh * 100
@@ -508,28 +540,34 @@ for (i in 1){
   df$Reff_notesting_q0 <- sapply(phi_vec, compute_Reff, 
                                  VE_I = this_VE_I, VE_S = this_VE_S, 
                                  theta = 0, q = q0,
-                                 psi = this_psi, X_I = this_X_I, X_S = this_X_S)
+                                 psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                                 H_I = this_H_I, H_S = this_H_S)
   df$Reff_modtesting_q0 <- sapply(phi_vec, compute_Reff, 
                                   VE_I = this_VE_I, VE_S = this_VE_S, 
                                   theta = mod_theta, q = q0,
-                                  psi = this_psi, X_I = this_X_I, X_S = this_X_S)
+                                  psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                                  H_I = this_H_I, H_S = this_H_S)
   df$Reff_realtesting_q0 <- sapply(phi_vec, compute_Reff, 
                                    VE_I = this_VE_I, VE_S = this_VE_S,  
                                    theta = real_theta, q = q0,
-                                   psi = this_psi, X_I = this_X_I, X_S = this_X_S)
+                                   psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                                   H_I = this_H_I, H_S = this_H_S)
   
   df$Reff_notesting_qhigh <- sapply(phi_vec, compute_Reff, 
                                     VE_I = this_VE_I, VE_S = this_VE_S,
                                     theta = 0, q = qhigh,
-                                    psi = this_psi, X_I = this_X_I, X_S = this_X_S)
+                                    psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                                    H_I = this_H_I, H_S = this_H_S)
   df$Reff_modtesting_qhigh <- sapply(phi_vec, compute_Reff, 
                                      VE_I = this_VE_I, VE_S = this_VE_S, 
                                      theta = mod_theta, q = qhigh,
-                                     psi = this_psi, X_I = this_X_I, X_S = this_X_S)
+                                     psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                                     H_I = this_H_I, H_S = this_H_S)
   df$Reff_realtesting_qhigh <- sapply(phi_vec, compute_Reff, 
                                       VE_I = this_VE_I, VE_S = this_VE_S, 
                                       theta = real_theta, q = qhigh,
-                                      psi = this_psi, X_I = this_X_I, X_S = this_X_S)
+                                      psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                                      H_I = this_H_I, H_S = this_H_S)
   
   E <- ggplot(df, aes(x=phi*100)) +
     geom_hline(yintercept = 1, size = 0.5, alpha = 0.5, linetype = "dashed") +

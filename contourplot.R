@@ -13,7 +13,8 @@ df$Reff <- NA
 for (i in 1:dim(df)[1]){
   df$Reff[i] <- compute_Reff(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S,  
                              theta = 0, q = 0, 
-                             df$psi[i], X_I = this_X_I, X_S = this_X_S)
+                             df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                             H_I = this_H_I, H_S = this_H_S)
 }
 
 p <- ggplot(df, aes(x = phi*100, y = psi*100, z = Reff, colour = ..level..)) + 
@@ -36,13 +37,16 @@ df$Reff_real <- NA
 for (i in 1:dim(df)[1]){
   df$Reff_ideal[i] <- compute_Reff(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S,  
                                    theta = ideal_theta, q = 0, 
-                                   df$psi[i], X_I = this_X_I, X_S = this_X_S)
+                                   df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                   H_I = this_H_I, H_S = this_H_S)
   df$Reff_mod[i] <- compute_Reff(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, 
                                  theta = mod_theta, q = 0, 
-                                 df$psi[i], X_I = this_X_I, X_S = this_X_S)
+                                 df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                 H_I = this_H_I, H_S = this_H_S)
   df$Reff_real[i] <- compute_Reff(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, 
                                   theta = real_theta, q = 0, 
-                                  df$psi[i], X_I = this_X_I, X_S = this_X_S)
+                                  df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                  H_I = this_H_I, H_S = this_H_S)
 }
 
 p <- ggplot(df, aes(x = phi*100, y = psi*100, z = Reff_ideal, colour = ..level..)) + 
@@ -63,7 +67,8 @@ df$breakthrough <- NA
 for (i in 1:dim(df)[1]){
   df$breakthrough[i] <- compute_percent_breakthrough_infections(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, 
                                                         theta = 0, q = 0, 
-                                                        df$psi[i], X_I = this_X_I, X_S = this_X_S)
+                                                        df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                                        H_I = this_H_I, H_S = this_H_S)
 }
 
 p_breakthrough <- ggplot(df, aes(x = phi*100, y = psi*100, z = breakthrough)) + 
@@ -85,7 +90,8 @@ df$dom_transmission <- NA
 for (i in 1:dim(df)[1]){
   df$dom_transmission[i] <- compute_dominant_transmission(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, 
                                                           theta = 0, q = 0, 
-                                                          df$psi[i], X_I = this_X_I, X_S = this_X_S)
+                                                          df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                                          H_I = this_H_I, H_S = this_H_S)
 }
 
 p_dom <- ggplot(df, aes(x = phi*100, y = psi*100, z = dom_transmission)) + 
@@ -115,14 +121,17 @@ for (i in 1:dim(df)[1]){
   df$infections_averted_per100_ideal[i] <- compute_infections_averted_per100tests(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, 
                                                                                   theta = ideal_theta, q = 0, 
                                                                                   df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                                                                  H_I = this_H_I, H_S = this_H_S,
                                                                                   freq = high_freq, compliance = high_compliance)
   df$infections_averted_per100_mod[i] <- compute_infections_averted_per100tests(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S,
                                                                                 theta = mod_theta, q = 0, 
                                                                                 df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                                                                H_I = this_H_I, H_S = this_H_S,
                                                                                 freq = low_freq, compliance = high_compliance)
   df$infections_averted_per100_real[i] <- compute_infections_averted_per100tests(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S,
                                                                                  theta = real_theta, q = 0,
                                                                                  df$psi[i],  X_I = this_X_I, X_S = this_X_S,
+                                                                                 H_I = this_H_I, H_S = this_H_S,
                                                                                  freq = low_freq, compliance = low_compliance)
 }
 
