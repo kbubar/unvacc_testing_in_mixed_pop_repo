@@ -11,9 +11,9 @@ df <- expand.grid(phi = phi_vec, psi = psi_vec)
 df$Reff <- NA
 
 for (i in 1:dim(df)[1]){
-  df$Reff[i] <- compute_Reff(df$phi[i], VE_S = VE_S, VE_I = VE_I, 
-                             theta = 0, q = 0, df$psi[i], 
-                             X_I = this_X_I, X_S = this_X_S)
+  df$Reff[i] <- compute_Reff(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S,  
+                             theta = 0, q = 0, 
+                             df$psi[i], X_I = this_X_I, X_S = this_X_S)
 }
 
 p <- ggplot(df, aes(x = phi*100, y = psi*100, z = Reff, colour = ..level..)) + 
@@ -34,15 +34,15 @@ df$Reff_mod <- NA
 df$Reff_real <- NA
 
 for (i in 1:dim(df)[1]){
-  df$Reff_ideal[i] <- compute_Reff(df$phi[i], VE_S = VE_S, VE_I = VE_I, 
-                                   theta = ideal_theta, q = 0, df$psi[i], 
-                                   X_I = this_X_I, X_S = this_X_S)
-  df$Reff_mod[i] <- compute_Reff(df$phi[i], VE_S = VE_S, VE_I = VE_I, 
-                                   theta = mod_theta, q = 0, df$psi[i], 
-                                   X_I = this_X_I, X_S = this_X_S)
-  df$Reff_real[i] <- compute_Reff(df$phi[i], VE_S = VE_S, VE_I = VE_I, 
-                                   theta = real_theta, q = 0, df$psi[i], 
-                                   X_I = this_X_I, X_S = this_X_S)
+  df$Reff_ideal[i] <- compute_Reff(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S,  
+                                   theta = ideal_theta, q = 0, 
+                                   df$psi[i], X_I = this_X_I, X_S = this_X_S)
+  df$Reff_mod[i] <- compute_Reff(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, 
+                                 theta = mod_theta, q = 0, 
+                                 df$psi[i], X_I = this_X_I, X_S = this_X_S)
+  df$Reff_real[i] <- compute_Reff(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, 
+                                  theta = real_theta, q = 0, 
+                                  df$psi[i], X_I = this_X_I, X_S = this_X_S)
 }
 
 p <- ggplot(df, aes(x = phi*100, y = psi*100, z = Reff_ideal, colour = ..level..)) + 
@@ -54,15 +54,16 @@ p <- ggplot(df, aes(x = phi*100, y = psi*100, z = Reff_ideal, colour = ..level..
   ggtitle(expression(R[eff]), "99% compliance, 2x weekly") 
 
 p_Reff_ideal <- direct.label(p, list(last.points, hjust = 1, vjust = -2))
+
 # _____________________________________________________________________
 # Percent breakthrough ####
 # _____________________________________________________________________
 df$breakthrough <- NA
 
 for (i in 1:dim(df)[1]){
-  df$breakthrough[i] <- compute_percent_breakthrough_infections(df$phi[i], VE_I, VE_S, 
-                                                        theta = 0, q = 0, df$psi[i], 
-                                                        X_I = this_X_I, X_S = this_X_S)
+  df$breakthrough[i] <- compute_percent_breakthrough_infections(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, 
+                                                        theta = 0, q = 0, 
+                                                        df$psi[i], X_I = this_X_I, X_S = this_X_S)
 }
 
 p_breakthrough <- ggplot(df, aes(x = phi*100, y = psi*100, z = breakthrough)) + 
@@ -82,9 +83,9 @@ p_breakthrough <- ggplot(df, aes(x = phi*100, y = psi*100, z = breakthrough)) +
 df$dom_transmission <- NA
 
 for (i in 1:dim(df)[1]){
-  df$dom_transmission[i] <- compute_dominant_transmission(df$phi[i], VE_I, VE_S, 
-                                                          theta = 0, q = 0, df$psi[i], 
-                                                          X_I = this_X_I, X_S = this_X_S)
+  df$dom_transmission[i] <- compute_dominant_transmission(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, 
+                                                          theta = 0, q = 0, 
+                                                          df$psi[i], X_I = this_X_I, X_S = this_X_S)
 }
 
 p_dom <- ggplot(df, aes(x = phi*100, y = psi*100, z = dom_transmission)) + 
@@ -111,18 +112,18 @@ df$infections_averted_per100_mod <- NA
 df$infections_averted_per100_real <- NA
 
 for (i in 1:dim(df)[1]){
-  df$infections_averted_per100_ideal[i] <- compute_infections_averted_per100tests(df$phi[i], VE_I, VE_S, 
-                                                          theta = ideal_theta, q = 0, df$psi[i], 
-                                                          X_I = this_X_I, X_S = this_X_S,
-                                                          freq = high_freq, compliance = high_compliance)
-  df$infections_averted_per100_mod[i] <- compute_infections_averted_per100tests(df$phi[i], VE_I, VE_S, 
-                                                                                  theta = mod_theta, q = 0, df$psi[i], 
-                                                                                  X_I = this_X_I, X_S = this_X_S,
-                                                                                  freq = low_freq, compliance = high_compliance)
-  df$infections_averted_per100_real[i] <- compute_infections_averted_per100tests(df$phi[i], VE_I, VE_S, 
-                                                                                  theta = real_theta, q = 0, df$psi[i], 
-                                                                                  X_I = this_X_I, X_S = this_X_S,
-                                                                                  freq = low_freq, compliance = low_compliance)
+  df$infections_averted_per100_ideal[i] <- compute_infections_averted_per100tests(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, 
+                                                                                  theta = ideal_theta, q = 0, 
+                                                                                  df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                                                                  freq = high_freq, compliance = high_compliance)
+  df$infections_averted_per100_mod[i] <- compute_infections_averted_per100tests(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S,
+                                                                                theta = mod_theta, q = 0, 
+                                                                                df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                                                                freq = low_freq, compliance = high_compliance)
+  df$infections_averted_per100_real[i] <- compute_infections_averted_per100tests(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S,
+                                                                                 theta = real_theta, q = 0,
+                                                                                 df$psi[i],  X_I = this_X_I, X_S = this_X_S,
+                                                                                 freq = low_freq, compliance = low_compliance)
 }
 
 p_ideal <- ggplot(df, aes(x = phi*100, y = psi*100, fill = infections_averted_per100_ideal)) + 

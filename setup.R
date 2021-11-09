@@ -69,6 +69,8 @@ scientific <- function(x){
 N <- 20000
 
 phi_vec <- seq(0, 1, by = 0.01)
+this_phi <- 0.58 # fully vacc. in US as of 11/4
+
 this_psi <- 0.55 # Set 11/4. may need to change. Need ref.
 this_X_S <- 0.627 # Gardner 2021
 this_X_I <- 0.125 # Gardner 2021
@@ -87,8 +89,8 @@ sigma <- 1/3 # 1/latent period
 
 R0 <- 4
 alpha <- R0*gamma/N # transmissibility
-VE_S <- 0.70 # best guess from lots of sources including Gardner 
-VE_I <- 0.20 # best guess from lots of sources including Gardner 
+this_VE_S <- 0.70 # best guess from lots of sources including Gardner 
+this_VE_I <- 0.20 # best guess from lots of sources including Gardner 
 
 # Testing parameters
 ideal_theta <- 0.808 # ideal testing: twice weekly, PCR, 99% compliance
