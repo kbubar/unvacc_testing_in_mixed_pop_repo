@@ -175,7 +175,6 @@ for (this_panel in panels){
   R0 = ifelse(this_panel==1, 4, 6)
   alpha <- R0*gamma/N # transmissibility
   
-  R0_ideal_theta <- alpha*N*(1-ideal_theta)/gamma 
   R0_mod_theta <- alpha*N*(1-mod_theta)/gamma 
   R0_real_theta <- alpha*N*(1-real_theta)/gamma 
   
@@ -184,9 +183,6 @@ for (this_panel in panels){
   df$tot_infections_notesting <- sapply(phi_vec, compute_tot_infections, 
                                         VE_I = this_VE_I, VE_S = this_VE_S, theta = 0, q = this_q,
                                         psi = this_psi, X_I = this_X_I, X_S = this_X_S)
-  df$tot_infections_idealtesting <- sapply(phi_vec, compute_tot_infections, 
-                                           VE_I = this_VE_I, VE_S = this_VE_S, theta = ideal_theta, q = this_q,
-                                           psi = this_psi, X_I = this_X_I, X_S = this_X_S)
   df$tot_infections_modtesting <- sapply(phi_vec, compute_tot_infections, 
                                          VE_I = this_VE_I, VE_S = this_VE_S, theta = mod_theta, q = this_q,
                                          psi = this_psi, X_I = this_X_I, X_S = this_X_S)
@@ -195,7 +191,6 @@ for (this_panel in panels){
                                           psi = this_psi, X_I = this_X_I, X_S = this_X_S)
   
   # Total number of cases averted 
-  df$cases_averted_ideal <- (df$tot_infections_notesting - df$tot_infections_idealtesting)
   df$cases_averted_mod <- (df$tot_infections_notesting - df$tot_infections_modtesting)
   df$cases_averted_real <- (df$tot_infections_notesting - df$tot_infections_realtesting)
   
@@ -203,9 +198,6 @@ for (this_panel in panels){
   df$u_infections_notesting <- sapply(phi_vec, compute_u_infections, 
                                       VE_I = this_VE_I, VE_S = this_VE_S, theta = 0, q = this_q,
                                       psi = this_psi, X_I = this_X_I, X_S = this_X_S)
-  df$u_infections_idealtesting <- sapply(phi_vec, compute_u_infections, 
-                                         VE_I = this_VE_I, VE_S = this_VE_S, theta = ideal_theta, q = this_q,
-                                         psi = this_psi, X_I = this_X_I, X_S = this_X_S)
   df$u_infections_modtesting <- sapply(phi_vec, compute_u_infections, 
                                        VE_I = this_VE_I, VE_S = this_VE_S, theta = mod_theta, q = this_q,
                                        psi = this_psi, X_I = this_X_I, X_S = this_X_S)
@@ -213,14 +205,11 @@ for (this_panel in panels){
                                         VE_I = this_VE_I, VE_S = this_VE_S, theta = real_theta, q = this_q,
                                         psi = this_psi, X_I = this_X_I, X_S = this_X_S)
   
-  df$prop_cases_averted_u_ideal <- (df$u_infections_notesting - df$u_infections_idealtesting) / df$cases_averted_ideal * 100
   df$prop_cases_averted_u_mod <- (df$u_infections_notesting - df$u_infections_modtesting) / df$cases_averted_mod * 100
   df$prop_cases_averted_u_real <- (df$u_infections_notesting - df$u_infections_realtesting) / df$cases_averted_real * 100
   
-  df$num_cases_averted_u_ideal <- (df$u_infections_notesting - df$u_infections_idealtesting) 
   df$num_cases_averted_u_mod <- (df$u_infections_notesting - df$u_infections_modtesting) 
   df$num_cases_averted_u_real <- (df$u_infections_notesting - df$u_infections_realtesting) 
-  df$num_cases_averted_v_ideal <- (df$cases_averted_ideal - df$num_cases_averted_u_ideal) 
   df$num_cases_averted_v_mod <- (df$cases_averted_mod - df$num_cases_averted_u_mod) 
   df$num_cases_averted_v_real <- (df$cases_averted_real - df$num_cases_averted_u_real) 
   
@@ -228,9 +217,6 @@ for (this_panel in panels){
   df$Reff_notesting <- sapply(phi_vec, compute_Reff, 
                               VE_I = this_VE_I, VE_S = this_VE_S, theta = 0, q = this_q, 
                               psi = this_psi, X_I = this_X_I, X_S = this_X_S)
-  df$Reff_idealtesting <- sapply(phi_vec, compute_Reff, 
-                                 VE_I = this_VE_I, VE_S = this_VE_S, theta = ideal_theta, q = this_q,
-                                 psi = this_psi, X_I = this_X_I, X_S = this_X_S)
   df$Reff_modtesting <- sapply(phi_vec, compute_Reff, 
                                VE_I = this_VE_I, VE_S = this_VE_S, theta = mod_theta, q = this_q,
                                psi = this_psi, X_I = this_X_I, X_S = this_X_S)
@@ -243,7 +229,6 @@ for (this_panel in panels){
   df[101,this_elem] <- 0
   
   A <- ggplot(df, aes(x=phi*100)) + 
-    geom_line(aes(y = tot_infections_idealtesting/N*100), col = mygreen, size = my_linesize)+
     geom_line(aes(y = tot_infections_notesting/N*100), col = myred, size = my_linesize) +  
     geom_line(aes(y = tot_infections_modtesting/N*100), col = myblue, size = my_linesize) + 
     geom_line(aes(y = tot_infections_realtesting/N*100), col = myyellow, size = my_linesize) + 
@@ -253,7 +238,6 @@ for (this_panel in panels){
     scale_y_continuous(expand = c(0, 0), limits = c(0, 100)) 
   
   B <- ggplot(df, aes(x=phi*100)) + 
-    geom_line(aes(y=cases_averted_ideal/N*100), col = mygreen, size = my_linesize) +
     geom_line(aes(y=cases_averted_mod/N*100), col = myblue, size = my_linesize) +
     geom_line(aes(y = cases_averted_real/N*100), col = myyellow, size = my_linesize) + 
     geom_line(aes(y = 0), col = myred, size = my_linesize) +  
@@ -266,7 +250,6 @@ for (this_panel in panels){
     geom_hline(yintercept = 1, size = 0.5, linetype = "dashed", alpha = 0.5) +
     geom_line(aes(y = Reff_notesting), col = myred, size = my_linesize) +
     geom_line(aes(y = Reff_modtesting), col = myblue, size = my_linesize) +
-    geom_line(aes(y = Reff_idealtesting), col = mygreen, size = my_linesize) +
     geom_line(aes(y = Reff_realtesting), col = myyellow, size = my_linesize) +
     scale_x_continuous(expand = c(0, 0), limits = c(0, 100), breaks = c(0, 50, 100)) +
     scale_y_continuous(expand = c(0,0), limits = c(0, 4)) + 
@@ -400,7 +383,6 @@ for (i in 1){
     ylab("") + # Transmission mode (%)
     xlab("") + # Population vaccination rate (%)
     labs(fill = "") +
-    #onlyy_theme +
     ggtitle("Transmission mode\n(%)") +
     scale_y_continuous(expand = c(0, 0), limits = c(0, 100.1)) +
     scale_x_continuous(expand = c(0, 0), breaks = c(0, 50, 100)) + 
@@ -417,10 +399,6 @@ for (i in 1){
                                            VE_I = this_VE_I, VE_S = this_VE_S, 
                                            theta = 0, q = q0,
                                            psi = this_psi, X_I = this_X_I, X_S = this_X_S)
-  df$tot_infections_ideal_q0 <- sapply(phi_vec, compute_tot_infections, 
-                                       VE_I = this_VE_I, VE_S = this_VE_S, 
-                                       theta = ideal_theta, q = q0,
-                                       psi = this_psi, X_I = this_X_I, X_S = this_X_S)
   df$tot_infections_mod_q0 <- sapply(phi_vec, compute_tot_infections, 
                                      VE_I = this_VE_I, VE_S = this_VE_S, 
                                      theta = mod_theta, q = q0,
@@ -434,10 +412,6 @@ for (i in 1){
                                               VE_I = this_VE_I, VE_S = this_VE_S, 
                                               theta = 0, q = qhigh,
                                               psi = this_psi, X_I = this_X_I, X_S = this_X_S)
-  df$tot_infections_ideal_qhigh <- sapply(phi_vec, compute_tot_infections, 
-                                          VE_I = this_VE_I, VE_S = this_VE_S, 
-                                          theta = ideal_theta, q = qhigh,
-                                          psi = this_psi, X_I = this_X_I, X_S = this_X_S)
   df$tot_infections_mod_qhigh <- sapply(phi_vec, compute_tot_infections, 
                                         VE_I = this_VE_I, VE_S = this_VE_S, 
                                         theta = mod_theta, q = qhigh,
@@ -447,20 +421,16 @@ for (i in 1){
                                          theta = real_theta, q = qhigh,
                                          psi = this_psi, X_I = this_X_I, X_S = this_X_S)
   
-  df$cases_averted_ideal_q0 <- (df$tot_infections_notesting_q0 - df$tot_infections_ideal_q0)
   df$cases_averted_mod_q0 <- (df$tot_infections_notesting_q0 - df$tot_infections_mod_q0)
   df$cases_averted_real_q0 <- (df$tot_infections_notesting_q0 - df$tot_infections_real_q0)
   
-  df$cases_averted_ideal_qhigh <- (df$tot_infections_notesting_qhigh - df$tot_infections_ideal_qhigh)
   df$cases_averted_mod_qhigh <- (df$tot_infections_notesting_qhigh - df$tot_infections_mod_qhigh)
   df$cases_averted_real_qhigh <- (df$tot_infections_notesting_qhigh - df$tot_infections_real_qhigh)
   
   C <- ggplot(df, aes(x=phi*100)) + 
-    geom_line(aes(y=cases_averted_ideal_q0/N*100), col = mygreen, size = 0.8, alpha = 0.6, linetype = "dashed") +
     geom_line(aes(y=cases_averted_mod_q0/N*100), col = myblue, size = 0.8, alpha = 0.6, linetype = "dashed") +
     geom_line(aes(y = cases_averted_real_q0/N*100), col = myyellow, size = 0.8, alpha = 0.6, linetype = "dashed") + 
     geom_line(aes(y = 0), col = myred, size = my_linesize) +  
-    geom_line(aes(y=cases_averted_ideal_qhigh/N*100), col = mygreen, size = my_linesize) +
     geom_line(aes(y=cases_averted_mod_qhigh/N*100), col = myblue, size = my_linesize) +
     geom_line(aes(y = cases_averted_real_qhigh/N*100), col = myyellow, size = my_linesize) +
     ylab("") + # Cases averted (#)
@@ -477,10 +447,6 @@ for (i in 1){
                                          VE_I = this_VE_I, VE_S = this_VE_S, 
                                          theta = 0, q = q0,
                                          psi = this_psi, X_I = this_X_I, X_S = this_X_S)
-  df$u_infections_idealtesting_q0 <- sapply(phi_vec, compute_u_infections, 
-                                            VE_I = this_VE_I, VE_S = this_VE_S, 
-                                            theta = ideal_theta, q = q0,
-                                            psi = this_psi, X_I = this_X_I, X_S = this_X_S)
   df$u_infections_modtesting_q0 <- sapply(phi_vec, compute_u_infections, 
                                           VE_I = this_VE_I, VE_S = this_VE_S, 
                                           theta = mod_theta, q = q0,
@@ -490,14 +456,11 @@ for (i in 1){
                                            theta = real_theta, q = q0,
                                            psi = this_psi, X_I = this_X_I, X_S = this_X_S)
   
-  df$prop_cases_averted_u_ideal_q0 <- (df$u_infections_notesting_q0 - df$u_infections_idealtesting_q0) / df$cases_averted_ideal_q0 * 100
   df$prop_cases_averted_u_mod_q0 <- (df$u_infections_notesting_q0 - df$u_infections_modtesting_q0) / df$cases_averted_mod_q0 * 100
   df$prop_cases_averted_u_real_q0 <- (df$u_infections_notesting_q0 - df$u_infections_realtesting_q0) / df$cases_averted_real_q0 * 100
   
-  df$num_cases_averted_u_ideal_q0 <- (df$u_infections_notesting_q0 - df$u_infections_idealtesting_q0) 
   df$num_cases_averted_u_mod_q0 <- (df$u_infections_notesting_q0 - df$u_infections_modtesting_q0) 
   df$num_cases_averted_u_real_q0 <- (df$u_infections_notesting_q0 - df$u_infections_realtesting_q0) 
-  df$num_cases_averted_v_ideal_q0 <- (df$cases_averted_ideal_q0 - df$num_cases_averted_u_ideal_q0) 
   df$num_cases_averted_v_mod_q0 <- (df$cases_averted_mod_q0 - df$num_cases_averted_u_mod_q0) 
   df$num_cases_averted_v_real_q0 <- (df$cases_averted_real_q0 - df$num_cases_averted_u_real_q0)
   
@@ -505,10 +468,6 @@ for (i in 1){
                                             VE_I = this_VE_I, VE_S = this_VE_S, 
                                             theta = 0, q = qhigh,
                                             psi = this_psi, X_I = this_X_I, X_S = this_X_S)
-  df$u_infections_idealtesting_qhigh <- sapply(phi_vec, compute_u_infections, 
-                                               VE_I = this_VE_I, VE_S = this_VE_S, 
-                                               theta = ideal_theta, q = qhigh,
-                                               psi = this_psi, X_I = this_X_I, X_S = this_X_S)
   df$u_infections_modtesting_qhigh <- sapply(phi_vec, compute_u_infections, 
                                              VE_I = this_VE_I, VE_S = this_VE_S, 
                                              theta = mod_theta, q = qhigh,
@@ -518,14 +477,11 @@ for (i in 1){
                                               theta = real_theta, q = qhigh,
                                               psi = this_psi, X_I = this_X_I, X_S = this_X_S)
   
-  df$prop_cases_averted_u_ideal_qhigh <- (df$u_infections_notesting_qhigh - df$u_infections_idealtesting_qhigh) / df$cases_averted_ideal_qhigh * 100
   df$prop_cases_averted_u_mod_qhigh <- (df$u_infections_notesting_qhigh - df$u_infections_modtesting_qhigh) / df$cases_averted_mod_qhigh * 100
   df$prop_cases_averted_u_real_qhigh <- (df$u_infections_notesting_qhigh - df$u_infections_realtesting_qhigh) / df$cases_averted_real_qhigh * 100
   
-  df$num_cases_averted_u_ideal_qhigh <- (df$u_infections_notesting_qhigh - df$u_infections_idealtesting_qhigh) 
   df$num_cases_averted_u_mod_qhigh <- (df$u_infections_notesting_qhigh - df$u_infections_modtesting_qhigh) 
   df$num_cases_averted_u_real_qhigh <- (df$u_infections_notesting_qhigh - df$u_infections_realtesting_qhigh) 
-  df$num_cases_averted_v_ideal_qhigh <- (df$cases_averted_ideal_qhigh - df$num_cases_averted_u_ideal_qhigh) 
   df$num_cases_averted_v_mod_qhigh <- (df$cases_averted_mod_qhigh - df$num_cases_averted_u_mod_qhigh) 
   df$num_cases_averted_v_real_qhigh <- (df$cases_averted_real_qhigh - df$num_cases_averted_u_real_qhigh)
   
@@ -534,10 +490,8 @@ for (i in 1){
   df[101,this_elem] <- 0
   
   D <- ggplot(df, aes(x=phi*100)) + 
-    geom_line(aes(y=prop_cases_averted_u_ideal_q0), col = mygreen, size = 0.8, alpha = 0.6, linetype = "dashed") +
     geom_line(aes(y=prop_cases_averted_u_mod_q0), col = myblue, size = 0.8, alpha = 0.6, linetype = "dashed") +
     geom_line(aes(y=prop_cases_averted_u_real_q0), col = myyellow, size = 0.8, alpha = 0.6, linetype = "dashed") +
-    geom_line(aes(y=prop_cases_averted_u_ideal_qhigh), col = mygreen, size = my_linesize) +
     geom_line(aes(y=prop_cases_averted_u_mod_qhigh), col = myblue, size = my_linesize) +
     geom_line(aes(y=prop_cases_averted_u_real_qhigh), col = myyellow, size = my_linesize) +
     geom_line(aes(y=0), col = myred, size = my_linesize) +
@@ -555,10 +509,6 @@ for (i in 1){
                                  VE_I = this_VE_I, VE_S = this_VE_S, 
                                  theta = 0, q = q0,
                                  psi = this_psi, X_I = this_X_I, X_S = this_X_S)
-  df$Reff_idealtesting_q0 <- sapply(phi_vec, compute_Reff, 
-                                    VE_I = this_VE_I, VE_S = this_VE_S,  
-                                    theta = ideal_theta, q = q0,
-                                    psi = this_psi, X_I = this_X_I, X_S = this_X_S)
   df$Reff_modtesting_q0 <- sapply(phi_vec, compute_Reff, 
                                   VE_I = this_VE_I, VE_S = this_VE_S, 
                                   theta = mod_theta, q = q0,
@@ -572,10 +522,6 @@ for (i in 1){
                                     VE_I = this_VE_I, VE_S = this_VE_S,
                                     theta = 0, q = qhigh,
                                     psi = this_psi, X_I = this_X_I, X_S = this_X_S)
-  df$Reff_idealtesting_qhigh <- sapply(phi_vec, compute_Reff, 
-                                       VE_I = this_VE_I, VE_S = this_VE_S, 
-                                       theta = ideal_theta, q = qhigh,
-                                       psi = this_psi, X_I = this_X_I, X_S = this_X_S)
   df$Reff_modtesting_qhigh <- sapply(phi_vec, compute_Reff, 
                                      VE_I = this_VE_I, VE_S = this_VE_S, 
                                      theta = mod_theta, q = qhigh,
@@ -589,12 +535,10 @@ for (i in 1){
     geom_hline(yintercept = 1, size = 0.5, alpha = 0.5, linetype = "dashed") +
     geom_line(aes(y = Reff_notesting_q0), col = myred, size = 0.8, alpha = 0.6, linetype = "dashed") +
     geom_line(aes(y = Reff_modtesting_q0), col = myblue,  size = 0.8, alpha = 0.6, linetype = "dashed") +
-    geom_line(aes(y = Reff_idealtesting_q0), col = mygreen,  size = 0.8, alpha = 0.6, linetype = "dashed") +
     geom_line(aes(y = Reff_realtesting_q0), col = myyellow,  size = 0.8, alpha = 0.6, linetype = "dashed") +
     
     geom_line(aes(y = Reff_notesting_qhigh), col = myred, size = my_linesize) +
     geom_line(aes(y = Reff_modtesting_qhigh), col = myblue, size = my_linesize) +
-    geom_line(aes(y = Reff_idealtesting_qhigh), col = mygreen, size = my_linesize) +
     geom_line(aes(y = Reff_realtesting_qhigh), col = myyellow, size = my_linesize) +
     scale_x_continuous(expand = c(0, 0), limits = c(0, 100), breaks = c(0, 50, 100)) +
     scale_y_continuous(expand = c(0,0), limits = c(0, 4)) + 
