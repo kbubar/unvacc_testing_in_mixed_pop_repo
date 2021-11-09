@@ -24,7 +24,7 @@ for (i in 1){
     ylab("Infected (#)") + 
     xlab("Time (days)") +
     scale_x_continuous(expand = c(0, 0), limits = c(0, 270)) + 
-    scale_y_continuous(expand = c(0, 0), limits = c(0, 875)) +
+    scale_y_continuous(expand = c(0, 0), limits = c(0, 1000)) +
     onlyy_theme 
   
   #*  Panel D - transmission mode over time (i.e. who caused new daily cases) ####
@@ -48,7 +48,7 @@ for (i in 1){
     ylab("New daily infections (#) ") + 
     xlab("Time (days)") +
     scale_x_continuous(expand = c(0, 0), limits = c(0, 270)) + 
-    scale_y_continuous(expand = c(0, 0), limits = c(0, 50)) +
+    scale_y_continuous(expand = c(0, 0), limits = c(0, 80)) +
     alllabels_theme
   
   #* Panel C - total infections and breakthrough cases over phi ####
@@ -245,22 +245,22 @@ for (this_panel in panels){
   df[101,this_elem] <- 0
   
   A <- ggplot(df, aes(x=phi*100)) + 
-    geom_line(aes(y = tot_infections_notesting/N*100), col = myred, size = my_linesize) +  
-    geom_line(aes(y = tot_infections_modtesting/N*100), col = myblue, size = my_linesize) + 
-    geom_line(aes(y = tot_infections_realtesting/N*100), col = myyellow, size = my_linesize) + 
+    geom_line(aes(y = tot_infections_notesting), col = myred, size = my_linesize) +  
+    geom_line(aes(y = tot_infections_modtesting), col = myblue, size = my_linesize) + 
+    geom_line(aes(y = tot_infections_realtesting), col = myyellow, size = my_linesize) + 
     ylab("") + # Total infections (%)
     xlab("") +
     scale_x_continuous(expand = c(0, 0), limits = c(0, 100), breaks = c(0, 50, 100)) +
-    scale_y_continuous(expand = c(0, 0), limits = c(0, 100)) 
+    scale_y_continuous(expand = c(0, 0), limits = c(0, N)) 
   
   B <- ggplot(df, aes(x=phi*100)) + 
-    geom_line(aes(y=cases_averted_mod/N*100), col = myblue, size = my_linesize) +
-    geom_line(aes(y = cases_averted_real/N*100), col = myyellow, size = my_linesize) + 
+    geom_line(aes(y=cases_averted_mod), col = myblue, size = my_linesize) +
+    geom_line(aes(y = cases_averted_real), col = myyellow, size = my_linesize) + 
     geom_line(aes(y = 0), col = myred, size = my_linesize) +  
     ylab("") + # Cases averted (#)
     xlab("") +
     scale_x_continuous(expand = c(0, 0), limits = c(0, 100), breaks = c(0, 50, 100)) +
-    scale_y_continuous(expand = c(0, 0), limits = c(-1, 100))  
+    scale_y_continuous(expand = c(0, 0), limits = c(-1, N/2))  
   
   C <- ggplot(df, aes(x=phi*100)) +
     geom_hline(yintercept = 1, size = 0.5, linetype = "dashed", alpha = 0.5) +
@@ -268,16 +268,16 @@ for (this_panel in panels){
     geom_line(aes(y = Reff_modtesting), col = myblue, size = my_linesize) +
     geom_line(aes(y = Reff_realtesting), col = myyellow, size = my_linesize) +
     scale_x_continuous(expand = c(0, 0), limits = c(0, 100), breaks = c(0, 50, 100)) +
-    scale_y_continuous(expand = c(0,0), limits = c(0, 4)) + 
+    scale_y_continuous(expand = c(0,0), limits = c(0, 6)) + 
     ylab("") + # R_eff 
     xlab("") 
   
   if (this_panel == 1){
     A <- A + onlyy_theme + 
-      ggtitle("Total infections\n(% of pop.)") + 
+      ggtitle("Total infections") + 
       theme(plot.title = element_text(size = 13))
-    B <- B + nolabels_theme + 
-      ggtitle("Infections averted\n(% of pop.)") + 
+    B <- B + onlyy_theme + 
+      ggtitle("Infections averted") + 
       theme(plot.title = element_text(size = 13))
     C <- C + onlyy_theme + 
       ggtitle(expression(R[eff]))+ 
@@ -285,18 +285,17 @@ for (this_panel in panels){
     
     panel1 <- ggarrange(A, NULL, B, NULL, C, NULL,
                         nrow = 1,
-                        widths = c(1, -0.2, 1, -0.15, 1, -0.1), 
+                        widths = c(1, 0, 1, 0, 1, 0), 
                         align = "hv",
-                        labels = c(' a', NA, '     b', NA, '    c', NA),
+                        labels = c(' a', NA, '  b', NA, '   c', NA),
                         label.y = 0.82)
     
   } else {
-    B <- B + onlyx_theme
     panel2 <- ggarrange(A, NULL, B, NULL, C, NULL,
                         nrow = 1,
-                        widths = c(1, -0.2, 1, -0.15, 1, -0.1), 
+                        widths = c(1, 0, 1, 0, 1, 0), 
                         align = "hv",
-                        labels = c(' d', NA, '     e', NA, '    f', NA))
+                        labels = c(' d', NA, ' e', NA, '    f', NA))
   }
 }
 

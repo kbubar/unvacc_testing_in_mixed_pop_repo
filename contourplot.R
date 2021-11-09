@@ -1,8 +1,8 @@
 # TEST of contour plot
 source("setup.R") 
 
-phi_vec <- seq(0, 1, by = 0.01)
-psi_vec <- seq(0, 1, by = 0.01)
+phi_vec <- seq(0, 1, by = 0.05)
+psi_vec <- seq(0, 1, by = 0.05)
 df <- expand.grid(phi = phi_vec, psi = psi_vec)
 
 # _____________________________________________________________________
@@ -85,6 +85,9 @@ p_breakthrough <- ggplot(df, aes(x = phi*100, y = psi*100, z = breakthrough)) +
 # _____________________________________________________________________
 # Dominant transmission ####
 # _____________________________________________________________________
+caseyblue <- "#1A1484"
+caseypink <- "#F20587"
+
 df$dom_transmission <- NA
 
 for (i in 1:dim(df)[1]){
@@ -102,8 +105,9 @@ p_dom <- ggplot(df, aes(x = phi*100, y = psi*100, z = dom_transmission)) +
   ylab("Infection-acquired immunity (%)") +
   xlab("Population vaccination rate (%)") + 
   ggtitle("Dominant mode of transmission") + 
-  labs(fill = "") 
-
+  labs(fill = "") +
+  scale_fill_manual(values = c(caseyblue, caseypink))
+                    
 ggarrange(p_Reff, p_breakthrough, p_dom,
           nrow = 1,
           align = "hv")
@@ -137,14 +141,14 @@ for (i in 1:dim(df)[1]){
 
 p_ideal <- ggplot(df, aes(x = phi*100, y = psi*100, fill = infections_averted_per100_ideal)) + 
   geom_tile() +
-  #stat_contour(aes(z = Reff_ideal), breaks = c(1), size = 1) + 
+  stat_contour(aes(z = Reff_ideal), breaks = c(1), size = 1) + 
   scale_y_continuous(expand = c(0,0)) +
   scale_x_continuous(expand = c(0,0)) +
   ylab("Infection-acquired immunity (%)") +
   xlab("Population vaccination rate (%)") + 
   ggtitle("2x weekly testing, 99% compliance") + 
   labs(fill = "") + 
-  scale_fill_gradientn(colours = cet_pal(5, name = "inferno"), limits=c(0,5))
+  scale_fill_gradientn(colours = cet_pal(5, name = "inferno"), limits=c(0,6))
 
 
 p_mod <- ggplot(df, aes(x = phi*100, y = psi*100, fill = infections_averted_per100_mod)) + 
@@ -156,7 +160,7 @@ p_mod <- ggplot(df, aes(x = phi*100, y = psi*100, fill = infections_averted_per1
   xlab("Population vaccination rate (%)") + 
   ggtitle("Weekly testing, 99% compliance") + 
   labs(fill = "") + 
-  scale_fill_gradientn(colours = cet_pal(5, name = "inferno"), limits=c(0,5))
+  scale_fill_gradientn(colours = cet_pal(5, name = "inferno"), limits=c(0,6))
 
 p_real <- ggplot(df, aes(x = phi*100, y = psi*100, fill = infections_averted_per100_real)) + 
   geom_tile() +
@@ -167,7 +171,78 @@ p_real <- ggplot(df, aes(x = phi*100, y = psi*100, fill = infections_averted_per
   xlab("Population vaccination rate (%)") + 
   ggtitle("Weekly testing, 50% compliance") + 
   labs(fill = "") + 
-  scale_fill_gradientn(colours = cet_pal(5, name = "inferno"), limits=c(0,5))
+  scale_fill_gradientn(colours = cet_pal(5, name = "inferno"), limits=c(0,6))
+
+ggarrange(p_real, p_mod, p_ideal,
+          ncol = 3,
+          align = "hv")
+
+ggsave("heatmaps3.pdf", device = cairo_pdf, width = 12, height = 4)
+
+
+# _____________________________________________________________________
+# Number infections averted ####
+# _____________________________________________________________________
+df$infections_averted_ideal <- NA
+df$infections_averted_mod <- NA
+df$infections_averted_real <- NA
+
+for (i in 1:dim(df)[1]){
+  # computer number of infections without testing
+  tot_inf <- compute_tot_infections(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, 
+                                                    theta = 0, q = 0, 
+                                                    df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                                    H_I = this_H_I, H_S = this_H_S)
+  
+  df$infections_averted_ideal[i] <- tot_inf - compute_tot_infections(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, 
+                                                                     theta = ideal_theta, q = 0, 
+                                                                     df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                                                     H_I = this_H_I, H_S = this_H_S)
+    
+  df$infections_averted_mod[i] <- tot_inf - compute_tot_infections(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, 
+                                                                   theta = mod_theta, q = 0, 
+                                                                   df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                                                   H_I = this_H_I, H_S = this_H_S)
+  
+  df$infections_averted_real[i] <- tot_inf - compute_tot_infections(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, 
+                                                                    theta = real_theta, q = 0, 
+                                                                    df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                                                    H_I = this_H_I, H_S = this_H_S)
+}
+
+p_ideal <- ggplot(df, aes(x = phi*100, y = psi*100, fill = infections_averted_ideal)) + 
+  geom_tile() +
+  stat_contour(aes(z = Reff_ideal), breaks = c(1), size = 1) + 
+  scale_y_continuous(expand = c(0,0)) +
+  scale_x_continuous(expand = c(0,0)) +
+  ylab("Infection-acquired immunity (%)") +
+  xlab("Population vaccination rate (%)") + 
+  ggtitle("2x weekly testing, 99% compliance") + 
+  labs(fill = "") + 
+  scale_fill_gradientn(colours = cet_pal(5, name = "inferno"), limits=c(0,18000))
+
+
+p_mod <- ggplot(df, aes(x = phi*100, y = psi*100, fill = infections_averted_mod)) + 
+  geom_tile() +
+  stat_contour(aes(z = Reff_mod), breaks = 1, size = 1) + 
+  scale_y_continuous(expand = c(0,0)) +
+  scale_x_continuous(expand = c(0,0)) +
+  ylab("Infection-acquired immunity (%)") +
+  xlab("Population vaccination rate (%)") + 
+  ggtitle("Weekly testing, 99% compliance") + 
+  labs(fill = "") + 
+  scale_fill_gradientn(colours = cet_pal(5, name = "inferno"), limits=c(0,18000))
+
+p_real <- ggplot(df, aes(x = phi*100, y = psi*100, fill = infections_averted_real)) + 
+  geom_tile() +
+  stat_contour(aes(z = Reff_real), breaks = 1, size = 1) + 
+  scale_y_continuous(expand = c(0,0)) +
+  scale_x_continuous(expand = c(0,0)) +
+  ylab("Infection-acquired immunity (%)") +
+  xlab("Population vaccination rate (%)") + 
+  ggtitle("Weekly testing, 50% compliance") + 
+  labs(fill = "") + 
+  scale_fill_gradientn(colours = cet_pal(5, name = "inferno"), limits=c(0,18000))
 
 ggarrange(p_real, p_mod, p_ideal,
           ncol = 3,
