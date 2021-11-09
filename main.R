@@ -18,9 +18,9 @@ for (i in 1){
                           H_I = this_H_I, H_S = this_H_S)
   
   B <- ggplot(df_B, aes(x = time)) + 
-    geom_line(aes(y = I_v), col = mylightgray, size = my_linesize) + 
+    geom_line(aes(y = I_v + I_h), col = mylightgray, size = my_linesize) + 
     geom_line(aes(y = I_u + I_x), col = mygray, size = my_linesize, linetype = "longdash")  + 
-    geom_line(aes(y = I_v + I_u + I_x), col = myblack, size = my_linesize) +
+    geom_line(aes(y = I_v + I_u + I_x + I_h), col = myblack, size = my_linesize) +
     ylab("Infected (#)") + 
     xlab("Time (days)") +
     scale_x_continuous(expand = c(0, 0), limits = c(0, 270)) + 
@@ -137,7 +137,7 @@ ggarrange(B, NULL, C, NULL, NULL, NULL, D, NULL, E,
           widths = c(1, -0.1, 1),
           heights = c(1, -0.13, 1))
 
-ggsave("fig1_test.pdf", device = cairo_pdf, width = 8, height = 5.5)
+ggsave("fig1_withh.pdf", device = cairo_pdf, width = 8, height = 5.5)
 
 # _____________________________________________________________________
 # TABLE1 - when transmission is no longer dominated by unvaccinated ####

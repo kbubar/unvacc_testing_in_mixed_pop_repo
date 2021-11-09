@@ -17,7 +17,8 @@ calculate_derivatives_leaky <- function(t, x, parameters){
     
     # if no one is susceptible or everyone/no one is vaccinated, lambda = 0
     if (S_v > 0 && phi != 0){
-      lambda_v <- alpha*(rate_u_and_v*I_u + rate_u_and_v*I_x*(1-X_I) + rate_v_and_v*I_h*(1-H_I) + rate_v_and_v*I_v*(1-VE_I))*(1-VE_S) + ext_forcing*(1-VE_S)/N
+      lambda_v <- alpha*(rate_u_and_v*I_u + rate_u_and_v*I_x*(1-X_I) + 
+                           rate_v_and_v*I_h*(1-H_I) + rate_v_and_v*I_v*(1-VE_I))*(1-VE_S) + ext_forcing*(1-VE_S)/N
     } else {
       lambda_v <- 0
     }
@@ -41,7 +42,7 @@ calculate_derivatives_leaky <- function(t, x, parameters){
     }
     
     dS_v  <- -lambda_v*S_v
-    dS_h <- -lambda_h*S_h
+    dS_h  <- -lambda_h*S_h
     dS_x  <- -lambda_x*S_x
     dS_u  <- -lambda_u*S_u
     
@@ -194,7 +195,11 @@ compute_who_caused_daily_infections <- function(phi, VE_I, VE_S,
     rate_u_and_u <- 1
   }
   
-  cases_in_v_by_v <- alpha*rate_v_and_v*((I_v*(1-VE_I) + I_h*(1-H_I))*((1-VE_S)*S_v + (1-H_S)*S_h))*dt
+  # in v by v includes v to v, v to h, h to v and h to h
+  cases_in_v_by_v <- alpha*rate_v_and_v*dt*(I_v*(1-VE_I)*(1-VE_S)*S_v + 
+                                              I_v*(1-VE_I)*(1-H_S)*S_h +
+                                              I_h*(1-H_I)*(1-VE_S)*S_v + 
+                                              I_h*(1-H_I)*(1-H_S)*S_h)
   cases_in_v_by_external <- ext_forcing*((1-VE_S)*S_v + (1-H_S)*S_h)/N*dt
   
   # in u by u includes u to u, u to x, x to x, x to u

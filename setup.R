@@ -71,8 +71,8 @@ N <- 20000
 phi_vec <- seq(0, 1, by = 0.01)
 this_phi <- 0.58 # fully vacc. in US as of 11/4
 
-this_psi <- 0.35 # CDC estimate 
-this_X_S <- 0.627 # Gardner 2021
+this_psi <- 0.35  # CDC estimate 
+this_X_S <- 0.627 # Gardner 2021 
 this_X_I <- 0.125 # Gardner 2021
 
 this_H_S <- 0.827 # Gardner 2021
