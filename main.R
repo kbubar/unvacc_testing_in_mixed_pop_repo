@@ -240,12 +240,30 @@ for (this_panel in panels){
                                 psi = this_psi, X_I = this_X_I, X_S = this_X_S,
                                 H_I = this_H_I, H_S = this_H_S)
   
+  # Reduction per test 
+  df$numtests_modtesting <- sapply(phi_vec, compute_num_tests, 
+                                   VE_I = this_VE_I, VE_S = this_VE_S, 
+                                   theta = mod_theta, freq = low_freq, 
+                                   inf_period = 1/gamma, compliance = high_compliance, q = this_q,
+                                   psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                                   H_I = this_H_I, H_S = this_H_S)
+  df$numtests_realtesting <- sapply(phi_vec, compute_num_tests, 
+                                    VE_I = this_VE_I, VE_S = this_VE_S, 
+                                    theta = real_theta, freq = low_freq, 
+                                    inf_period = 1/gamma, compliance = low_compliance, q = this_q,
+                                    psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                                    H_I = this_H_I, H_S = this_H_S)
+
+  df$reducpertest_modtesting <- df$cases_averted_mod / df$numtests_modtesting
+  df$reducpertest_realtesting <- df$cases_averted_real / df$numtests_realtesting
+  df$reducpertest_notesting <- 0
+  
   # fix anywhere that had NaN because 0 in the denominator
   this_elem <- which(is.na(df[101,])) 
   df[101,this_elem] <- 0
   
   A <- ggplot(df, aes(x=phi*100)) + 
-    geom_line(aes(y = tot_infections_notesting), col = myred, size = my_linesize) +  
+    geom_line(aes(y = tot_infections_notesting), col = mylightgray, size = my_linesize) +  
     geom_line(aes(y = tot_infections_modtesting), col = myblue, size = my_linesize) + 
     geom_line(aes(y = tot_infections_realtesting), col = myyellow, size = my_linesize) + 
     ylab("") + # Total infections (%)
@@ -256,19 +274,28 @@ for (this_panel in panels){
   B <- ggplot(df, aes(x=phi*100)) + 
     geom_line(aes(y=cases_averted_mod), col = myblue, size = my_linesize) +
     geom_line(aes(y = cases_averted_real), col = myyellow, size = my_linesize) + 
-    geom_line(aes(y = 0), col = myred, size = my_linesize) +  
+    geom_line(aes(y = 0), col = mylightgray, size = my_linesize) +  
     ylab("") + # Cases averted (#)
     xlab("") +
     scale_x_continuous(expand = c(0, 0), limits = c(0, 100), breaks = c(0, 50, 100)) +
-    scale_y_continuous(expand = c(0, 0), limits = c(-1, N/2))  
+    scale_y_continuous(expand = c(0, 0), limits = c(-50, N/2))  
   
-  C <- ggplot(df, aes(x=phi*100)) +
+  C <- ggplot(df, aes(x=phi*100)) + 
+    geom_line(aes(y=reducpertest_modtesting * 100), col = myblue, size = my_linesize) +
+    geom_line(aes(y = reducpertest_realtesting * 100), col = myyellow, size = my_linesize) +
+    geom_line(aes(y = 0), col = mylightgray, size = my_linesize) +
+    ylab("") + # Cases averted per 100 tests (#)
+    xlab("") +
+    scale_x_continuous(expand = c(0, 0), limits = c(0, 100), breaks = c(0, 50, 100)) +
+    scale_y_continuous(expand = c(0, 0), limits = c(-0.05, 7))
+  
+  D <- ggplot(df, aes(x=phi*100)) +
     geom_hline(yintercept = 1, size = 0.5, linetype = "dashed", alpha = 0.5) +
-    geom_line(aes(y = Reff_notesting), col = myred, size = my_linesize) +
+    geom_line(aes(y = Reff_notesting), col = mylightgray, size = my_linesize) +
     geom_line(aes(y = Reff_modtesting), col = myblue, size = my_linesize) +
     geom_line(aes(y = Reff_realtesting), col = myyellow, size = my_linesize) +
     scale_x_continuous(expand = c(0, 0), limits = c(0, 100), breaks = c(0, 50, 100)) +
-    scale_y_continuous(expand = c(0,0), limits = c(0, 6)) + 
+    scale_y_continuous(expand = c(0,0), limits = c(0, 5)) + 
     ylab("") + # R_eff 
     xlab("") 
   
@@ -280,22 +307,25 @@ for (this_panel in panels){
       ggtitle("Infections averted") + 
       theme(plot.title = element_text(size = 13))
     C <- C + onlyy_theme + 
+      ggtitle("Infections averted\n per 100 tests")+ 
+      theme(plot.title = element_text(size = 13))
+    D <- D + onlyy_theme + 
       ggtitle(expression(R[eff]))+ 
       theme(plot.title = element_text(size = 13))
     
-    panel1 <- ggarrange(A, NULL, B, NULL, C, NULL,
+    panel1 <- ggarrange(A, NULL, B, NULL, C, NULL, D, NULL,
                         nrow = 1,
-                        widths = c(1, 0, 1, 0, 1, 0), 
+                        widths = c(1, 0, 1, 0, 1, 0, 1, 0), 
                         align = "hv",
-                        labels = c(' a', NA, '  b', NA, '   c', NA),
+                        labels = c(' a', NA, '  b', NA, '   c', NA, '  d', NA),
                         label.y = 0.82)
     
   } else {
-    panel2 <- ggarrange(A, NULL, B, NULL, C, NULL,
+    panel2 <- ggarrange(A, NULL, B, NULL, C, NULL, D, NULL,
                         nrow = 1,
-                        widths = c(1, 0, 1, 0, 1, 0), 
+                        widths = c(1, 0, 1, 0, 1, 0, 1, 0), 
                         align = "hv",
-                        labels = c(' d', NA, ' e', NA, '    f', NA))
+                        labels = c(' e', NA, ' f', NA, '    g', NA, ' h', NA))
   }
 }
 

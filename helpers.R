@@ -344,7 +344,7 @@ compute_dominant_transmission <- function(phi, VE_I, VE_S, theta = 0, q = 0,
                                           psi = this_psi, X_I = this_X_I, X_S = this_X_S,
                                           H_I = this_H_I, H_S = this_H_S){
   # OUTPUT:
-  # which group (V or U or ext) is contributing most to transmission at a given phi and psi 
+  # proportion of transmission events caused by u -> u/(u+v)
   
   who_caused <- unlist(compute_who_caused_cases_tot(phi, VE_I, VE_S, theta, q, psi, X_I,
                                                     X_S, H_I, H_S))
@@ -353,15 +353,7 @@ compute_dominant_transmission <- function(phi, VE_I, VE_S, theta = 0, q = 0,
   by_u <- who_caused[2] + who_caused[4]
   by_ext <- who_caused[5] + who_caused[6]
   
-  out <- which.max(c(by_v, by_u, by_ext))
-  
-  if (out == 1){
-    out <- ("v")
-  } else if (out == 2){
-    out <- ("u")
-  } else {
-    out <- ("ext")
-  }
+  out <- by_u / (by_u + by_v)
 }
 
 compute_infections_averted_per100tests <- function(phi, VE_I, VE_S, theta = 0, q = 0,
