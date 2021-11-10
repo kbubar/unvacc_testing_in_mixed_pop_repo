@@ -338,7 +338,7 @@ annotate_figure(fig2,
                 bottom = text_grob("Population vaccination rate (%)", size = 14, family = "Arial",
                                    vjust = -1.2))
 
-ggsave("fig2.pdf", device = cairo_pdf, width = 8, height = 5)
+ggsave("fig2.pdf", dpi = 300, width = 8, height = 5)
 
 # _____________________________________________________________________
 # FIG3 - w/homophily ####
