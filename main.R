@@ -23,7 +23,7 @@ for (i in 1){
     geom_line(aes(y = I_v + I_u + I_x + I_h), col = myblack, size = my_linesize) +
     ylab("Infected (#)") + 
     xlab("Time (days)") +
-    scale_x_continuous(expand = c(0, 0), limits = c(0, 270)) + 
+    scale_x_continuous(expand = c(0, 0), limits = c(0, 200)) + 
     scale_y_continuous(expand = c(0, 0), limits = c(0, 1000)) +
     onlyy_theme 
   
@@ -47,7 +47,7 @@ for (i in 1){
     geom_line(aes(y = cases_in_v_by_v), col = mydarkteal, size = my_linesize) + 
     ylab("New daily infections (#) ") + 
     xlab("Time (days)") +
-    scale_x_continuous(expand = c(0, 0), limits = c(0, 270)) + 
+    scale_x_continuous(expand = c(0, 0), limits = c(0, 200)) + 
     scale_y_continuous(expand = c(0, 0), limits = c(0, 80)) +
     alllabels_theme
   
@@ -137,7 +137,7 @@ ggarrange(B, NULL, C, NULL, NULL, NULL, D, NULL, E,
           widths = c(1, -0.1, 1),
           heights = c(1, -0.13, 1))
 
-ggsave("fig1_withh.pdf", device = cairo_pdf, width = 8, height = 5.5)
+ggsave("fig1.pdf", dpi = 300, width = 8, height = 5.5)
 
 # _____________________________________________________________________
 # TABLE1 - when transmission is no longer dominated by unvaccinated ####
