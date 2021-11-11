@@ -319,23 +319,23 @@ for (this_panel in panels){
     
     panel1 <- ggarrange(A, NULL, B, NULL, C, NULL, D, NULL,
                         nrow = 1,
-                        widths = c(1, -0.1, 1, -0.1, 1, -0.1, 1, 0), 
+                        widths = c(1, -0.1, 1, -0.15, 1, -0.15, 1, 0.1), 
                         align = "hv",
-                        labels = c(' a', NA, '  b', NA, '   c', NA, '  d', NA),
+                        labels = c(' a', NA, '   b', NA, '    c', NA, '    d', NA),
                         label.y = 0.82)
     
   } else {
     panel2 <- ggarrange(A, NULL, B, NULL, C, NULL, D, NULL,
                         nrow = 1,
-                        widths = c(1, -0.1, 1, -0.1, 1, -0.1, 1, 0), 
+                        widths = c(1, -0.1, 1, -0.15, 1, -0.15, 1, 0.1),
                         align = "hv",
-                        labels = c(' e', NA, ' f', NA, '    g', NA, ' h', NA))
+                        labels = c(' e', NA, '    f', NA, '    g', NA, '    h', NA))
   }
 }
 
 # export 2000x800
 fig2 <- ggarrange(panel1, panel2, nrow = 2,
-                  heights = c(1.13, 1),
+                  heights = c(1.05, 1),
                   align = "hv")
 
 annotate_figure(fig2,
