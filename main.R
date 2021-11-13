@@ -23,7 +23,7 @@ for (i in 1){
     geom_line(aes(y = I_v + I_u + I_x + I_h), col = myblack, size = my_linesize) +
     ylab("Infected (#)") + 
     xlab("Time (days)") +
-    scale_x_continuous(expand = c(0, 0), limits = c(0, 270)) + 
+    scale_x_continuous(expand = c(0, 0), limits = c(0, 200)) + 
     scale_y_continuous(expand = c(0, 0), limits = c(0, 1000)) +
     onlyy_theme 
   
@@ -39,15 +39,19 @@ for (i in 1){
   df$cases_in_v_by_u <- unlist(list_who_caused[[2]])
   df$cases_in_u_by_v <- unlist(list_who_caused[[3]])
   df$cases_in_u_by_u <- unlist(list_who_caused[[4]])
+  df$cases_in_v_by_ext <- unlist(list_who_caused[[5]])
+  df$cases_in_u_by_ext <- unlist(list_who_caused[[6]])
   
   D <- ggplot(df, aes(x = time)) + 
+    geom_line(aes(y = cases_in_v_by_ext), col = mygray, size = my_linesize) +
+    geom_line(aes(y = cases_in_u_by_ext), col = mylightgray, size = my_linesize) + 
     geom_line(aes(y = cases_in_u_by_v), col = mylightteal, size = my_linesize) + 
     geom_line(aes(y = cases_in_v_by_u), col = mylightorange, size = my_linesize) +
     geom_line(aes(y = cases_in_u_by_u), col = mydarkorange, size = my_linesize) +
     geom_line(aes(y = cases_in_v_by_v), col = mydarkteal, size = my_linesize) + 
     ylab("New daily infections (#) ") + 
     xlab("Time (days)") +
-    scale_x_continuous(expand = c(0, 0), limits = c(0, 270)) + 
+    scale_x_continuous(expand = c(0, 0), limits = c(0, 200)) + 
     scale_y_continuous(expand = c(0, 0), limits = c(0, 80)) +
     alllabels_theme
   
@@ -137,7 +141,7 @@ ggarrange(B, NULL, C, NULL, NULL, NULL, D, NULL, E,
           widths = c(1, -0.1, 1),
           heights = c(1, -0.13, 1))
 
-ggsave("fig1_withh.pdf", device = cairo_pdf, width = 8, height = 5.5)
+ggsave("fig1.pdf", device = cairo_pdf, width = 8, height = 5.5)
 
 # _____________________________________________________________________
 # TABLE1 - when transmission is no longer dominated by unvaccinated ####
@@ -272,13 +276,13 @@ for (this_panel in panels){
     scale_y_continuous(expand = c(0, 0), limits = c(0, N)) 
   
   B <- ggplot(df, aes(x=phi*100)) + 
-    geom_line(aes(y=cases_averted_mod), col = myblue, size = my_linesize) +
-    geom_line(aes(y = cases_averted_real), col = myyellow, size = my_linesize) + 
+    geom_line(aes(y=cases_averted_mod/1000), col = myblue, size = my_linesize) +
+    geom_line(aes(y = cases_averted_real/1000), col = myyellow, size = my_linesize) + 
     geom_line(aes(y = 0), col = mylightgray, size = my_linesize) +  
-    ylab("") + # Cases averted (#)
+    ylab("") + # Cases averted (thousands)
     xlab("") +
     scale_x_continuous(expand = c(0, 0), limits = c(0, 100), breaks = c(0, 50, 100)) +
-    scale_y_continuous(expand = c(0, 0), limits = c(-50, N/2))  
+    scale_y_continuous(expand = c(0, 0), limits = c(-0.1, 10))  
   
   C <- ggplot(df, aes(x=phi*100)) + 
     geom_line(aes(y=reducpertest_modtesting * 100), col = myblue, size = my_linesize) +
@@ -304,7 +308,7 @@ for (this_panel in panels){
       ggtitle("Total infections") + 
       theme(plot.title = element_text(size = 13))
     B <- B + onlyy_theme + 
-      ggtitle("Infections averted") + 
+      ggtitle("Infections averted\n (thousands)") + 
       theme(plot.title = element_text(size = 13))
     C <- C + onlyy_theme + 
       ggtitle("Infections averted\n per 100 tests")+ 
@@ -315,30 +319,30 @@ for (this_panel in panels){
     
     panel1 <- ggarrange(A, NULL, B, NULL, C, NULL, D, NULL,
                         nrow = 1,
-                        widths = c(1, 0, 1, 0, 1, 0, 1, 0), 
+                        widths = c(1, -0.1, 1, -0.15, 1, -0.15, 1, 0.1), 
                         align = "hv",
-                        labels = c(' a', NA, '  b', NA, '   c', NA, '  d', NA),
+                        labels = c(' a', NA, '   b', NA, '    c', NA, '    d', NA),
                         label.y = 0.82)
     
   } else {
     panel2 <- ggarrange(A, NULL, B, NULL, C, NULL, D, NULL,
                         nrow = 1,
-                        widths = c(1, 0, 1, 0, 1, 0, 1, 0), 
+                        widths = c(1, -0.1, 1, -0.15, 1, -0.15, 1, 0.1),
                         align = "hv",
-                        labels = c(' e', NA, ' f', NA, '    g', NA, ' h', NA))
+                        labels = c(' e', NA, '    f', NA, '    g', NA, '    h', NA))
   }
 }
 
 # export 2000x800
 fig2 <- ggarrange(panel1, panel2, nrow = 2,
-                  heights = c(1.13, 1),
+                  heights = c(1.05, 1),
                   align = "hv")
 
 annotate_figure(fig2,
                 bottom = text_grob("Population vaccination rate (%)", size = 14, family = "Arial",
                                    vjust = -1.2))
 
-ggsave("fig2.pdf", dpi = 300, width = 8, height = 5)
+ggsave("fig2.pdf", device = cairo_pdf, width = 8, height = 5)
 
 # _____________________________________________________________________
 # FIG3 - w/homophily ####
