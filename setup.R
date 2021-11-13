@@ -17,7 +17,7 @@ library(remotes)
 remotes::install_version("Rttf2pt1", version = "1.3.8")
 library(extrafont)
 # font_import()
-# loadfonts(device = "win")
+#loadfonts(device = "win", quiet = TRUE)
 # fonts()
 
 source("helpers.R")
@@ -69,7 +69,7 @@ scientific <- function(x){
 N <- 20000
 
 phi_vec <- seq(0, 1, by = 0.01)
-this_phi <- 0.58 # fully vacc. in US as of 11/4
+this_phi <- 0.58  # fully vacc. in US as of 11/4
 
 this_psi <- 0.35  # CDC estimate 
 this_X_S <- 0.627 # Gardner 2021 
@@ -83,6 +83,7 @@ dt <- 1
 t <- seq(from=1, to=270, by=dt)
 ext_forcing = 1 # imported cases
 
+this_q <- 0
 q0 <- 0
 qhigh <- 0.8
 
