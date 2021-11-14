@@ -244,6 +244,8 @@ for (this_panel in panels){
                                 psi = this_psi, X_I = this_X_I, X_S = this_X_S,
                                 H_I = this_H_I, H_S = this_H_S)
   
+  Reff_1 <- min(which(df$Reff_notesting <= 1), 500) - 1 
+  
   # Reduction per test 
   df$numtests_modtesting <- sapply(phi_vec, compute_num_tests, 
                                    VE_I = this_VE_I, VE_S = this_VE_S, 
@@ -267,13 +269,16 @@ for (this_panel in panels){
   df[101,this_elem] <- 0
   
   A <- ggplot(df, aes(x=phi*100)) + 
-    geom_line(aes(y = tot_infections_notesting), col = mylightgray, size = my_linesize) +  
-    geom_line(aes(y = tot_infections_modtesting), col = myblue, size = my_linesize) + 
-    geom_line(aes(y = tot_infections_realtesting), col = myyellow, size = my_linesize) + 
+    geom_line(aes(y = tot_infections_notesting/1000), col = mylightgray, size = my_linesize) +  
+    geom_line(aes(y = tot_infections_modtesting/1000), col = myblue, size = my_linesize) + 
+    geom_line(aes(y = tot_infections_realtesting/1000), col = myyellow, size = my_linesize) + 
     ylab("") + # Total infections (%)
     xlab("") +
     scale_x_continuous(expand = c(0, 0), limits = c(0, 100), breaks = c(0, 50, 100)) +
-    scale_y_continuous(expand = c(0, 0), limits = c(0, N)) 
+    scale_y_continuous(expand = c(0, 0), limits = c(0, N/1000)) 
+  if (Reff_1 <= 100){
+    A <- A + geom_vline(xintercept = Reff_1, alpha = 0.5, linetype = "dashed", size = 0.5, col = mygray) 
+  }
   
   B <- ggplot(df, aes(x=phi*100)) + 
     geom_line(aes(y=cases_averted_mod/1000), col = myblue, size = my_linesize) +
@@ -283,6 +288,9 @@ for (this_panel in panels){
     xlab("") +
     scale_x_continuous(expand = c(0, 0), limits = c(0, 100), breaks = c(0, 50, 100)) +
     scale_y_continuous(expand = c(0, 0), limits = c(-0.1, 10))  
+  if (Reff_1 <= 100){
+    B <- B + geom_vline(xintercept = Reff_1, alpha = 0.5, linetype = "dashed", size = 0.5, col = mygray) 
+  }
   
   C <- ggplot(df, aes(x=phi*100)) + 
     geom_line(aes(y=reducpertest_modtesting * 100), col = myblue, size = my_linesize) +
@@ -292,6 +300,16 @@ for (this_panel in panels){
     xlab("") +
     scale_x_continuous(expand = c(0, 0), limits = c(0, 100), breaks = c(0, 50, 100)) +
     scale_y_continuous(expand = c(0, 0), limits = c(-0.05, 7))
+  if (Reff_1 <= 100){
+    C <- C + geom_vline(xintercept = Reff_1, alpha = 0.5, linetype = "dashed", size = 0.5, col = mygray) 
+  }
+  Reff_mod <- min(which(df$Reff_modtesting <= 1), 500) - 1 
+  Reff_real <- min(which(df$Reff_realtesting <= 1), 500) - 1 
+  if (Reff_1 <= 100){
+    C <- C + 
+      geom_vline(xintercept = Reff_real, alpha = 0.7, linetype = "dashed", size = 0.5, col = myyellow) +
+      geom_vline(xintercept = Reff_mod, alpha = 0.7, linetype = "dashed", size = 0.5, col = myblue) 
+  }
   
   D <- ggplot(df, aes(x=phi*100)) +
     geom_hline(yintercept = 1, size = 0.5, linetype = "dashed", alpha = 0.5) +
@@ -305,7 +323,7 @@ for (this_panel in panels){
   
   if (this_panel == 1){
     A <- A + onlyy_theme + 
-      ggtitle("Total infections") + 
+      ggtitle("Total infections\n (thousands)") + 
       theme(plot.title = element_text(size = 13))
     B <- B + onlyy_theme + 
       ggtitle("Infections averted\n (thousands)") + 
@@ -319,30 +337,30 @@ for (this_panel in panels){
     
     panel1 <- ggarrange(A, NULL, B, NULL, C, NULL, D, NULL,
                         nrow = 1,
-                        widths = c(1, -0.1, 1, -0.15, 1, -0.15, 1, 0.1), 
+                        widths = c(1, -0.05, 1, -0.15, 1, -0.15, 1, 0.1), 
                         align = "hv",
-                        labels = c(' a', NA, '   b', NA, '    c', NA, '    d', NA),
+                        labels = c(' a', NA, ' b', NA, '    c', NA, '    d', NA),
                         label.y = 0.82)
     
   } else {
     panel2 <- ggarrange(A, NULL, B, NULL, C, NULL, D, NULL,
                         nrow = 1,
-                        widths = c(1, -0.1, 1, -0.15, 1, -0.15, 1, 0.1),
+                        widths = c(1, -0.05, 1, -0.15, 1, -0.15, 1, 0.1),
                         align = "hv",
-                        labels = c(' e', NA, '    f', NA, '    g', NA, '    h', NA))
+                        labels = c(' e', NA, '  f', NA, '    g', NA, '    h', NA))
   }
 }
 
 # export 2000x800
-fig2 <- ggarrange(panel1, panel2, nrow = 2,
+fig3 <- ggarrange(panel1, panel2, nrow = 2,
                   heights = c(1.05, 1),
                   align = "hv")
 
-annotate_figure(fig2,
+annotate_figure(fig3,
                 bottom = text_grob("Population vaccination rate (%)", size = 14, family = "Arial",
                                    vjust = -1.2))
 
-ggsave("fig2.pdf", device = cairo_pdf, width = 8, height = 5)
+ggsave("fig3.pdf", device = cairo_pdf, width = 8, height = 5)
 
 # _____________________________________________________________________
 # FIG3 - w/homophily ####
