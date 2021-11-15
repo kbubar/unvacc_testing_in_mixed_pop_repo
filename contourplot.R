@@ -13,11 +13,12 @@ source("setup.R")
 
 # Either read in the corresponding RDS file
 df <- readRDS("df_fig2_setupparams.RData")
+df <- readRDS("df_suppfig2_R06.RData")
 
 # or run the model 
 ptm <- proc.time()
-phi_vec <- seq(0, 1, by = 0.05) # fine grid : by = 0.01
-psi_vec <- seq(0, 1, by = 0.05)
+phi_vec <- seq(0, 1, by = 0.01) # fine grid : by = 0.01
+psi_vec <- seq(0, 1, by = 0.01)
 df <- expand.grid(phi = phi_vec, psi = psi_vec)
 
 df$Reff <- NA
@@ -101,8 +102,8 @@ ggarrange(p_Reff, p_breakthrough, p_dom,
           widths = c(1, 1.15, 1.3),
           align = "hv")
 
-ggsave("fig2_heatmap.pdf", device = cairo_pdf, width = 12, height = 4)
-ggsave("fig2_heatmap.svg", device = svg, width = 12, height = 4)
+ggsave("suppfig2_heatmap_R06.pdf", device = cairo_pdf, width = 12, height = 4)
+ggsave("suppfig2_heatmap_R06.svg", device = svg, width = 12, height = 4)
 
 
 # _____________________________________________________________________
@@ -117,6 +118,7 @@ ggsave("fig2_heatmap.svg", device = svg, width = 12, height = 4)
 
 # Either read in the corresponding RDS file
 df <- readRDS("df_fig4_setupparams.RData")
+df <- readRDS("df_suppfig4_R06.RData")
 
 # or run the model 
 ptm <- proc.time()
@@ -197,7 +199,7 @@ infectavert_mod <- ggplot(df, aes(x = phi*100, y = psi*100, fill = infections_av
   xlab("") + #xlab("Population vaccination rate (%)") + 
   ggtitle("Weekly testing, 99% compliance", "")+#"Infections averted\nrel. to no testing") + 
   labs(fill = "") + 
-  scale_fill_gradientn(colours = cet_pal(5, name = "inferno"), limits=c(0,12000)) + 
+  scale_fill_gradientn(colours = cet_pal(5, name = "inferno"), limits=c(0,12000)) + #14000 for R0=6
   theme(legend.text = element_text(size = 11), 
         legend.spacing.x = unit(0.75, 'cm'),
         plot.title = element_text(color = myblue),
@@ -215,7 +217,7 @@ infectavert_real <- ggplot(df, aes(x = phi*100, y = psi*100, fill = infections_a
   xlab("") + #xlab("Population vaccination rate (%)") + 
   ggtitle("Weekly testing, 50% compliance", "") +# "Infections averted\nrel. to no testing") + 
   labs(fill = "") + 
-  scale_fill_gradientn(colours = cet_pal(5, name = "inferno"), limits=c(0,12000)) + 
+  scale_fill_gradientn(colours = cet_pal(5, name = "inferno"), limits=c(0,12000)) + #14000 for R0=6
   theme(legend.position = "none",
         plot.title = element_text(color = myyellow),
         plot.subtitle = element_text(hjust = 0.5)) + 
@@ -231,7 +233,7 @@ infper100_mod <- ggplot(df, aes(x = phi*100, y = psi*100, fill = infections_aver
   xlab("") + #xlab("Population vaccination rate (%)") + 
   ggtitle("") + #subtitle = "Infections averted per 100 tests") + 
   labs(fill = "") + 
-  scale_fill_gradientn(colours = cet_pal(5, name = "inferno"), limits=c(0,5)) + 
+  scale_fill_gradientn(colours = cet_pal(5, name = "inferno"), limits=c(0,5)) + # 8 for R0 = 6
   theme(legend.text = element_text(size = 11), 
         legend.spacing.x = unit(0.75, 'cm'),
         legend.text.align = 0,
@@ -269,6 +271,6 @@ annotate_figure(fig4,
                 left = text_grob("Infection-acquired immunity(%)", size = 14, family = "Arial", rot = 90,
                                  vjust = 1.1))
 
-ggsave("fig4_heatmap.pdf", device = cairo_pdf, width = 8, height = 7.5)
-ggsave("fig4_heatmap.svg", device = svg, width = 8, height = 7.5)
+ggsave("suppfig4_heatmap_R06.pdf", device = cairo_pdf, width = 8, height = 7.5)
+#ggsave("fig4_heatmap.svg", device = svg, width = 8, height = 7.5)
 
