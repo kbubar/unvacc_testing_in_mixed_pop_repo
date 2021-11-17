@@ -13,7 +13,7 @@ source("setup.R")
 
 # Either read in the corresponding RDS file
 df <- readRDS("df_fig2_setupparams.RData")
-df <- readRDS("df_suppfig2_R06.RData")
+#df <- readRDS("df_suppfig2_R06.RData")
 
 # or run the model 
 ptm <- proc.time()
@@ -100,10 +100,12 @@ p_dom <- ggplot(df, aes(x = phi*100, y = psi*100, z = dom_transmission)) +
 ggarrange(p_Reff, p_breakthrough, p_dom,
           ncol = 3,
           widths = c(1, 1.15, 1.3),
+          labels = c('a  ', 'b', 'c'),
+          label.y = 0.92,
           align = "hv")
 
-ggsave("suppfig2_heatmap_R06.pdf", device = cairo_pdf, width = 12, height = 4)
-ggsave("suppfig2_heatmap_R06.svg", device = svg, width = 12, height = 4)
+#ggsave("fig2_heatmap.pdf", device = cairo_pdf, width = 12, height = 4)
+#ggsave("suppfig2_heatmap_R06.svg", device = svg, width = 12, height = 4)
 
 
 # _____________________________________________________________________
@@ -118,22 +120,25 @@ ggsave("suppfig2_heatmap_R06.svg", device = svg, width = 12, height = 4)
 
 # Either read in the corresponding RDS file
 df <- readRDS("df_fig4_setupparams.RData")
-df <- readRDS("df_suppfig4_R06.RData")
+#df <- readRDS("df_suppfig4_R06.RData")
 
 # or run the model 
 ptm <- proc.time()
 
-phi_vec <- seq(0, 1, by = 0.01)
-psi_vec <- seq(0, 1, by = 0.01)
+phi_vec <- seq(0, 1, by = 0.05)
+psi_vec <- seq(0, 1, by = 0.05)
 df <- expand.grid(phi = phi_vec, psi = psi_vec)
 
 df$Reff <- NA
 df$Reff_mod <- NA
 df$Reff_real <- NA
+df$totinfections_mod <- NA
+df$totinfections_real <- NA
 df$infections_averted_mod <- NA
 df$infections_averted_real <- NA
 df$infections_averted_per100_mod <- NA
 df$infections_averted_per100_real <- NA
+
 
 for (i in 1:dim(df)[1]){
   df$Reff[i] <- compute_Reff(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S,  
@@ -150,20 +155,24 @@ for (i in 1:dim(df)[1]){
                                   df$psi[i], X_I = this_X_I, X_S = this_X_S,
                                   H_I = this_H_I, H_S = this_H_S)
   
-  tot_inf <- compute_tot_infections(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, 
+  df$totinfections_notesting[i] <- compute_tot_infections(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, 
                                     theta = 0, q = this_q, 
                                     df$psi[i], X_I = this_X_I, X_S = this_X_S,
                                     H_I = this_H_I, H_S = this_H_S)
   
-  df$infections_averted_mod[i] <- tot_inf - compute_tot_infections(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, 
-                                                                   theta = mod_theta, q = this_q, 
-                                                                   df$psi[i], X_I = this_X_I, X_S = this_X_S,
-                                                                   H_I = this_H_I, H_S = this_H_S)
+  df$totinfections_mod[i] <- compute_tot_infections(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, 
+                                                 theta = mod_theta, q = this_q, 
+                                                 df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                                 H_I = this_H_I, H_S = this_H_S)
   
-  df$infections_averted_real[i] <- tot_inf - compute_tot_infections(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, 
-                                                                    theta = real_theta, q = this_q, 
-                                                                    df$psi[i], X_I = this_X_I, X_S = this_X_S,
-                                                                    H_I = this_H_I, H_S = this_H_S)
+  df$totinfections_real[i] <- compute_tot_infections(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, 
+                                                 theta = real_theta, q = this_q, 
+                                                 df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                                 H_I = this_H_I, H_S = this_H_S)
+  
+  df$infections_averted_mod[i] <- df$totinfections_notesting[i] - df$totinfections_mod[i]
+  
+  df$infections_averted_real[i] <- df$totinfections_notesting[i] - df$totinfections_real[i]
   
   num_tests_mod <- compute_num_tests(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S,
                                      theta = mod_theta, freq = low_freq, inf_period = 1/gamma,
@@ -188,18 +197,36 @@ proc.time() - ptm
 # _____________________________________________________________________
 #* II: Plot fig4 ####
 # _____________________________________________________________________
+mylinesize <- 0.4
 
-infectavert_mod <- ggplot(df, aes(x = phi*100, y = psi*100, fill = infections_averted_mod)) + 
+infectavert <- ggplot(df, aes(x = phi*100, y = psi*100, fill = totinfections_notesting)) + 
   geom_tile() +
-  stat_contour(aes(z = Reff_mod), breaks = 1, size = 0.6, col = "white") + 
-  stat_contour(aes(z = Reff), breaks = 1, size = 0.6, col = mylightgray) + 
+  stat_contour(aes(z = Reff), breaks = 1, size = mylinesize, col = mylightgray, linetype = "longdash") + 
+  scale_y_continuous(expand = c(0,0)) +
+  scale_x_continuous(expand = c(0,0)) +
+  ylab("") + #ylab("Infection-acquired immunity (%)") +
+  xlab("") + #xlab("Population vaccination rate (%)") + 
+  ggtitle("No testing", "")+#"Infections averted\nrel. to no testing") + 
+  labs(fill = "") + 
+  scale_fill_gradientn(colours = cet_pal(5, name = "inferno"), limits=c(0,20000)) + #14000 for R0=6
+  theme(legend.text = element_text(size = 11), 
+        legend.spacing.x = unit(0.75, 'cm'),
+        plot.title = element_text(color = mygray),
+        plot.subtitle = element_text(hjust = 0.5),
+        axis.text.y = element_blank()) + 
+  coord_fixed(1)
+
+infectavert_mod <- ggplot(df, aes(x = phi*100, y = psi*100, fill = totinfections_mod)) + 
+  geom_tile() +
+  stat_contour(aes(z = Reff_mod), breaks = 1, size = mylinesize, col = "white") + 
+  #stat_contour(aes(z = Reff), breaks = 1, size = mylinesize, col = mylightgray, linetype = "longdash") + 
   scale_y_continuous(expand = c(0,0)) +
   scale_x_continuous(expand = c(0,0)) +
   ylab("") + #ylab("Infection-acquired immunity (%)") +
   xlab("") + #xlab("Population vaccination rate (%)") + 
   ggtitle("Weekly testing, 99% compliance", "")+#"Infections averted\nrel. to no testing") + 
   labs(fill = "") + 
-  scale_fill_gradientn(colours = cet_pal(5, name = "inferno"), limits=c(0,12000)) + #14000 for R0=6
+  scale_fill_gradientn(colours = cet_pal(5, name = "inferno"), limits=c(0,20000)) + #14000 for R0=6
   theme(legend.text = element_text(size = 11), 
         legend.spacing.x = unit(0.75, 'cm'),
         plot.title = element_text(color = myblue),
@@ -207,33 +234,33 @@ infectavert_mod <- ggplot(df, aes(x = phi*100, y = psi*100, fill = infections_av
         axis.text.y = element_blank()) + 
   coord_fixed(1)
 
-infectavert_real <- ggplot(df, aes(x = phi*100, y = psi*100, fill = infections_averted_real)) + 
+infectavert_real <- ggplot(df, aes(x = phi*100, y = psi*100, fill = totinfections_real)) + 
   geom_tile() +
-  stat_contour(aes(z = Reff_real), breaks = 1, size = 0.6, col =  "white") + 
-  stat_contour(aes(z = Reff), breaks = 1, size = 0.6, col = mylightgray) + 
+  stat_contour(aes(z = Reff_real), breaks = 1, size = mylinesize, col =  "white") + 
+  #stat_contour(aes(z = Reff), breaks = 1, size = mylinesize, col = mylightgray, linetype = "longdash") + 
   scale_y_continuous(expand = c(0,0)) +
   scale_x_continuous(expand = c(0,0)) +
   ylab("") + #ylab("Infection-acquired immunity (%)") +
   xlab("") + #xlab("Population vaccination rate (%)") + 
   ggtitle("Weekly testing, 50% compliance", "") +# "Infections averted\nrel. to no testing") + 
   labs(fill = "") + 
-  scale_fill_gradientn(colours = cet_pal(5, name = "inferno"), limits=c(0,12000)) + #14000 for R0=6
-  theme(legend.position = "none",
+  scale_fill_gradientn(colours = cet_pal(5, name = "inferno"), limits=c(0,20000)) + #14000 for R0=6
+  theme(#legend.position = "none",
         plot.title = element_text(color = myyellow),
         plot.subtitle = element_text(hjust = 0.5)) + 
   coord_fixed(1)
 
 infper100_mod <- ggplot(df, aes(x = phi*100, y = psi*100, fill = infections_averted_per100_mod)) + 
   geom_tile() +
-  stat_contour(aes(z = Reff_mod), breaks = 1, size = 0.6, col =  "white") + 
-  stat_contour(aes(z = Reff), breaks = 1, size = 0.6, col = mylightgray) + 
+  stat_contour(aes(z = Reff_mod), breaks = 1, size = mylinesize, col =  "white") + 
+  stat_contour(aes(z = Reff), breaks = 1, size = mylinesize, col = mylightgray, linetype = "longdash") + 
   scale_y_continuous(expand = c(0,0)) +
   scale_x_continuous(expand = c(0,0)) +
   ylab("") + #ylab("Infection-acquired immunity (%)") +
   xlab("") + #xlab("Population vaccination rate (%)") + 
   ggtitle("") + #subtitle = "Infections averted per 100 tests") + 
   labs(fill = "") + 
-  scale_fill_gradientn(colours = cet_pal(5, name = "inferno"), limits=c(0,5)) + # 8 for R0 = 6
+  scale_fill_gradientn(colours = cet_pal(5, name = "inferno"), limits=c(0,8)) + # 8 for R0 = 6
   theme(legend.text = element_text(size = 11), 
         legend.spacing.x = unit(0.75, 'cm'),
         legend.text.align = 0,
@@ -244,15 +271,15 @@ infper100_mod <- ggplot(df, aes(x = phi*100, y = psi*100, fill = infections_aver
 
 infper100_real <- ggplot(df, aes(x = phi*100, y = psi*100, fill = infections_averted_per100_real)) + 
   geom_tile() +
-  stat_contour(aes(z = Reff_real), breaks = 1, size = 0.6, col = "white") + 
-  stat_contour(aes(z = Reff), breaks = 1, size = 0.6, col = mylightgray) + 
+  stat_contour(aes(z = Reff_real), breaks = 1, size = mylinesize, col = "white") + 
+  stat_contour(aes(z = Reff), breaks = 1, size = mylinesize, col = mylightgray, linetype = "longdash") + 
   scale_y_continuous(expand = c(0,0)) +
   scale_x_continuous(expand = c(0,0)) +
   ylab("") + #ylab("Infection-acquired immunity (%)") +
   xlab("") + #xlab("Population vaccination rate (%)") + 
   ggtitle("")+ #subtitle = "Infections averted per 100 tests") + 
   labs(fill = "") + 
-  scale_fill_gradientn(colours = cet_pal(5, name = "inferno"), limits=c(0,5)) + 
+  scale_fill_gradientn(colours = cet_pal(5, name = "inferno"), limits=c(0,8)) + 
   theme(legend.position = "none",
         plot.subtitle = element_text(hjust = 0.5)) + 
   coord_fixed(1)
@@ -263,14 +290,16 @@ fig4 <- ggarrange(infectavert_real, NULL, infectavert_mod, NULL,
           ncol = 4, nrow = 3,
           widths = c(1, -0.05, 1.178, 0.05),
           heights = c(1, -0.11, 1),
-          align = "hv")
+          align = "hv",
+          labels = c("  a", NA, "  b", NA, NA, NA, NA, NA, "  c", NA, "  d", NA),
+          label.y = 0.87)
 
 annotate_figure(fig4,
                 bottom = text_grob("Population vaccination rate (%)", size = 14, family = "Arial",
                                    vjust = -1.2),
-                left = text_grob("Infection-acquired immunity(%)", size = 14, family = "Arial", rot = 90,
+                left = text_grob("Infection-acquired immunity (%)", size = 14, family = "Arial", rot = 90,
                                  vjust = 1.1))
 
 ggsave("suppfig4_heatmap_R06.pdf", device = cairo_pdf, width = 8, height = 7.5)
-#ggsave("fig4_heatmap.svg", device = svg, width = 8, height = 7.5)
+ggsave("suppfig4_heatmap_R06.svg", device = svg, width = 8, height = 7.5)
 

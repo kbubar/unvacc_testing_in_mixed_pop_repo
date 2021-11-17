@@ -24,7 +24,7 @@ for (i in 1){
     ylab("Infected (#)") + 
     xlab("Time (days)") +
     scale_x_continuous(expand = c(0, 0), limits = c(0, 200)) + 
-    scale_y_continuous(expand = c(0, 0), limits = c(0, 1000)) +
+    scale_y_continuous(expand = c(0, 0), limits = c(0, 1000)) + # 2500 for R0 = 6
     onlyy_theme 
   
   #*  Panel D - transmission mode over time (i.e. who caused new daily cases) ####
@@ -52,7 +52,7 @@ for (i in 1){
     ylab("New daily infections (#) ") + 
     xlab("Time (days)") +
     scale_x_continuous(expand = c(0, 0), limits = c(0, 200)) + 
-    scale_y_continuous(expand = c(0, 0), limits = c(0, 80)) +
+    scale_y_continuous(expand = c(0, 0), limits = c(0, 80)) + # C(0, 200) for R0 = 6
     alllabels_theme
   
   #* Panel C - total infections and breakthrough cases over phi ####
@@ -114,7 +114,7 @@ for (i in 1){
   df$cases_in_u_by_u <- mat_who_caused[,4]
   
   df_toplot <- melt(df, id = c("phi"))
-  
+ 
   E <- ggplot(df_toplot, aes(x=phi*100, y=value*100, color = variable)) + 
     geom_line(size = my_linesize) +
     ylab(paste("Transmission mode (%) ")) +
@@ -135,6 +135,7 @@ for (i in 1){
 # export as cairo_pdf,8x5.5in  
 ggarrange(B, NULL, C, NULL, NULL, NULL, D, NULL, E,
           labels = c("b", NA, "c", NA, NA, NA, "d", NA, "e"),
+          #labels = c("a", NA, "b", NA, NA, NA, "c", NA, "d"), # for supp R0 = 6
           nrow = 3,
           ncol = 3,
           align = "hv",
@@ -148,36 +149,65 @@ ggsave("fig1.pdf", device = cairo_pdf, width = 8, height = 5.5)
 # i.e. when the cumulative orange curves drop below 50% on fig 1E
 # _____________________________________________________________________
 
-mytable <- data.frame(q = c(rep(q0, 12), rep(qhigh, 12)),
-                      theta = c(rep(c(rep(0, 3), rep(real_theta, 3), rep(mod_theta, 3), rep(ideal_theta, 3)), 2)),
-                      R0 = rep(c(2,4,6), 8),
-                      phi = rep(NA, 24))
+#mytable <- data.frame(q = c(rep(q0, 12), rep(qhigh, 12)),
+#                      theta = c(rep(c(rep(0, 3), rep(real_theta, 3), rep(mod_theta, 3), rep(ideal_theta, 3)), 2)),
+#                      R0 = rep(c(2,4,6), 8),
+#                      phi = rep(NA, 24))
+# for (i in 1:24){
+#   R0 <- mytable[i,]$R0
+#   alpha <- R0*gamma/N # transmissibility
+#   
+#   this_theta <- mytable[i,]$theta
+#   this_q <- mytable[i,]$q
+#   
+#   df <- data.frame(phi = phi_vec)
+#   
+#   lists_who_caused <- lapply(phi_vec, compute_who_caused_cases_tot, 
+#                              VE_I = this_VE_I, VE_S = this_VE_S, 
+#                              theta = this_theta, q = this_q, 
+#                              psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+#                              H_I = this_H_I, H_S = this_H_S)
+#   mat_who_caused <- matrix(unlist(lists_who_caused), ncol=6, byrow=TRUE)
+#   
+#   df$cases_in_v_by_v <- mat_who_caused[,1]
+#   df$cases_in_u_by_v <- mat_who_caused[,3]
+#   df$cases_in_v_by_u <- mat_who_caused[,2]
+#   df$cases_in_u_by_u <- mat_who_caused[,4]
+#   
+#   tot <- df$cases_in_v_by_v + df$cases_in_u_by_v + df$cases_in_v_by_u + df$cases_in_u_by_u
+#   # get the phi value when cumulative infections by u drop below 50%
+#   mytable[i,4] <- df[min(which((df$cases_in_u_by_u + df$cases_in_v_by_u)/tot < 0.5)), 1]
+# }
 
-for (i in 1:24){
-  R0 <- mytable[i,]$R0
-  alpha <- R0*gamma/N # transmissibility
-  
-  this_theta <- mytable[i,]$theta
-  this_q <- mytable[i,]$q
-  
-  df <- data.frame(phi = phi_vec)
-  
-  lists_who_caused <- lapply(phi_vec, compute_who_caused_cases_tot, 
-                             VE_I = this_VE_I, VE_S = this_VE_S, 
-                             theta = this_theta, q = this_q, 
-                             psi = this_psi, X_I = this_X_I, X_S = this_X_S,
-                             H_I = this_H_I, H_S = this_H_S)
-  mat_who_caused <- matrix(unlist(lists_who_caused), ncol=6, byrow=TRUE)
-  
-  df$cases_in_v_by_u <- mat_who_caused[,2]
-  df$cases_in_u_by_u <- mat_who_caused[,4]
-  
-  # get the phi value when cumulative infections by u drop below 50%
-  mytable[i,4] <- df[min(which(df$cases_in_u_by_u + df$cases_in_v_by_u < 0.5)), 1]
-}
+my_list <- lapply(phi_vec, compute_dominant_transmission,
+                  VE_I = this_VE_I, VE_S = this_VE_S, 
+                  theta = mod_theta, q = 0,
+                  psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                  H_I = this_H_I, H_S = this_H_S)
+my_mat <- matrix(unlist(my_list))
+
+print(min(which(my_mat < 0.5)) - 1)
+
+# who makes up who is infected (R0 = 4)
+# mod_theta = 75
+# real_theta = 73
+
+# who makes up who is infected (R0 = 6)
+# mod_theta = 67
+# real_theta = 63
+
+## 
+# who dominates transmission (R0 = 4) // without external
+# mod_theta = 65 // 67
+# real_theta = 72 // 73
+
+# who dominates transmission (R0 = 6) // without external
+# mod_theta = 60 // 61
+# real_theta = 67 // 67
+
 
 # _____________________________________________________________________
-# FIG2 - w/testing ####
+# FIG3 - w/testing ####
 # _____________________________________________________________________
 this_q <- 0
 panels <- c(1,2)
@@ -303,16 +333,16 @@ for (this_panel in panels){
   if (Reff_1 <= 100){
     C <- C + geom_vline(xintercept = Reff_1, alpha = 0.5, linetype = "dashed", size = 0.5, col = mygray) 
   }
-  Reff_mod <- min(which(df$Reff_modtesting <= 1), 500) - 1 
-  Reff_real <- min(which(df$Reff_realtesting <= 1), 500) - 1 
-  if (Reff_1 <= 100){
-    C <- C + 
-      geom_vline(xintercept = Reff_real, alpha = 0.7, linetype = "dashed", size = 0.5, col = myyellow) +
-      geom_vline(xintercept = Reff_mod, alpha = 0.7, linetype = "dashed", size = 0.5, col = myblue) 
-  }
+  # Reff_mod <- min(which(df$Reff_modtesting <= 1), 500) - 1 
+  # Reff_real <- min(which(df$Reff_realtesting <= 1), 500) - 1 
+  # if (Reff_1 <= 100){
+  #   C <- C + 
+  #     geom_vline(xintercept = Reff_real, alpha = 0.7, linetype = "dashed", size = 0.5, col = myyellow) +
+  #     geom_vline(xintercept = Reff_mod, alpha = 0.7, linetype = "dashed", size = 0.5, col = myblue) 
+  # }
   
   D <- ggplot(df, aes(x=phi*100)) +
-    geom_hline(yintercept = 1, size = 0.5, linetype = "dashed", alpha = 0.5) +
+    geom_hline(yintercept = 1, size = 0.5, linetype = "dashed", alpha = 0.5, col = mygray) +
     geom_line(aes(y = Reff_notesting), col = mylightgray, size = my_linesize) +
     geom_line(aes(y = Reff_modtesting), col = myblue, size = my_linesize) +
     geom_line(aes(y = Reff_realtesting), col = myyellow, size = my_linesize) +
@@ -360,10 +390,10 @@ annotate_figure(fig3,
                 bottom = text_grob("Population vaccination rate (%)", size = 14, family = "Arial",
                                    vjust = -1.2))
 
-ggsave("fig3.pdf", device = cairo_pdf, width = 8, height = 5)
+ggsave("fig3_v1.pdf", device = cairo_pdf, width = 8, height = 5)
 
 # _____________________________________________________________________
-# FIG3 - w/homophily ####
+# OLDFIG3 - w/homophily ####
 # _____________________________________________________________________
 this_theta <- 0
 R0 <- 4
