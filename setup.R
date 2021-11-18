@@ -71,12 +71,15 @@ N <- 20000
 phi_vec <- seq(0, 1, by = 0.01)
 this_phi <- 0.58  # fully vacc. in US as of 11/4
 
+this_VE_S <- 0.75 # best guess from lots of sources including Gardner 
+this_VE_I <- 0.5  # best guess from lots of sources including Eyre (UK) 
+
 this_psi <- 0.35  # CDC estimate 
 this_X_S <- 0.627 # Gardner 2021 
 this_X_I <- 0.125 # Gardner 2021
 
-this_H_S <- 0.827 # Gardner 2021
-this_H_I <- 0.464 # Gardner 2021
+this_H_S = (1-this_X_S)*this_VE_S + this_X_S  # 0.89
+this_H_I = (1-this_X_I)*this_VE_I + this_X_I  # 0.57
 
 # Simulation parameters - time span and homophily
 dt <- 1 
@@ -93,8 +96,6 @@ sigma <- 1/3 # 1/latent period
 
 R0 <- 4
 alpha <- R0*gamma/N # transmissibility
-this_VE_S <- 0.70 # best guess from lots of sources including Gardner 
-this_VE_I <- 0.20 # best guess from lots of sources including Gardner 
 
 # Testing parameters
 ideal_theta <- 0.808 # ideal testing: twice weekly, PCR, 99% compliance
@@ -106,3 +107,15 @@ low_compliance <- 0.5
 
 high_freq <- 3.5
 low_freq <- 7
+
+# VE Uncertainty parameters
+boosted_VE_S = 0.8
+boosted_VE_I = 0.6
+boosted_H_S = (1-this_X_S)*boosted_VE_S + this_X_S
+boosted_H_I = (1-this_X_I)*boosted_VE_I + this_X_I
+
+low_VE_S = 0.5
+low_VE_I = 0.2
+low_H_S = (1-this_X_S)*low_VE_S + this_X_S
+low_H_I = (1-this_X_I)*low_VE_I + this_X_I
+
