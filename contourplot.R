@@ -24,23 +24,30 @@ df <- expand.grid(phi = phi_vec, psi = psi_vec)
 df$Reff <- NA
 df$breakthrough <- NA
 df$dom_transmission <- NA
+df$tot_infections <- NA
 
 for (i in 1:dim(df)[1]){
-  df$Reff[i] <- compute_Reff(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S,  
-                             theta = 0, q = this_q, 
+  df$tot_infections[i] <- compute_tot_infections(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S,  
+                                              theta = 0, q = this_q, 
+                                              df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                              H_I = this_H_I, H_S = this_H_S)
+  df$Reff[i] <- compute_Reff(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S,
+                             theta = 0, q = this_q,
                              df$psi[i], X_I = this_X_I, X_S = this_X_S,
                              H_I = this_H_I, H_S = this_H_S)
 
-  df$breakthrough[i] <- compute_percent_breakthrough_infections(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, 
-                                                                theta = 0, q = this_q, 
+  df$breakthrough[i] <- compute_percent_breakthrough_infections(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S,
+                                                                theta = 0, q = this_q,
                                                                 df$psi[i], X_I = this_X_I, X_S = this_X_S,
                                                                 H_I = this_H_I, H_S = this_H_S)
-  
-  df$dom_transmission[i] <- (compute_dominant_transmission(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, 
-                                                           theta = 0, q = this_q, 
+
+  df$dom_transmission[i] <- (compute_dominant_transmission(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S,
+                                                           theta = 0, q = this_q,
                                                            df$psi[i], X_I = this_X_I, X_S = this_X_S,
                                                            H_I = this_H_I, H_S = this_H_S))*100
 }
+
+df$percent_tot_infections <- df$tot_infections/max(df$tot_infections)*100
 
 #saveRDS(df,file="df_fig2_setupparams.RData")
 
@@ -51,15 +58,27 @@ proc.time() - ptm
 # _____________________________________________________________________
 
 # plot Reff
-p <- ggplot(df, aes(x = phi*100, y = psi*100, z = Reff, colour = ..level..)) + 
-  stat_contour(breaks = 1:R0, size = 1) + 
-  scale_y_continuous(expand = c(0, 0), limits = c(0, 100)) +
-  scale_x_continuous(expand = c(0, 0), limits = c(0, 100)) +
+p_Reff <- ggplot(df, aes(x = phi*100, y = psi*100, z = Reff))+ #, colour = ..level..)) + 
+  geom_tile(aes(fill = tot_infections)) +
+  geom_contour(breaks = 1:R0, size = 0.4, color = "white") +
+  # geom_text_contour(breaks = 1:R0, color = "white", rotate = FALSE,
+  #                   nudge_y = 1,
+  #                   nudge_x = 2)+
+  #stat_contour(breaks = 1:R0, size = 1, color = "white") + 
+  scale_y_continuous(expand = c(0, 0)) +
+  scale_x_continuous(expand = c(0, 0)) +
   ylab("Infection-acquired immunity (%)") +
   xlab("") +# xlab("Population vaccination rate (%)") + 
-  ggtitle(expression(R[eff])) 
+  #ggtitle(expression(R[eff])) +
+  ggtitle("Total infections") +
+  scale_fill_gradientn(colours = cet_pal(5, name = "l1"))+ 
+  coord_fixed(1) + 
+  labs(fill = "") +
+  theme(legend.text = element_text(size = 11), 
+        legend.spacing.x = unit(0.75, 'cm')) 
 
-p_Reff <- direct.label(p, list("smart.grid"))
+# FIXME - labeling for R
+#p_Reff <- direct.label(p, list("smart.grid"))
 
 # plot % infections in the unvaccinated
 p_breakthrough <- ggplot(df, aes(x = phi*100, y = psi*100, z = breakthrough)) + 
@@ -76,7 +95,8 @@ p_breakthrough <- ggplot(df, aes(x = phi*100, y = psi*100, z = breakthrough)) +
         legend.title.align = 0.5,
         legend.spacing.x = unit(0.5, 'cm'), 
         legend.position = "none") +
-  scale_fill_gradientn(colours = cet_pal(5, name = "inferno")) 
+  scale_fill_gradientn(colours = cet_pal(5, name = "inferno")) + 
+  coord_fixed(1)
   # annotate("text", label = "50",
   #           x = 65, y = 85, colour = "white")  
 
@@ -89,23 +109,23 @@ p_dom <- ggplot(df, aes(x = phi*100, y = psi*100, z = dom_transmission)) +
   ylab("") + # ylab("Infection-acquired immunity (%)") +
   xlab("") + # xlab("Population vaccination rate (%)") + 
   ggtitle("% of transmission from\nunvaccinated individuals") + 
- labs(fill = "")+#"Percent of\ntransmission\nby unvacc.") +
+  labs(fill = "")+#"Percent of\ntransmission\nby unvacc.") +
   theme(legend.text = element_text(size = 11), 
         legend.title = element_text(size = 11),
         legend.title.align = 0.5,
-        legend.spacing.x = unit(0.5, 'cm'),
-        axis.text.y = element_blank()) +
-  scale_fill_gradientn(colours = cet_pal(5, name = "inferno")) #+ 
+        legend.spacing.x = unit(0.5, 'cm')) +
+  scale_fill_gradientn(colours = cet_pal(5, name = "inferno"))+ 
+  coord_fixed(1)
 
 ggarrange(p_Reff, p_breakthrough, p_dom,
           ncol = 3,
-          widths = c(1, 1.15, 1.3),
+          widths = c(1.4, 1, 1.2),
           labels = c('a  ', 'b', 'c'),
           label.y = 0.92,
           align = "hv")
 
-#ggsave("fig2_heatmap.pdf", device = cairo_pdf, width = 12, height = 4)
-#ggsave("suppfig2_heatmap_R06.svg", device = svg, width = 12, height = 4)
+ggsave("fig2_heatmap_3.pdf", device = cairo_pdf, width = 12, height = 4)
+#ggsave("fig2_heatmap.svg", device = svg, width = 12, height = 4)
 
 # To find transition points:
 infection_transitions <- df[df$breakthrough >= 50,]  %>% group_by(psi) %>% summarize(phi=min(phi))
