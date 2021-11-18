@@ -24,23 +24,30 @@ df <- expand.grid(phi = phi_vec, psi = psi_vec)
 df$Reff <- NA
 df$breakthrough <- NA
 df$dom_transmission <- NA
+df$tot_infections <- NA
 
 for (i in 1:dim(df)[1]){
-  df$Reff[i] <- compute_Reff(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S,  
-                             theta = 0, q = this_q, 
+  df$tot_infections[i] <- compute_tot_infections(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S,  
+                                              theta = 0, q = this_q, 
+                                              df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                              H_I = this_H_I, H_S = this_H_S)
+  df$Reff[i] <- compute_Reff(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S,
+                             theta = 0, q = this_q,
                              df$psi[i], X_I = this_X_I, X_S = this_X_S,
                              H_I = this_H_I, H_S = this_H_S)
 
-  df$breakthrough[i] <- compute_percent_breakthrough_infections(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, 
-                                                                theta = 0, q = this_q, 
+  df$breakthrough[i] <- compute_percent_breakthrough_infections(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S,
+                                                                theta = 0, q = this_q,
                                                                 df$psi[i], X_I = this_X_I, X_S = this_X_S,
                                                                 H_I = this_H_I, H_S = this_H_S)
-  
-  df$dom_transmission[i] <- (compute_dominant_transmission(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, 
-                                                           theta = 0, q = this_q, 
+
+  df$dom_transmission[i] <- (compute_dominant_transmission(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S,
+                                                           theta = 0, q = this_q,
                                                            df$psi[i], X_I = this_X_I, X_S = this_X_S,
                                                            H_I = this_H_I, H_S = this_H_S))*100
 }
+
+df$percent_tot_infections <- df$tot_infections/max(df$tot_infections)*100
 
 #saveRDS(df,file="df_fig2_setupparams.RData")
 
@@ -51,15 +58,27 @@ proc.time() - ptm
 # _____________________________________________________________________
 
 # plot Reff
-p <- ggplot(df, aes(x = phi*100, y = psi*100, z = Reff, colour = ..level..)) + 
-  stat_contour(breaks = 1:R0, size = 1) + 
-  scale_y_continuous(expand = c(0, 0), limits = c(0, 100)) +
-  scale_x_continuous(expand = c(0, 0), limits = c(0, 100)) +
+p_Reff <- ggplot(df, aes(x = phi*100, y = psi*100, z = Reff))+ #, colour = ..level..)) + 
+  geom_tile(aes(fill = tot_infections)) +
+  geom_contour(breaks = 1:R0, size = 0.4, color = "white") +
+  # geom_text_contour(breaks = 1:R0, color = "white", rotate = FALSE,
+  #                   nudge_y = 1,
+  #                   nudge_x = 2)+
+  #stat_contour(breaks = 1:R0, size = 1, color = "white") + 
+  scale_y_continuous(expand = c(0, 0)) +
+  scale_x_continuous(expand = c(0, 0)) +
   ylab("Infection-acquired immunity (%)") +
   xlab("") +# xlab("Population vaccination rate (%)") + 
-  ggtitle(expression(R[eff])) 
+  #ggtitle(expression(R[eff])) +
+  ggtitle("Total infections") +
+  scale_fill_gradientn(colours = cet_pal(5, name = "l1"))+ 
+  coord_fixed(1) + 
+  labs(fill = "") +
+  theme(legend.text = element_text(size = 11), 
+        legend.spacing.x = unit(0.75, 'cm')) 
 
-p_Reff <- direct.label(p, list("smart.grid"))
+# FIXME - labeling for R
+#p_Reff <- direct.label(p, list("smart.grid"))
 
 # plot % infections in the unvaccinated
 p_breakthrough <- ggplot(df, aes(x = phi*100, y = psi*100, z = breakthrough)) + 
@@ -76,7 +95,8 @@ p_breakthrough <- ggplot(df, aes(x = phi*100, y = psi*100, z = breakthrough)) +
         legend.title.align = 0.5,
         legend.spacing.x = unit(0.5, 'cm'), 
         legend.position = "none") +
-  scale_fill_gradientn(colours = cet_pal(5, name = "inferno")) 
+  scale_fill_gradientn(colours = cet_pal(5, name = "inferno")) + 
+  coord_fixed(1)
   # annotate("text", label = "50",
   #           x = 65, y = 85, colour = "white")  
 
@@ -89,23 +109,23 @@ p_dom <- ggplot(df, aes(x = phi*100, y = psi*100, z = dom_transmission)) +
   ylab("") + # ylab("Infection-acquired immunity (%)") +
   xlab("") + # xlab("Population vaccination rate (%)") + 
   ggtitle("% of transmission from\nunvaccinated individuals") + 
- labs(fill = "")+#"Percent of\ntransmission\nby unvacc.") +
+  labs(fill = "")+#"Percent of\ntransmission\nby unvacc.") +
   theme(legend.text = element_text(size = 11), 
         legend.title = element_text(size = 11),
         legend.title.align = 0.5,
-        legend.spacing.x = unit(0.5, 'cm'),
-        axis.text.y = element_blank()) +
-  scale_fill_gradientn(colours = cet_pal(5, name = "inferno")) #+ 
+        legend.spacing.x = unit(0.5, 'cm')) +
+  scale_fill_gradientn(colours = cet_pal(5, name = "inferno"))+ 
+  coord_fixed(1)
 
 ggarrange(p_Reff, p_breakthrough, p_dom,
           ncol = 3,
-          widths = c(1, 1.15, 1.3),
+          widths = c(1.25, 1, 1.25),
           labels = c('a  ', 'b', 'c'),
           label.y = 0.92,
           align = "hv")
 
-#ggsave("fig2_heatmap.pdf", device = cairo_pdf, width = 12, height = 4)
-#ggsave("suppfig2_heatmap_R06.svg", device = svg, width = 12, height = 4)
+ggsave("fig2_heatmap_3.pdf", device = cairo_pdf, width = 12, height = 4)
+#ggsave("fig2_heatmap.svg", device = svg, width = 12, height = 4)
 
 # To find transition points:
 infection_transitions <- df[df$breakthrough >= 50,]  %>% group_by(psi) %>% summarize(phi=min(phi))
@@ -136,14 +156,14 @@ psi_vec <- seq(0, 1, by = 0.05)
 df <- expand.grid(phi = phi_vec, psi = psi_vec)
 
 df$Reff <- NA
-df$Reff_mod <- NA
-df$Reff_real <- NA
-df$totinfections_mod <- NA
-df$totinfections_real <- NA
-df$infections_averted_mod <- NA
-df$infections_averted_real <- NA
-df$infections_averted_per100_mod <- NA
-df$infections_averted_per100_real <- NA
+df$Reff_99 <- NA
+df$Reff_50 <- NA
+df$totinfections_99 <- NA
+df$totinfections_50 <- NA
+df$infections_averted_99 <- NA
+df$infections_averted_50 <- NA
+df$infections_averted_per100_99 <- NA
+df$infections_averted_per100_50 <- NA
 
 
 for (i in 1:dim(df)[1]){
@@ -152,12 +172,12 @@ for (i in 1:dim(df)[1]){
                              df$psi[i], X_I = this_X_I, X_S = this_X_S,
                              H_I = this_H_I, H_S = this_H_S)
 
-  df$Reff_mod[i] <- compute_Reff(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, 
-                                 theta = mod_theta, q = this_q, 
+  df$Reff_99[i] <- compute_Reff(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, 
+                                 theta = theta_99, q = this_q, 
                                  df$psi[i], X_I = this_X_I, X_S = this_X_S,
                                  H_I = this_H_I, H_S = this_H_S)
-  df$Reff_real[i] <- compute_Reff(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, 
-                                  theta = real_theta, q = this_q, 
+  df$Reff_50[i] <- compute_Reff(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, 
+                                  theta = theta_50, q = this_q, 
                                   df$psi[i], X_I = this_X_I, X_S = this_X_S,
                                   H_I = this_H_I, H_S = this_H_S)
   
@@ -166,32 +186,32 @@ for (i in 1:dim(df)[1]){
                                     df$psi[i], X_I = this_X_I, X_S = this_X_S,
                                     H_I = this_H_I, H_S = this_H_S)
   
-  df$totinfections_mod[i] <- compute_tot_infections(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, 
-                                                 theta = mod_theta, q = this_q, 
+  df$totinfections_99[i] <- compute_tot_infections(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, 
+                                                 theta = theta_99, q = this_q, 
                                                  df$psi[i], X_I = this_X_I, X_S = this_X_S,
                                                  H_I = this_H_I, H_S = this_H_S)
   
-  df$totinfections_real[i] <- compute_tot_infections(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, 
-                                                 theta = real_theta, q = this_q, 
+  df$totinfections_50[i] <- compute_tot_infections(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, 
+                                                 theta = theta_50, q = this_q, 
                                                  df$psi[i], X_I = this_X_I, X_S = this_X_S,
                                                  H_I = this_H_I, H_S = this_H_S)
   
-  df$infections_averted_mod[i] <- df$totinfections_notesting[i] - df$totinfections_mod[i]
+  df$infections_averted_99[i] <- df$totinfections_notesting[i] - df$totinfections_99[i]
   
-  df$infections_averted_real[i] <- df$totinfections_notesting[i] - df$totinfections_real[i]
+  df$infections_averted_50[i] <- df$totinfections_notesting[i] - df$totinfections_50[i]
   
-  num_tests_mod <- compute_num_tests(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S,
-                                     theta = mod_theta, freq = low_freq, inf_period = 1/gamma,
+  num_tests_99 <- compute_num_tests(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S,
+                                     theta = theta_99, freq = low_freq, inf_period = 1/gamma,
                                      compliance = high_compliance, q = this_q, 
                                      df$psi[i], this_X_I, this_X_S, this_H_I, this_H_S)
   
-  num_tests_real <- compute_num_tests(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S,
-                                      theta = real_theta, freq = low_freq, inf_period = 1/gamma,
+  num_tests_50 <- compute_num_tests(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S,
+                                      theta = theta_50, freq = low_freq, inf_period = 1/gamma,
                                       compliance = low_compliance, q = this_q, 
                                       df$psi[i], this_X_I, this_X_S, this_H_I, this_H_S)
   
-  df$infections_averted_per100_mod[i] <- df$infections_averted_mod[i]/num_tests_mod*100
-  df$infections_averted_per100_real[i] <- df$infections_averted_real[i]/num_tests_real*100
+  df$infections_averted_per100_99[i] <- df$infections_averted_99[i]/num_tests_99*100
+  df$infections_averted_per100_50[i] <- df$infections_averted_50[i]/num_tests_50*100
 }
 
 proc.time() - ptm
@@ -222,9 +242,9 @@ infectavert <- ggplot(df, aes(x = phi*100, y = psi*100, fill = totinfections_not
         axis.text.y = element_blank()) + 
   coord_fixed(1)
 
-infectavert_mod <- ggplot(df, aes(x = phi*100, y = psi*100, fill = totinfections_mod)) + 
+infectavert_99 <- ggplot(df, aes(x = phi*100, y = psi*100, fill = totinfections_99)) + 
   geom_tile() +
-  stat_contour(aes(z = Reff_mod), breaks = 1, size = mylinesize, col = "white") + 
+  stat_contour(aes(z = Reff_99), breaks = 1, size = mylinesize, col = "white") + 
   #stat_contour(aes(z = Reff), breaks = 1, size = mylinesize, col = mylightgray, linetype = "longdash") + 
   scale_y_continuous(expand = c(0,0)) +
   scale_x_continuous(expand = c(0,0)) +
@@ -240,9 +260,9 @@ infectavert_mod <- ggplot(df, aes(x = phi*100, y = psi*100, fill = totinfections
         axis.text.y = element_blank()) + 
   coord_fixed(1)
 
-infectavert_real <- ggplot(df, aes(x = phi*100, y = psi*100, fill = totinfections_real)) + 
+infectavert_50 <- ggplot(df, aes(x = phi*100, y = psi*100, fill = totinfections_50)) + 
   geom_tile() +
-  stat_contour(aes(z = Reff_real), breaks = 1, size = mylinesize, col =  "white") + 
+  stat_contour(aes(z = Reff_50), breaks = 1, size = mylinesize, col =  "white") + 
   #stat_contour(aes(z = Reff), breaks = 1, size = mylinesize, col = mylightgray, linetype = "longdash") + 
   scale_y_continuous(expand = c(0,0)) +
   scale_x_continuous(expand = c(0,0)) +
@@ -256,9 +276,9 @@ infectavert_real <- ggplot(df, aes(x = phi*100, y = psi*100, fill = totinfection
         plot.subtitle = element_text(hjust = 0.5)) + 
   coord_fixed(1)
 
-infper100_mod <- ggplot(df, aes(x = phi*100, y = psi*100, fill = infections_averted_per100_mod)) + 
+infper100_99 <- ggplot(df, aes(x = phi*100, y = psi*100, fill = infections_averted_per100_99)) + 
   geom_tile() +
-  stat_contour(aes(z = Reff_mod), breaks = 1, size = mylinesize, col =  "white") + 
+  stat_contour(aes(z = Reff_99), breaks = 1, size = mylinesize, col =  "white") + 
   stat_contour(aes(z = Reff), breaks = 1, size = mylinesize, col = mylightgray, linetype = "longdash") + 
   scale_y_continuous(expand = c(0,0)) +
   scale_x_continuous(expand = c(0,0)) +
@@ -275,9 +295,9 @@ infper100_mod <- ggplot(df, aes(x = phi*100, y = psi*100, fill = infections_aver
   coord_fixed(1)
 
 
-infper100_real <- ggplot(df, aes(x = phi*100, y = psi*100, fill = infections_averted_per100_real)) + 
+infper100_50 <- ggplot(df, aes(x = phi*100, y = psi*100, fill = infections_averted_per100_50)) + 
   geom_tile() +
-  stat_contour(aes(z = Reff_real), breaks = 1, size = mylinesize, col = "white") + 
+  stat_contour(aes(z = Reff_50), breaks = 1, size = mylinesize, col = "white") + 
   stat_contour(aes(z = Reff), breaks = 1, size = mylinesize, col = mylightgray, linetype = "longdash") + 
   scale_y_continuous(expand = c(0,0)) +
   scale_x_continuous(expand = c(0,0)) +
@@ -290,9 +310,9 @@ infper100_real <- ggplot(df, aes(x = phi*100, y = psi*100, fill = infections_ave
         plot.subtitle = element_text(hjust = 0.5)) + 
   coord_fixed(1)
 
-fig4 <- ggarrange(infectavert_real, NULL, infectavert_mod, NULL,
+fig4 <- ggarrange(infectavert_50, NULL, infectavert_99, NULL,
                   NULL,NULL,NULL, NULL,
-                  infper100_real, NULL, infper100_mod, NULL,
+                  infper100_50, NULL, infper100_99, NULL,
           ncol = 4, nrow = 3,
           widths = c(1, -0.05, 1.178, 0.05),
           heights = c(1, -0.11, 1),

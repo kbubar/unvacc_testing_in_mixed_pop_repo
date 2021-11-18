@@ -78,8 +78,13 @@ this_psi <- 0.35  # CDC estimate
 this_X_S <- 0.63 # Gardner 2021 
 this_X_I <- 0.13 # Gardner 2021
 
+<<<<<<< HEAD
 this_H_S = (1-this_X_S)*this_VE_S + this_X_S  # 0.91
 this_H_I = (1-this_X_I)*this_VE_I + this_X_I  # 0.57
+=======
+this_H_S = (1-this_X_S)*this_VE_S + this_X_S  # 0.89 for baseline scenario
+this_H_I = (1-this_X_I)*this_VE_I + this_X_I  # 0.57 for baseline scenario
+>>>>>>> 074cc235154bf7c92be5772839cc52803fe4a9cc
 
 # Simulation parameters - time span and homophily
 dt <- 1 
@@ -98,9 +103,8 @@ R0 <- 4
 alpha <- R0*gamma/N # transmissibility
 
 # Testing parameters
-ideal_theta <- 0.808 # ideal testing: twice weekly, PCR, 99% compliance
-mod_theta <- 0.473 # moderate testing: weekly, PCR, 99% compliance
-real_theta <- 0.242 # realistic testing: weekly, PCR, 50% compliance
+theta_99 <- 0.473 # moderate testing: weekly, PCR, 99% compliance
+theta_50 <- 0.242 # realistic testing: weekly, PCR, 50% compliance
 
 high_compliance <- 0.99
 low_compliance <- 0.5
