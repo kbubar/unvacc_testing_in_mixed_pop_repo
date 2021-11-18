@@ -90,10 +90,11 @@ for (i in 1){
           plot.margin=unit(c(5.5, 2, 5.5, 2), "pt")) # top, right, bottom, left
   
   Reff_1 <- min(which(df$Reff <= 1)) - 1 
-  
   if (Reff_1 <= 100){
     C <- C + geom_vline(xintercept = Reff_1, alpha = 0.5, linetype = "dashed", size = 0.5) 
   }
+  inf_transition <- min(which(df$breakthrough >= 50)) - 1
+  C <- C + geom_vline(xintercept = inf_transition, alpha = 0.5, linetype = "dashed", size = 0.5, col = mydarkteal) 
   
   #* Panel E - cumulative transmission mode over phi ####
   df <- data.frame(phi = phi_vec)
@@ -114,6 +115,9 @@ for (i in 1){
   df$cases_in_u_by_u <- mat_who_caused[,4]
   
   df_toplot <- melt(df, id = c("phi"))
+  
+  df$total_by_v <- df$cases_in_u_by_v + df$cases_in_v_by_v
+  df$total_by_u <- df$cases_in_u_by_u + df$cases_in_v_by_u
  
   E <- ggplot(df_toplot, aes(x=phi*100, y=value*100, color = variable)) + 
     geom_line(size = my_linesize) +
@@ -130,6 +134,8 @@ for (i in 1){
   if (Reff_1 <= 100){
     E <- E + geom_vline(xintercept = Reff_1, alpha = 0.5, linetype = "dashed", size = 0.5)
   }
+  trans_transition <- min(which(df$total_by_u < df$total_by_v)) - 1
+  E <- E + geom_vline(xintercept = trans_transition, alpha = 0.5, linetype = "dashed", size = 0.5, col = mydarkteal) 
 }
 
 # export as cairo_pdf,8x5.5in  

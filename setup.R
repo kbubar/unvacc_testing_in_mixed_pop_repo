@@ -17,7 +17,7 @@ library(remotes)
 remotes::install_version("Rttf2pt1", version = "1.3.8")
 library(extrafont)
 # font_import()
-loadfonts(device = "win", quiet = TRUE)
+loadfonts(device = "pdf", quiet = TRUE)
  fonts()
 
 source("helpers.R")
