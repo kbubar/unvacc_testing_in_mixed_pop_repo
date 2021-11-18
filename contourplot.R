@@ -107,6 +107,12 @@ ggarrange(p_Reff, p_breakthrough, p_dom,
 #ggsave("fig2_heatmap.pdf", device = cairo_pdf, width = 12, height = 4)
 #ggsave("suppfig2_heatmap_R06.svg", device = svg, width = 12, height = 4)
 
+# To find transition points:
+infection_transitions <- df[df$breakthrough >= 50,]  %>% group_by(psi) %>% summarize(phi=min(phi))
+transmission_transitions <- df[df$dom_transmission < 50,]  %>% group_by(psi) %>% summarize(phi=min(phi))
+print(paste0("Infection transition point: ",min(infection_transitions$phi), " - ",max(infection_transitions$phi)))
+print(paste0("Transmission transition point: ",min(transmission_transitions$phi), " - ",max(transmission_transitions$phi)))
+
 
 # _____________________________________________________________________
 # FIGURE 4: ####
