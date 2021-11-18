@@ -17,8 +17,8 @@ df <- readRDS("df_fig2_setupparams.RData")
 
 # or run the model 
 ptm <- proc.time()
-phi_vec <- seq(0, 1, by = 0.01) # fine grid : by = 0.01
-psi_vec <- seq(0, 1, by = 0.01)
+phi_vec <- seq(0, 1, by = 0.05) # fine grid : by = 0.01
+psi_vec <- seq(0, 1, by = 0.05)
 df <- expand.grid(phi = phi_vec, psi = psi_vec)
 
 df$Reff <- NA
@@ -47,8 +47,6 @@ for (i in 1:dim(df)[1]){
                                                            H_I = this_H_I, H_S = this_H_S))*100
 }
 
-df$percent_tot_infections <- df$tot_infections/max(df$tot_infections)*100
-
 #saveRDS(df,file="df_fig2_setupparams.RData")
 
 proc.time() - ptm
@@ -71,7 +69,8 @@ p_Reff <- ggplot(df, aes(x = phi*100, y = psi*100, z = Reff))+ #, colour = ..lev
   xlab("") +# xlab("Population vaccination rate (%)") + 
   #ggtitle(expression(R[eff])) +
   ggtitle("Total infections") +
-  scale_fill_gradientn(colours = cet_pal(5, name = "l1"))+ 
+  #scale_fill_gradientn(colours = cet_pal(5, name = "l1"))+ 
+  scale_fill_viridis(option="viridis") +
   coord_fixed(1) + 
   labs(fill = "") +
   theme(legend.text = element_text(size = 11), 
@@ -95,7 +94,8 @@ p_breakthrough <- ggplot(df, aes(x = phi*100, y = psi*100, z = breakthrough)) +
         legend.title.align = 0.5,
         legend.spacing.x = unit(0.5, 'cm'), 
         legend.position = "none") +
-  scale_fill_gradientn(colours = cet_pal(5, name = "inferno")) + 
+  #scale_fill_gradientn(colours = cet_pal(5, name = "inferno")) + 
+  scale_fill_viridis(option="magma") +
   coord_fixed(1)
   # annotate("text", label = "50",
   #           x = 65, y = 85, colour = "white")  
@@ -109,12 +109,13 @@ p_dom <- ggplot(df, aes(x = phi*100, y = psi*100, z = dom_transmission)) +
   ylab("") + # ylab("Infection-acquired immunity (%)") +
   xlab("") + # xlab("Population vaccination rate (%)") + 
   ggtitle("% of transmission from\nunvaccinated individuals") + 
-  labs(fill = "")+#"Percent of\ntransmission\nby unvacc.") +
+  labs(fill = "")+ #"Percent of\ntransmission\nby unvacc.") +
   theme(legend.text = element_text(size = 11), 
         legend.title = element_text(size = 11),
         legend.title.align = 0.5,
         legend.spacing.x = unit(0.5, 'cm')) +
-  scale_fill_gradientn(colours = cet_pal(5, name = "inferno"))+ 
+  # scale_fill_gradientn(colours = cet_pal(5, name = "inferno"))+ 
+  scale_fill_viridis(option="magma") +
   coord_fixed(1)
 
 ggarrange(p_Reff, p_breakthrough, p_dom,
