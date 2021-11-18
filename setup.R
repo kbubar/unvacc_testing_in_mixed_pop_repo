@@ -71,14 +71,14 @@ N <- 20000
 phi_vec <- seq(0, 1, by = 0.01)
 this_phi <- 0.58  # fully vacc. in US as of 11/4
 
-this_VE_S <- 0.75 # best guess from lots of sources including Gardner 
-this_VE_I <- 0.5  # best guess from lots of sources including Eyre (UK) 
+this_VE_S <- 0.65 # best guess from lots of sources including Gardner 
+this_VE_I <- 0.35  # best guess from lots of sources including Eyre (UK) 
 
 this_psi <- 0.35  # CDC estimate 
-this_X_S <- 0.627 # Gardner 2021 
-this_X_I <- 0.125 # Gardner 2021
+this_X_S <- 0.63 # Gardner 2021 
+this_X_I <- 0.13 # Gardner 2021
 
-this_H_S = (1-this_X_S)*this_VE_S + this_X_S  # 0.89
+this_H_S = (1-this_X_S)*this_VE_S + this_X_S  # 0.91
 this_H_I = (1-this_X_I)*this_VE_I + this_X_I  # 0.57
 
 # Simulation parameters - time span and homophily
@@ -115,7 +115,7 @@ boosted_H_S = (1-this_X_S)*boosted_VE_S + this_X_S
 boosted_H_I = (1-this_X_I)*boosted_VE_I + this_X_I
 
 low_VE_S = 0.5
-low_VE_I = 0.2
+low_VE_I = 0.1
 low_H_S = (1-this_X_S)*low_VE_S + this_X_S
 low_H_I = (1-this_X_I)*low_VE_I + this_X_I
 
