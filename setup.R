@@ -11,14 +11,16 @@ library(scales)
 library(RColorBrewer)
 library(directlabels)
 library(cetcolor)
+library(viridis)
 
 ## Run all these lines (14-18) if you haven't already installed fonts 
 library(remotes)
 remotes::install_version("Rttf2pt1", version = "1.3.8")
 library(extrafont)
 # font_import()
-loadfonts(device = "pdf", quiet = TRUE)
- fonts()
+loadfonts(device = "win", quiet = TRUE) # windows
+# loadfonts(device = "pdf", quiet = TRUE) # mac
+fonts()
 
 source("helpers.R")
 
@@ -71,20 +73,18 @@ N <- 20000
 phi_vec <- seq(0, 1, by = 0.01)
 this_phi <- 0.58  # fully vacc. in US as of 11/4
 
-this_VE_S <- 0.65 # best guess from lots of sources including Gardner 
-this_VE_I <- 0.35  # best guess from lots of sources including Eyre (UK) 
+baseline_VE_S <- 0.65 # best guess from lots of sources including Gardner 
+baseline_VE_I <- 0.35  # best guess from lots of sources including Eyre (UK) 
+
+this_VE_S <- baseline_VE_S
+this_VE_I <- baseline_VE_I
 
 this_psi <- 0.35  # CDC estimate 
 this_X_S <- 0.63 # Gardner 2021 
 this_X_I <- 0.13 # Gardner 2021
 
-<<<<<<< HEAD
-this_H_S = (1-this_X_S)*this_VE_S + this_X_S  # 0.91
-this_H_I = (1-this_X_I)*this_VE_I + this_X_I  # 0.57
-=======
-this_H_S = (1-this_X_S)*this_VE_S + this_X_S  # 0.89 for baseline scenario
-this_H_I = (1-this_X_I)*this_VE_I + this_X_I  # 0.57 for baseline scenario
->>>>>>> 074cc235154bf7c92be5772839cc52803fe4a9cc
+this_H_S <- (1-this_X_S)*this_VE_S + this_X_S  # 0.87 for baseline scenario
+this_H_I <- (1-this_X_I)*this_VE_I + this_X_I  # 0.43 for baseline scenario
 
 # Simulation parameters - time span and homophily
 dt <- 1 

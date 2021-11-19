@@ -369,3 +369,10 @@ compute_infections_averted_per100tests <- function(phi, VE_I, VE_S, theta = 0, q
   
   tot_averted_per100 <- tot_averted/num_tests*100
 }
+
+get_legend = function(myggplot){
+  tmp <- ggplot_gtable(ggplot_build(myggplot))
+  leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
+  legend <- tmp$grobs[[leg]]
+  return(legend)
+}
