@@ -78,13 +78,8 @@ this_psi <- 0.35  # CDC estimate
 this_X_S <- 0.63 # Gardner 2021 
 this_X_I <- 0.13 # Gardner 2021
 
-<<<<<<< HEAD
-this_H_S = (1-this_X_S)*this_VE_S + this_X_S  # 0.91
-this_H_I = (1-this_X_I)*this_VE_I + this_X_I  # 0.57
-=======
-this_H_S = (1-this_X_S)*this_VE_S + this_X_S  # 0.89 for baseline scenario
+this_H_S = (1-this_X_S)*this_VE_S + this_X_S  # 0.91 for baseline scenario
 this_H_I = (1-this_X_I)*this_VE_I + this_X_I  # 0.57 for baseline scenario
->>>>>>> 074cc235154bf7c92be5772839cc52803fe4a9cc
 
 # Simulation parameters - time span and homophily
 dt <- 1 

@@ -89,12 +89,12 @@ for (i in 1){
           axis.text.x.bottom = element_blank(),
           plot.margin=unit(c(5.5, 2, 5.5, 2), "pt")) # top, right, bottom, left
   
-  Reff_1 <- min(which(df$Reff <= 1)) - 1 
+  Reff_1 <- min(which(df$Reff <= 1),500) - 1 
   if (Reff_1 <= 100){
     C <- C + geom_vline(xintercept = Reff_1, alpha = 0.5, linetype = "dashed", size = 0.5) 
   }
   inf_transition <- min(which(df$breakthrough >= 50)) - 1
-  C <- C + geom_vline(xintercept = inf_transition, alpha = 0.5, linetype = "dashed", size = 0.5, col = mydarkteal) 
+  C <- C + geom_vline(xintercept = inf_transition, alpha = 0.5, linetype = "dashed", size = 0.5, col = mypurple) 
   
   #* Panel E - cumulative transmission mode over phi ####
   df <- data.frame(phi = phi_vec)
@@ -135,7 +135,7 @@ for (i in 1){
     E <- E + geom_vline(xintercept = Reff_1, alpha = 0.5, linetype = "dashed", size = 0.5)
   }
   trans_transition <- min(which(df$total_by_u < df$total_by_v)) - 1
-  E <- E + geom_vline(xintercept = trans_transition, alpha = 0.5, linetype = "dashed", size = 0.5, col = mydarkteal) 
+  E <- E + geom_vline(xintercept = trans_transition, alpha = 0.5, linetype = "dashed", size = 0.5, col = mypurple) 
 }
 
 # export as cairo_pdf,8x5.5in  
