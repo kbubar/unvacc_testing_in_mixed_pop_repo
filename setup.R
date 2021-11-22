@@ -12,13 +12,14 @@ library(RColorBrewer)
 library(directlabels)
 library(cetcolor)
 library(viridis)
+library(dplyr)
 
 ## Run all these lines (14-18) if you haven't already installed fonts 
 library(remotes)
-remotes::install_version("Rttf2pt1", version = "1.3.8")
+#remotes::install_version("Rttf2pt1", version = "1.3.8")
 library(extrafont)
 # font_import()
-loadfonts(device = "win", quiet = TRUE) # windows
+loadfonts(device = "pdf", quiet = TRUE) # windows
 # loadfonts(device = "pdf", quiet = TRUE) # mac
 fonts()
 
