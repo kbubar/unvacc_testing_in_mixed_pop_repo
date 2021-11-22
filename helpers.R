@@ -318,6 +318,8 @@ compute_v_infections <- function(phi, VE_I, VE_S, theta = 0, q = 0,
   df <- run_leaky_model(phi, VE_I, VE_S, theta, q, psi, X_I, X_S, H_I, H_S)
   lastrow <- df[length(df$R_v),]
   tot_v_infections <- lastrow$R_v + lastrow$R_h - df$E_v[1] - df$E_h[1] - df$I_v[1] - df$I_h[1]
+  tot_u_infections <- lastrow$R_x + lastrow$R_u - df$E_x[1] - df$E_u[1] - df$I_x[1] - df$I_u[1]
+  pct_v <- tot_v_infections / (tot_v_infections + tot_u_infections)
 }
 
 compute_num_tests <- function(phi, VE_I, VE_S, theta = 0, freq, inf_period, compliance,
