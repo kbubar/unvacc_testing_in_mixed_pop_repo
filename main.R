@@ -96,6 +96,8 @@ for (i in 1){
   inf_transition <- min(which(df$breakthrough >= 50)) - 1
   C <- C + geom_vline(xintercept = inf_transition, alpha = 0.5, linetype = "dashed", size = 0.5, col = mypurple) 
   
+  print(paste0("Percentage of infections in unvaccinated population with 58% vaccination rate: ",100-df[df$phi==0.58,]$breakthrough))
+  
   #* Panel E - cumulative transmission mode over phi ####
   df <- data.frame(phi = phi_vec)
   
