@@ -572,7 +572,7 @@ df$min_trnsmsn_transition <- NA
 
 # Baseline VE
 baseline_inf_transitions_notesting <- baseline_df[baseline_df$breakthroughs_notesting >= 50,] %>%
-   group_by(psi) %>% summarize(phi=mean(phi))
+   group_by(psi) %>% summarize(phi=min(phi))
 df[df$testing==0 & df$VE==baseline_VE_S,]$min_inf_transition <- min(baseline_inf_transitions_notesting$phi)
 df[df$testing==0 & df$VE==baseline_VE_S,]$max_inf_transition <-  max(baseline_inf_transitions_notesting$phi)
 baseline_inf_transitions_99 <- baseline_df[baseline_df$breakthroughs_99 >= 50,] %>%
@@ -652,12 +652,6 @@ lowVE_trnsmsn_transitions_50 <- lowVE_df[lowVE_df$v_transmission_50 >= 50,] %>%
 df[df$testing==50 & df$VE==low_VE_S,]$min_trnsmsn_transition <- min(lowVE_trnsmsn_transitions_50$phi)
 df[df$testing==50 & df$VE==low_VE_S,]$max_trnsmsn_transition <- max(lowVE_trnsmsn_transitions_50$phi)
 
-#########################################################
-################  Combining Data  #####################
-#########################################################
-combined <- data.frame(c(baseline_df, boosted_df, lowVE_df))
-
-
 }
 
 # Plot Figure 5
@@ -699,14 +693,15 @@ p_trnsmsn_transition <- ggplot() +
  ggtitle("Transmission Transition Point") +
  theme()   
    
-ggarrange(p_inf_transition, p_trnsmsn_transition,
+fig5 <- ggarrange(p_inf_transition, p_trnsmsn_transition,
                     widths = c(1, 1),
                     labels = c('a  ', 'b'),
                     ncol = 2,
                     label.y = 0.92,
                     align = "hv")
+fig5
 
-
+ggsave("Fig5.pdf", fig5, device = cairo_pdf, width = 8, height = 4)
 
 
 # # _____________________________________________________________________
