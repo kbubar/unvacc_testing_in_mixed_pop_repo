@@ -150,7 +150,7 @@ ggarrange(B, NULL, C, NULL, NULL, NULL, D, NULL, E,
           widths = c(1, -0.1, 1),
           heights = c(1, -0.13, 1))
 
-ggsave("fig1.pdf", device = cairo_pdf, width = 8, height = 5.5)
+ggsave("Fig1.pdf", device = cairo_pdf, width = 8, height = 5.5)
 
 # _____________________________________________________________________
 # TABLE1 - when transmission is no longer dominated by unvaccinated ####
@@ -196,26 +196,8 @@ my_mat <- matrix(unlist(my_list))
 
 print(min(which(my_mat < 0.5)) - 1)
 
-# who makes up who is infected (R0 = 4)
-# theta_99 = 75
-# theta_50 = 73
-
-# who makes up who is infected (R0 = 6)
-# theta_99 = 67
-# theta_50 = 63
-
-## 
-# who dominates transmission (R0 = 4) // without external
-# theta_99 = 65 // 67
-# theta_50 = 72 // 73
-
-# who dominates transmission (R0 = 6) // without external
-# theta_99 = 60 // 61
-# theta_50 = 67 // 67
-
-
 # _____________________________________________________________________
-# FIG3 - w/testing ####
+# OLDFIG3 - w/testing ####
 # _____________________________________________________________________
 this_q <- 0
 panels <- c(1,2)

@@ -59,12 +59,9 @@ proc.time() - ptm
 p_Reff <- ggplot(df, aes(x = phi*100, y = psi*100, z = Reff))+ #, colour = ..level..)) + 
   geom_tile(aes(fill = tot_infections)) +
   geom_contour(breaks = 1:R0, size = 0.4, color = "white") +
-  # geom_contour2(aes(label = ..level..),breaks = 1:R0, size = 0.4, color = "white",
-  #               skip = 0) +
   geom_text_contour(breaks = 1:R0, color = "white", rotate = FALSE,
-                     nudge_y = 1,
-                   nudge_x = 2)+
-  #stat_contour(breaks = 1:R0, size = 1, color = "white") + 
+                    nudge_y = 1,
+                    nudge_x = 4)+
   scale_y_continuous(expand = c(0, 0)) +
   scale_x_continuous(expand = c(0, 0)) +
   ylab("Infection-acquired immunity (%)") +
@@ -76,9 +73,6 @@ p_Reff <- ggplot(df, aes(x = phi*100, y = psi*100, z = Reff))+ #, colour = ..lev
   labs(fill = "") +
   theme(legend.text = element_text(size = 11), 
         legend.spacing.x = unit(0.7, 'cm')) 
-
-# FIXME - labeling for R
-#p_Reff <- direct.label(p, list("smart.grid"))
 
 # plot % infections in the unvaccinated
 p_infection <- ggplot(df, aes(x = phi*100, y = psi*100, z = breakthrough)) + 
@@ -123,8 +117,8 @@ ggarrange(p_Reff, p_infection,
           label.y = 0.92,
           align = "hv")
 
-ggsave("fig2_heatmap.pdf", device = cairo_pdf, width = 12, height = 4)
-ggsave("fig2_heatmap.svg", device = svg, width = 12, height = 4)
+ggsave("SuppFig2.pdf", device = cairo_pdf, width = 12, height = 4)
+ggsave("Fig2.svg", device = svg, width = 12, height = 4)
 
 # To find transition points:
 infection_transitions <- df[df$breakthrough >= 50,]  %>% group_by(psi) %>% summarize(phi=min(phi))
@@ -266,7 +260,7 @@ fig3 <- arrangeGrob(panels, num_legend,
              nrow = 1,
              widths = c(3, 0.5))
 
-ggsave("Fig3.pdf", fig3, device = cairo_pdf, width = 12, height = 4)
+ggsave("SuppFig3.pdf", fig3, device = cairo_pdf, width = 12, height = 4)
 ggsave("Fig3.svg", device = svg, width = 12, height = 4)
 
 # _____________________________________________________________________
@@ -296,10 +290,10 @@ df$totinfections_notesting <- NA
 df$totinfections_99 <- NA
 df$totinfections_50 <- NA
 
-this_VE_I <- boosted_VE_I
-this_VE_S <- boosted_VE_S
-this_H_I  <- boosted_H_I
-this_H_S  <- boosted_H_S
+this_VE_I <- low_VE_I
+this_VE_S <- low_VE_S
+this_H_I  <- low_H_I
+this_H_S  <- low_H_S
 
 for (i in 1:dim(df)[1]){
   df$Reff[i] <- compute_Reff(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S,
@@ -416,12 +410,13 @@ fig4 <- arrangeGrob(panels, num_legend, percent_legend,
                     layout_matrix = lay,
                     widths = c(3, 0.5))
 
-ggsave("Fig4_boosted.pdf", fig4, device = cairo_pdf, width = 8, height = 8)
+ggsave("SuppFig4_waning.pdf", fig4, device = cairo_pdf, width = 8, height = 8)
 
 
-####################################################################################
-####################   Fig 5:  Transition Points    ################################
-####################################################################################
+# _____________________________________________________________________
+# FIGURE 5: ####
+# Transition points
+# _____________________________________________________________________
 
 phi_vec <- seq(0.5, 1, by = 0.01)
 psi_vec <- seq(0, 1, by = 0.01)
