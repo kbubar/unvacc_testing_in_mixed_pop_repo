@@ -41,6 +41,9 @@ myred <- "#8B0000"
 myblue <- "#77C3E4"
 myyellow <- "#EAC435"
 
+theta99_purple <- "#CC069B"
+theta50_purple <- "#8C126E"
+
 nolabels_theme <- theme(axis.title.x =element_blank(),
                         axis.text.x = element_blank(),
                         axis.title.y = element_blank(),
