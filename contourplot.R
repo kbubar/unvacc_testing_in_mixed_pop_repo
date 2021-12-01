@@ -697,6 +697,7 @@ df[df$testing==50 & df$VE==boosted_VE_S,]$max_inf_transition <- max(boosted_inf_
 
 boosted_trnsmsn_transitions_notesting <- boosted_df[boosted_df$v_transmission_notesting >= 50,] %>%
   group_by(psi) %>% summarize(phi=min(phi))
+
 df[df$testing==0 & df$VE==boosted_VE_S,]$min_trnsmsn_transition <- min(boosted_trnsmsn_transitions_notesting$phi)
 df[df$testing==0 & df$VE==boosted_VE_S,]$max_trnsmsn_transition <- max(boosted_trnsmsn_transitions_notesting$phi)
 boosted_trnsmsn_transitions_99 <- boosted_df[boosted_df$v_transmission_99 >= 50,] %>%
@@ -739,46 +740,48 @@ df[df$testing==50 & df$VE==low_VE_S,]$max_trnsmsn_transition <- max(lowVE_trnsms
 
 # Plot Figure 5
 p_inf_transition <- ggplot() + 
-  geom_errorbar(data = df[df$testing == 0,],
-    aes(VE, ymin = min_inf_transition, ymax = max_inf_transition), col = mylightgray,
-    width = 0.025, position = position_nudge(x = -0.05) # no testing 
+  geom_errorbarh(data = df[df$testing == 0,],
+    aes(y = label, xmin = min_inf_transition*100, xmax = max_inf_transition*100), col = mylightgray,
+    height = 0.05, position = position_nudge(y = -0.25) # no testing 
   ) +
-  geom_errorbar(data = df[df$testing == 50,],
-                aes(VE, ymin = min_inf_transition, ymax = max_inf_transition), col = mypurple,
-                width = 0.025                         # 50% compliance testing 
+  geom_errorbarh(data = df[df$testing == 50,],
+                aes(y = label, xmin = min_inf_transition*100, xmax = max_inf_transition*100), col = mypurple,
+                height = 0.05                         # 50% compliance testing 
   ) +
-  geom_errorbar(data = df[df$testing == 99,],
-                aes(VE, ymin = min_inf_transition, ymax = max_inf_transition), col = mygray,
-                width = 0.025, position = position_nudge(x = 0.05) # 99% compliance testing 
+  geom_errorbarh(data = df[df$testing == 99,],
+                aes(y = label, xmin = min_inf_transition*100, xmax = max_inf_transition*100), col = mygray,
+                height = .05, position = position_nudge(y = 0.25) # 99% compliance testing 
   ) +
-   ylim(0.5, 1) +
-   xlab("Vaccine Effectiveness") +
-   ylab("Proportion Vaccinated (%)") +
-   ggtitle("Infection Transition Point") +
+   xlim(50, 100) +
+   ylim("Waning","Baseline","Boosted") +
+   xlab("Proportion Vaccinated (%)") +
+   ylab("Vaccine Effectiveness") +
+   ggtitle("Vaccination rate at which\n breakthroughs dominate infections") +
    theme(legend.position = "none")
    
 p_trnsmsn_transition <- ggplot() + 
-  geom_errorbar(data = df[df$testing == 0,],
-                aes(VE, ymin = min_trnsmsn_transition, ymax = max_trnsmsn_transition), col = mylightgray,
-                width = 0.025, position = position_nudge(x = -0.05) # no testing 
+  geom_errorbarh(data = df[df$testing == 0,],
+                 aes(y = label, xmin = min_trnsmsn_transition*100, xmax = max_trnsmsn_transition*100), col = mylightgray,
+                 height = 0.05, position = position_nudge(y = -0.25) # no testing 
   ) +
-  geom_errorbar(data = df[df$testing == 50,],
-                aes(VE, ymin = min_trnsmsn_transition, ymax = max_trnsmsn_transition), col = mypurple,
-                width = 0.025                         # 50% compliance testing 
+  geom_errorbarh(data = df[df$testing == 50,],
+                 aes(y = label, xmin = min_trnsmsn_transition*100, xmax = max_trnsmsn_transition*100), col = mypurple,
+                 height = 0.05                         # 50% compliance testing 
   ) +
-  geom_errorbar(data = df[df$testing == 99,],
-                aes(VE, ymin = min_trnsmsn_transition, ymax = max_trnsmsn_transition), col = mygray,
-                width = 0.025, position = position_nudge(x = 0.05) # 99% compliance testing 
+  geom_errorbarh(data = df[df$testing == 99,],
+                 aes(y = label, xmin = min_trnsmsn_transition*100, xmax = max_trnsmsn_transition*100), col = mygray,
+                 height = .05, position = position_nudge(y = 0.25) # 99% compliance testing 
   ) +
- ylim(0.5, 1) +
- xlab("Vaccine Effectiveness") +
- #ylab("Vacc. Rate at Which Vacc. Dominate Transmission") +
- ggtitle("Transmission Transition Point") +
- theme()   
+  xlim(50, 100) +
+  ylim("Waning","Baseline","Boosted") +
+  xlab("Proportion Vaccinated (%)") +
+  ylab("") + #ylab("Vaccine Effectiveness") +
+ ggtitle("Vaccination rate at which\n vaccinated drive transmission") +
+ theme(axis.text.y = element_blank())   
    
 fig5 <- ggarrange(p_inf_transition, p_trnsmsn_transition,
-                    widths = c(1, 1),
-                    labels = c('a  ', 'b'),
+                    widths = c(1, 1.1),
+                    labels = c('a ', '    b'),
                     ncol = 2,
                     label.y = 0.92,
                     align = "hv")
