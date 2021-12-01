@@ -3,6 +3,11 @@
 
 source("setup.R") 
 
+# for Fig 4
+theme_set(theme_minimal(base_size = 12))
+theme_update(text = element_text(family="Arial"),
+             plot.title = element_text(size = 12, hjust = 0.5, family="Arial"))
+
 # _____________________________________________________________________
 # FIGURE 2: ####
 # Reff, % infections in the unvaccinated and % infections driven by the unvaccinated over phi and psi
@@ -274,8 +279,8 @@ ggsave("Fig3.svg", device = svg, width = 12, height = 4)
 # _____________________________________________________________________
 
 # Either read in the corresponding RDS file
-df <- readRDS("df_fig4_setupparams.RData")
-
+# df <- readRDS("df_fig4_setupparams.RData")
+df <- baselinedf
 # or run the model
 ptm <- proc.time()
 
@@ -332,85 +337,168 @@ df$percent_reduc_inf_50 <- (df$totinfections_notesting - df$totinfections_50)/df
 # stat_contour(aes(z = Reff_99), breaks = 1, size = mylinesize, col = "white") + 
   #   #stat_contour(aes(z = Reff), breaks = 1, size = mylinesize, col = mylightgray, linetype = "longdash") + 
   
-p_totinfections_50 <- ggplot(df, aes(x = phi*100, y = psi*100)) + #, colour = ..level..)) + 
-  geom_tile(aes(fill = totinfections_50)) +
-  geom_contour(aes(z = Reff_50), breaks = 1, size = 0.4, color = "white") +
-  geom_contour(aes(z = Reff), breaks = 1, size = 0.4, col = mylightgray, linetype = "longdash") +
-  scale_y_continuous(expand = c(0, 0)) +
-  scale_x_continuous(expand = c(0, 0)) +
-  ylab("Infection-acquired immunity (%)") +
-  xlab("") +# xlab("Population vaccination rate (%)") + 
-  ggtitle("Weekly testing, 50% compliance", "Total infections") +
-  scale_fill_viridis(option="viridis", limits = c(0, N)) +
-  coord_fixed(1) + 
-  theme(legend.position = "none",
-        plot.title = element_text(color = myyellow),
-        plot.subtitle = element_text(hjust = 0.5)) 
+# p_totinfections_50 <- ggplot(df, aes(x = phi*100, y = psi*100)) + #, colour = ..level..)) + 
+#   geom_tile(aes(fill = totinfections_50)) +
+#   geom_contour(aes(z = Reff_50), breaks = 1, size = 0.7, col = "white") +
+#   geom_contour(aes(z = Reff), breaks = 1, size = 0.7, col = "white", linetype = "longdash") +
+#   scale_y_continuous(expand = c(0, 0)) +
+#   scale_x_continuous(expand = c(0, 0)) +
+#   ylab("Infection-acquired immunity (%)") +
+#   xlab("") +# xlab("Population vaccination rate (%)") + 
+#   ggtitle("Weekly testing, 50% compliance", "Total infections") +
+#   scale_fill_viridis(option="viridis", limits = c(0, N)) +
+#   coord_fixed(1) + 
+#   theme(legend.position = "none",
+#         plot.title = element_text(color = myyellow),
+#         plot.subtitle = element_text(hjust = 0.5)) 
+# 
+# p_totinfections_99 <- ggplot(df, aes(x = phi*100, y = psi*100)) + #, colour = ..level..)) + 
+#   geom_tile(aes(fill = totinfections_99)) +
+#   geom_contour(aes(z = Reff_99), breaks = 1, size = 0.7, color = "white") +
+#   geom_contour(aes(z = Reff), breaks = 1, size = 0.7, col = "white", linetype = "longdash") +
+#   scale_y_continuous(expand = c(0, 0)) +
+#   scale_x_continuous(expand = c(0, 0)) +
+#   ylab("Infection-acquired immunity (%)") +
+#   xlab("") +# xlab("Population vaccination rate (%)") + 
+#   ggtitle("Weekly testing, 99% compliance", "Total infections") +
+#   scale_fill_viridis(option="viridis", limits = c(0, N)) +
+#   coord_fixed(1) + 
+#   theme(legend.position = "none",
+#         plot.title = element_text(color = myblue),
+#         plot.subtitle = element_text(hjust = 0.5)) 
 
-p_totinfections_99 <- ggplot(df, aes(x = phi*100, y = psi*100)) + #, colour = ..level..)) + 
-  geom_tile(aes(fill = totinfections_99)) +
-  geom_contour(aes(z = Reff_99), breaks = 1, size = 0.4, color = "white") +
-  geom_contour(aes(z = Reff), breaks = 1, size = 0.4, col = mylightgray, linetype = "longdash") +
-  scale_y_continuous(expand = c(0, 0)) +
-  scale_x_continuous(expand = c(0, 0)) +
-  ylab("Infection-acquired immunity (%)") +
-  xlab("") +# xlab("Population vaccination rate (%)") + 
-  ggtitle("Weekly testing, 99% compliance", "Total infections") +
-  scale_fill_viridis(option="viridis", limits = c(0, N)) +
-  coord_fixed(1) + 
-  theme(legend.position = "none",
-        plot.title = element_text(color = myblue),
-        plot.subtitle = element_text(hjust = 0.5)) 
+for (i in 1:3) {
+  if (i == 1) {
+    df <- waningdf
+  } else if (i==2) {
+    df <- baselinedf
+  } else {
+    df <- boosteddf
+  }
+  
 
-p_percentreduc_50 <- ggplot(df, aes(x = phi*100, y = psi*100)) + #, colour = ..level..)) + 
-  geom_tile(aes(fill = percent_reduc_inf_50)) +
-  geom_contour(aes(z = Reff_50), breaks = 1, size = 0.4, color = "white") +
-  geom_contour(aes(z = Reff), breaks = 1, size = 0.4, col = mylightgray, linetype = "longdash") +
-  scale_y_continuous(expand = c(0, 0)) +
-  scale_x_continuous(expand = c(0, 0)) +
-  ylab("Infection-acquired immunity (%)") +
-  xlab("") +# xlab("Population vaccination rate (%)") + 
-  ggtitle("Weekly testing, 50% compliance", "% reduction in infections due to testing") +
-  scale_fill_gradientn(colours = cet_pal(5, name = "inferno"), limits = c(0, 100)) + 
-  coord_fixed(1) + 
-  theme(legend.position = "none",
-        plot.title = element_text(color = myyellow),
-        plot.subtitle = element_text(hjust = 0.5)) 
+  totinfections <- ggplot(df, aes(x = phi*100, y = psi*100)) + #, colour = ..level..)) +
+    geom_contour(aes(z = totinfections_notesting), breaks = 5000, size = 0.7, col = mygray, linetype = "longdash") +
+    geom_contour(aes(z = totinfections_50), breaks = 5000, size = 0.7, col = mylightgray) +
+    geom_contour(aes(z = totinfections_99), breaks = 5000, size = 0.7, col = mypurple) +
+    scale_y_continuous(expand = c(0, 0), limits = c(0, 100)) +
+    scale_x_continuous(expand = c(0, 0), limits = c(0, 100)) +
+    ylab("") +
+    xlab("") +# xlab("Population vaccination rate (%)") +
+    coord_fixed(1)
+  
+  # percentreduc50 <- ggplot(df, aes(x = phi*100, y = psi*100)) + #, colour = ..level..)) + 
+  #   geom_tile(aes(fill = percent_reduc_inf_50)) +
+  #   geom_contour(aes(z = Reff_50), breaks = 1, size = 0.6, color = "white") +
+  #   geom_contour(aes(z = Reff), breaks = 1, size = 0.6, col = "white", linetype = "longdash") +
+  #   scale_y_continuous(expand = c(0, 0)) +
+  #   scale_x_continuous(expand = c(0, 0)) +
+  #   ylab("Infection-acquired immunity (%)") +
+  #   xlab("") +# xlab("Population vaccination rate (%)") + 
+  #   ggtitle("") +
+  #   scale_fill_gradientn(colours = cet_pal(5, name = "inferno"), limits = c(0, 100)) + 
+  #   coord_fixed(1) + 
+  #   theme(legend.position = "none")
+  
+  percentreduc50 <- ggplot(df, aes(x = phi*100, y = psi*100)) + #, colour = ..level..)) + 
+    geom_tile(aes(fill = totinfections_notesting - totinfections_50)) +
+    geom_contour(aes(z = Reff_50), breaks = 1, size = 0.6, color = "white") +
+    geom_contour(aes(z = Reff), breaks = 1, size = 0.6, col = "white", linetype = "longdash") +
+    scale_y_continuous(expand = c(0, 0)) +
+    scale_x_continuous(expand = c(0, 0)) +
+    ylab("Infection-acquired immunity (%)") +
+    xlab("") +# xlab("Population vaccination rate (%)") + 
+    ggtitle("") +
+    scale_fill_gradientn(colours = cet_pal(5, name = "inferno"), limits = c(0, N)) + 
+    coord_fixed(1) + 
+    theme(legend.position = "none")
+  
+  # percentreduc99 <- ggplot(df, aes(x = phi*100, y = psi*100)) + #, colour = ..level..)) + 
+  #   geom_tile(aes(fill = percent_reduc_inf_99)) +
+  #   geom_contour(aes(z = Reff_99), breaks = 1, size = 0.6, col = "white") +
+  #   geom_contour(aes(z = Reff), breaks = 1, size = 0.6, col = "white", linetype = "longdash") +
+  #   scale_y_continuous(expand = c(0, 0)) +
+  #   scale_x_continuous(expand = c(0, 0)) +
+  #   ylab("Infection-acquired immunity (%)") +
+  #   xlab("") +# xlab("Population vaccination rate (%)") + 
+  #   ggtitle("Weekly testing, 99% compliance", "% reduction in infections due to testing") +
+  #   scale_fill_gradientn(colours = cet_pal(5, name = "inferno"), limits = c(0, 100)) + 
+  #   coord_fixed(1) + 
+  #   labs(fill = "") +
+  #   theme(axis.title.y = element_blank(),
+  #         plot.title = element_blank(), #element_text(color = myblue),
+  #         plot.subtitle = element_blank()) #element_text(hjust = 0.5)) 
+  
+  percentreduc99 <- ggplot(df, aes(x = phi*100, y = psi*100)) + #, colour = ..level..)) + 
+    geom_tile(aes(fill = totinfections_notesting - totinfections_99)) +
+    geom_contour(aes(z = Reff_99), breaks = 1, size = 0.6, col = "white") +
+    geom_contour(aes(z = Reff), breaks = 1, size = 0.6, col = "white", linetype = "longdash") +
+    scale_y_continuous(expand = c(0, 0)) +
+    scale_x_continuous(expand = c(0, 0)) +
+    ylab("Infection-acquired immunity (%)") +
+    xlab("") +# xlab("Population vaccination rate (%)") + 
+    ggtitle("Weekly testing, 99% compliance", "% reduction in infections due to testing") +
+    scale_fill_gradientn(colours = cet_pal(5, name = "inferno"), limits = c(0, N)) + 
+    coord_fixed(1) + 
+    labs(fill = "") +
+    theme(axis.title.y = element_blank(),
+          plot.title = element_blank(), #element_text(color = myblue),
+          plot.subtitle = element_blank()) #element_text(hjust = 0.5)) 
+  
+  percent_legend <- get_legend(percentreduc99)
+  
+  if (i == 1){
+    totinfections_waning <- totinfections + onlyy_theme + ggtitle("Waning")
+    percentreduc50_waning <- percentreduc50 + onlyy_theme
+    percentreduc99_waning <- percentreduc99 + theme(legend.position = "none")
+  } else if (i == 2){
+    totinfections_baseline <- totinfections + nolabels_theme + ggtitle("Baseline")
+    percentreduc50_baseline <- percentreduc50 + nolabels_theme + theme(plot.title = element_blank())
+    percentreduc99_baseline <- percentreduc99 + onlyx_theme + 
+                                theme(legend.position = "none", plot.title = element_blank()) + 
+                                xlab("Population vaccination rate (%)")
+  } else {
+    totinfections_boosted <- totinfections + nolabels_theme + ggtitle("Boosted")
+    percentreduc50_boosted <- percentreduc50 + nolabels_theme + theme(plot.title = element_blank())
+    percentreduc99_boosted <- percentreduc99 + onlyx_theme + theme(legend.position = "none", plot.title = element_blank())
+  }
+}
 
-p_percentreduc_99 <- ggplot(df, aes(x = phi*100, y = psi*100)) + #, colour = ..level..)) + 
-  geom_tile(aes(fill = percent_reduc_inf_99)) +
-  geom_contour(aes(z = Reff_99), breaks = 1, size = 0.4, color = "white") +
-  geom_contour(aes(z = Reff), breaks = 1, size = 0.4, col = mylightgray, linetype = "longdash") +
-  scale_y_continuous(expand = c(0, 0)) +
-  scale_x_continuous(expand = c(0, 0)) +
-  ylab("Infection-acquired immunity (%)") +
-  xlab("") +# xlab("Population vaccination rate (%)") + 
-  ggtitle("Weekly testing, 99% compliance", "% reduction in infections due to testing") +
-  scale_fill_gradientn(colours = cet_pal(5, name = "inferno"), limits = c(0, 100)) + 
-  coord_fixed(1) + 
-  labs(fill = "") +
-  theme(plot.title = element_text(color = myblue),
-        plot.subtitle = element_text(hjust = 0.5)) 
+# panels <- ggarrange(p_totinfections_50, p_percentreduc_50,
+#           p_totinfections_99, p_percentreduc_99,
+#           nrow = 2, ncol = 2)
+# 
+# lay <- rbind(c(1, 2),
+#              c(1, 3))
+# 
+# grid.arrange(panels, num_legend, percent_legend,
+#              layout_matrix = lay)
+# 
+# fig4 <- arrangeGrob(panels, num_legend, percent_legend,
+#                     layout_matrix = lay,
+#                     widths = c(3, 0.5))
+# 
+# ggsave("SuppFig4_waning.pdf", fig4, device = cairo_pdf, width = 8, height = 8)
 
-percent_legend <- get_legend(p_percentreduc_99)
 
-p_percentreduc_99 <- p_percentreduc_99 + theme(legend.position = "none")
+###
+panels <- ggarrange(totinfections_waning, NULL, totinfections_baseline, NULL, totinfections_boosted,
+                    NULL, NULL, NULL, NULL, NULL,
+                    percentreduc50_waning, NULL, percentreduc50_baseline, NULL, percentreduc50_boosted,
+                    NULL, NULL, NULL, NULL, NULL,
+                    percentreduc99_waning, NULL, percentreduc99_baseline, NULL, percentreduc99_boosted,
+                    nrow = 5, ncol = 5,
+                    align = "hv",
+                    widths = c(1.5, -0.75, 1.5, -0.75, 1.5),
+                    heights = c(2, -0.1, 2, -0.5, 2))
 
-panels <- ggarrange(p_totinfections_50, p_percentreduc_50,
-          p_totinfections_99, p_percentreduc_99,
-          nrow = 2, ncol = 2)
+lay <- rbind(c(1, 2))
 
-lay <- rbind(c(1, 2),
-             c(1, 3))
+fig4 <- arrangeGrob(panels, percent_legend, layout_matrix = lay,
+             widths = c(3, 0.5))
 
-grid.arrange(panels, num_legend, percent_legend,
-             layout_matrix = lay)
-
-fig4 <- arrangeGrob(panels, num_legend, percent_legend,
-                    layout_matrix = lay,
-                    widths = c(3, 0.5))
-
-ggsave("SuppFig4_waning.pdf", fig4, device = cairo_pdf, width = 8, height = 8)
+ggsave("Fig4_new2.pdf", fig4, device = cairo_pdf, width = 6.5, height = 5)
+ggsave("Fig4_new2.svg", fig4, device = svg, width = 6.5, height = 5)
 
 
 # _____________________________________________________________________

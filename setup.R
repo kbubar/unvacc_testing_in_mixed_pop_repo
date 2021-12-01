@@ -75,6 +75,10 @@ N <- 20000
 phi_vec <- seq(0, 1, by = 0.01)
 this_phi <- 0.58  # fully vacc. in US as of 11/4
 
+this_psi <- 0.35  # CDC estimate 
+this_X_S <- 0.63 # Gardner 2021 
+this_X_I <- 0.13 # Gardner 2021
+
 baseline_VE_S <- 0.65 # best guess from lots of sources including Gardner 
 baseline_VE_I <- 0.35  # best guess from lots of sources including Eyre (UK) 
 
@@ -87,11 +91,6 @@ this_VE_I <- baseline_VE_I
 
 this_H_S <- baseline_H_S
 this_H_I <- baseline_H_I
-
-this_psi <- 0.35  # CDC estimate 
-this_X_S <- 0.63 # Gardner 2021 
-this_X_I <- 0.13 # Gardner 2021
-
 
 # Simulation parameters - time span and homophily
 dt <- 1 
