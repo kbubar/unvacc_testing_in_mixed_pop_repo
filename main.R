@@ -78,23 +78,25 @@ for (i in 1){
   C <- ggplot(df, aes(x=phi*100)) + 
     geom_line(aes(y=breakthrough), col = mylightgray, size = my_linesize) +
     geom_line(aes(y=tot_infections/N*100), col = myblack, size = my_linesize) + 
-    ylab("Total infected (%)") + 
+    ylab("Percentage") +#"Total infected (%)") + 
     xlab("Population vaccination rate (%)") + 
-    scale_y_continuous(expand = c(0, 0), limits = c(0, 100),
-                       sec.axis = sec_axis(~., name="Breakthrough infections (%)")) +
+    scale_y_continuous(expand = c(0, 0), limits = c(0, 100)) +
+                       # sec.axis = sec_axis(~., name="Breakthrough infections (%)")) +
     scale_x_continuous(expand = c(0, 0)) + 
     theme(axis.title.y.right = element_text(color = mylightgray),
           axis.title.y.left = element_text(color = myblack),
           axis.title.x.bottom = element_blank(),
           axis.text.x.bottom = element_blank(),
-          plot.margin=unit(c(5.5, 2, 5.5, 2), "pt")) # top, right, bottom, left
+          plot.margin=unit(c(5.5, 2, 5.5, 2), "pt")) + 
+    coord_fixed(1) # top, right, bottom, left
   
   Reff_1 <- min(which(df$Reff <= 1),500) - 1 
   if (Reff_1 <= 100){
-    C <- C + geom_vline(xintercept = Reff_1, alpha = 0.5, linetype = "dashed", size = 0.5) 
+    # C <- C + geom_vline(xintercept = Reff_1, alpha = 0.5, linetype = "dashed", size = 0.5)
+    C <- C + geom_point(aes(x = Reff_1, y = 0), shape = 17)
   }
   inf_transition <- min(which(df$breakthrough >= 50)) - 1
-  C <- C + geom_vline(xintercept = inf_transition, alpha = 0.5, linetype = "dashed", size = 0.5, col = mypurple) 
+  C <- C + geom_vline(xintercept = inf_transition, alpha = 1, linetype = "dashed", size = 0.5, col = mylightgreen) 
   
   print(paste0("Percentage of infections in unvaccinated population with 58% vaccination rate: ",100-df[df$phi==0.58,]$breakthrough))
   
@@ -131,13 +133,15 @@ for (i in 1){
     scale_color_manual(values = c(mygray, mylightgray, mydarkteal, mylightteal, mylightorange,
                                   mydarkorange)) +
     #labels = c("v to v", "v to u", "u to v", "u to u")) + 
-    theme(legend.position = "none")
+    theme(legend.position = "none") + 
+    coord_fixed(1)
   
   if (Reff_1 <= 100){
-    E <- E + geom_vline(xintercept = Reff_1, alpha = 0.5, linetype = "dashed", size = 0.5)
+    # E <- E + geom_vline(xintercept = Reff_1, alpha = 0.5, linetype = "dashed", size = 0.5)
+    E <- E + geom_point(aes(x = Reff_1, y = 0), shape = 17, color = "black")
   }
   trans_transition <- min(which(df$total_by_u < df$total_by_v)) - 1
-  E <- E + geom_vline(xintercept = trans_transition, alpha = 0.5, linetype = "dashed", size = 0.5, col = mypurple) 
+  E <- E + geom_vline(xintercept = trans_transition, alpha = 1, linetype = "dashed", size = 0.5, col = mydarkgreen) 
 }
 
 # export as cairo_pdf,8x5.5in  
@@ -147,10 +151,11 @@ ggarrange(B, NULL, C, NULL, NULL, NULL, D, NULL, E,
           nrow = 3,
           ncol = 3,
           align = "hv",
-          widths = c(1, -0.1, 1),
-          heights = c(1, -0.13, 1))
+          widths = c(1, 0, 1),
+          heights = c(1, -0.08, 1))
 
-ggsave("Fig1.pdf", device = cairo_pdf, width = 8, height = 5.5)
+# ggsave("Fig1.pdf", device = cairo_pdf, width = 8, height = 5.5)
+ggsave("Fig1.pdf", device = cairo_pdf, width = 6, height = 4.5)
 
 
 # _____________________________________________________________________

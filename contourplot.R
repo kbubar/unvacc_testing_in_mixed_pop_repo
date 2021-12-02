@@ -22,7 +22,7 @@ df <- readRDS("df_fig2_setupparams.RData")
 
 # or run the model 
 ptm <- proc.time()
-phi_vec <- seq(0, 1, by = 0.05) # fine grid : by = 0.01
+phi_vec <- seq(0, 1, by = 0.05) # fine grid : by = 0.01 (~20 min)
 psi_vec <- seq(0, 1, by = 0.05)
 df <- expand.grid(phi = phi_vec, psi = psi_vec)
 
@@ -30,6 +30,11 @@ df$Reff <- NA
 df$breakthrough <- NA
 df$dom_transmission <- NA
 df$tot_infections <- NA
+
+this_VE_I <- boosted_VE_I
+this_VE_S <- boosted_VE_S
+this_H_I  <- boosted_H_I
+this_H_S  <- boosted_H_S
 
 for (i in 1:dim(df)[1]){
   df$tot_infections[i] <- compute_tot_infections(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S,  
@@ -52,7 +57,7 @@ for (i in 1:dim(df)[1]){
                                                            H_I = this_H_I, H_S = this_H_S))*100
 }
 
-#saveRDS(df,file="df_fig2_setupparams.RData")
+saveRDS(df,file="df_fig2_boosted.RData")
 
 proc.time() - ptm
 
@@ -66,7 +71,7 @@ p_Reff <- ggplot(df, aes(x = phi*100, y = psi*100, z = Reff))+ #, colour = ..lev
   geom_contour(breaks = 1:R0, size = 0.4, color = "white") +
   geom_text_contour(breaks = 1:R0, color = "white", rotate = FALSE,
                     nudge_y = 1,
-                    nudge_x = 4)+
+                    nudge_x = 4, skip = 0)+
   scale_y_continuous(expand = c(0, 0)) +
   scale_x_continuous(expand = c(0, 0)) +
   ylab("Infection-acquired immunity (%)") +
@@ -114,16 +119,39 @@ p_transmission <- ggplot(df, aes(x = phi*100, y = psi*100, z = dom_transmission)
   scale_fill_gradientn(colours = cet_pal(5, name = "inferno"))+ 
   coord_fixed(1)
 
-ggarrange(p_Reff, p_infection,
-          p_transmission,
-          widths = c(1.26, 1, 1.23),
-          labels = c('a  ', 'b', 'c'),
-          ncol = 3,
-          label.y = 0.92,
-          align = "hv")
+num_legend <- get_legend(p_Reff)
+p_Reff <- p_Reff + theme(legend.position = "none")
 
-ggsave("SuppFig2.pdf", device = cairo_pdf, width = 12, height = 4)
-ggsave("Fig2.svg", device = svg, width = 12, height = 4)
+percent_legend <- get_legend(p_transmission)
+p_transmission <- p_transmission + theme(legend.position = "none")
+
+plot_a <- ggarrange(p_Reff,
+                    labels = c('a  '),
+                    label.y = 0.92)
+
+plot_b <- ggarrange(p_infection,
+                     labels = c('b'),
+                     label.y = 0.92)
+
+plot_c <- ggarrange(p_transmission,
+                    labels = c('c'),
+                    label.y = 0.92)
+
+fig2 <- arrangeGrob(plot_a, num_legend, plot_b, plot_c, percent_legend,
+                    nrow = 1,
+                    ncol = 5,
+                    widths = c(1, 0.4, 1, 1, 0.4))
+
+# ggarrange(p_Reff, p_infection,
+#           p_transmission,
+#           widths = c(1.26, 1, 1.23),
+#           labels = c('a  ', 'b', 'c'),
+#           ncol = 3,
+#           label.y = 0.92,
+#           align = "hv")
+
+ggsave("Fig2.pdf", fig2, device = cairo_pdf, width = 10, height = 3)
+ggsave("Fig2.svg", fig2, device = svg, width = 10, height = 3)
 
 # To find transition points:
 infection_transitions <- df[df$breakthrough >= 50,]  %>% group_by(psi) %>% summarize(phi=min(phi))
@@ -131,9 +159,72 @@ transmission_transitions <- df[df$dom_transmission < 50,]  %>% group_by(psi) %>%
 print(paste0("Infection transition point: ",min(infection_transitions$phi), " - ",max(infection_transitions$phi)))
 print(paste0("Transmission transition point: ",min(transmission_transitions$phi), " - ",max(transmission_transitions$phi)))
 
-
 # _____________________________________________________________________
 # FIGURE 3: ####
+# Reff and transition lines three scenarios
+#
+#*
+#* I: Get data ####
+# _____________________________________________________________________
+
+# Same df as figure 2
+baselinedf <- readRDS("df_fig2_setupparams.RData")
+waningdf <- readRDS("df_fig2_waning.RData")
+boosteddf <- readRDS("df_fig2_boosted.RData")
+
+# _____________________________________________________________________
+#* II: Plot fig3 ####
+# _____________________________________________________________________
+
+p_waning <- ggplot(waningdf, aes(x = phi*100, y = psi*100))+ #, colour = ..level..)) + 
+  geom_contour(aes(z = dom_transmission), breaks = 50, size = my_linesize, color = mydarkgreen) +
+  geom_contour(aes(z = breakthrough), breaks = 50, size = my_linesize, color = mylightgreen) +
+  geom_contour(aes(z = Reff),breaks = 1, size = my_linesize, color = "black") +
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 100)) +
+  scale_x_continuous(expand = c(0, 0), limits = c(0, 100)) +
+  ylab("Infection-acquired immunity (%)") +
+  xlab("Population vaccination rate (%)") + 
+  ggtitle("Waning/low VE") +
+  coord_fixed(1) + 
+  theme(legend.position = "none") 
+
+p_baseline <- ggplot(baselinedf, aes(x = phi*100, y = psi*100))+ #, colour = ..level..)) + 
+  geom_contour(aes(z = dom_transmission), breaks = 50, size = my_linesize, color = mydarkgreen) +
+  geom_contour(aes(z = breakthrough), breaks = 50, size = my_linesize, color = mylightgreen) +
+  geom_contour(aes(z = Reff),breaks = 1, size = my_linesize, color = "black") +
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 100)) +
+  scale_x_continuous(expand = c(0, 0), limits = c(0, 100)) +
+  ylab("") +
+  xlab("Population vaccination rate (%)") + 
+  ggtitle("Baseline VE") +
+  coord_fixed(1) + 
+  theme(legend.position = "none", 
+        axis.title.y = element_blank()) 
+
+p_boosted <- ggplot(boosteddf, aes(x = phi*100, y = psi*100))+ #, colour = ..level..)) + 
+  geom_contour(aes(z = dom_transmission), breaks = 50, size = my_linesize, color = mydarkgreen) +
+  geom_contour(aes(z = breakthrough), breaks = 50, size = my_linesize, color = mylightgreen) +
+  geom_contour(aes(z = Reff),breaks = 1, size = my_linesize, color = "black") +
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 100)) +
+  scale_x_continuous(expand = c(0, 0), limits = c(0, 100)) +
+  ylab("") +
+  xlab("Population vaccination rate (%)") + 
+  ggtitle("Boosted/high VE") +
+  coord_fixed(1) + 
+  theme(legend.position = "none", 
+        axis.title.y = element_blank()) 
+
+fig3 <- ggarrange(p_waning, p_baseline, p_boosted,
+                     nrow = 1,
+                     align = "hv",
+                     labels = c("a", "b", "c"))
+
+ggsave("Fig3.pdf", fig3, device = cairo_pdf, width = 10, height = 3)
+ggsave("Fig3.svg", fig3, device = svg, width = 10, height = 3)
+
+
+# _____________________________________________________________________
+# SUPP FIGURE 3: ####
 # Reff and total infections for the three scenarios
 #
 #*
@@ -215,7 +306,7 @@ p_Reff_waning <- ggplot(df, aes(x = phi*100, y = psi*100, z = Reff_waning))+ #, 
   scale_x_continuous(expand = c(0, 0)) +
   ylab("Infection-acquired immunity (%)") +
   xlab("") +# xlab("Population vaccination rate (%)") + 
-  ggtitle("Waning scenario") +
+  ggtitle("Waning/low VE") +
   scale_fill_viridis(option="viridis", limits = c(0, N)) +
   coord_fixed(1) + 
   theme(legend.position = "none") 
@@ -228,7 +319,7 @@ p_Reff_baseline <- ggplot(df, aes(x = phi*100, y = psi*100, z = Reff_baseline))+
   scale_x_continuous(expand = c(0, 0)) +
   ylab("") +
   xlab("Population vaccination rate (%)") + 
-  ggtitle("Baseline") +
+  ggtitle("Baseline VE") +
   scale_fill_viridis(option="viridis", limits = c(0, N)) +
   coord_fixed(1) + 
   theme(legend.position = "none", 
@@ -242,7 +333,7 @@ p_Reff_boosted <- ggplot(df, aes(x = phi*100, y = psi*100, z = Reff_boosted))+ #
   scale_x_continuous(expand = c(0, 0)) +
   ylab("") +
   xlab("") + # xlab("Population vaccination rate (%)") + 
-  ggtitle("Boosted scenario") +
+  ggtitle("Boosted/high VE") +
   scale_fill_viridis(option="viridis", limits = c(0, N)) +
   coord_fixed(1) + 
   labs(fill = "") +
@@ -269,7 +360,7 @@ ggsave("SuppFig3.pdf", fig3, device = cairo_pdf, width = 12, height = 4)
 ggsave("Fig3.svg", device = svg, width = 12, height = 4)
 
 # _____________________________________________________________________
-# FIGURE 4: ####
+# FIGURE 5: ####
 # Total infections averted and percent reduction in infections for 
 # all three VE scenarios (waning, baseline, boosted) and
 # both testing scenarios (weekly, 50% and 99% compliance)
@@ -284,8 +375,8 @@ df <- baselinedf
 # or run the model
 ptm <- proc.time()
 
-phi_vec <- seq(0, 1, by = 0.05)
-psi_vec <- seq(0, 1, by = 0.05)
+phi_vec <- seq(0, 1, by = 0.01)
+psi_vec <- seq(0, 1, by = 0.01)
 df <- expand.grid(phi = phi_vec, psi = psi_vec)
 
 df$Reff <- NA
@@ -295,10 +386,10 @@ df$totinfections_notesting <- NA
 df$totinfections_99 <- NA
 df$totinfections_50 <- NA
 
-this_VE_I <- low_VE_I
-this_VE_S <- low_VE_S
-this_H_I  <- low_H_I
-this_H_S  <- low_H_S
+this_VE_I <- baseline_VE_I
+this_VE_S <- baseline_VE_S
+this_H_I  <- baseline_H_I
+this_H_S  <- baseline_H_S
 
 for (i in 1:dim(df)[1]){
   df$Reff[i] <- compute_Reff(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S,
@@ -333,6 +424,9 @@ for (i in 1:dim(df)[1]){
 
 df$percent_reduc_inf_99 <- (df$totinfections_notesting - df$totinfections_99)/df$totinfections_notesting*100
 df$percent_reduc_inf_50 <- (df$totinfections_notesting - df$totinfections_50)/df$totinfections_notesting*100
+
+proc.time() - ptm
+#saveRDS(df, file = "df_fig5_waning.RData")
 
 # stat_contour(aes(z = Reff_99), breaks = 1, size = mylinesize, col = "white") + 
   #   #stat_contour(aes(z = Reff), breaks = 1, size = mylinesize, col = mylightgray, linetype = "longdash") + 
@@ -376,7 +470,6 @@ for (i in 1:3) {
     df <- boosteddf
   }
   
-
   totinfections <- ggplot(df, aes(x = phi*100, y = psi*100)) + #, colour = ..level..)) +
     geom_contour(aes(z = totinfections_notesting), breaks = 5000, size = 0.7, col = mygray, linetype = "longdash") +
     geom_contour(aes(z = totinfections_50), breaks = 5000, size = 0.7, col = mylightgray) +

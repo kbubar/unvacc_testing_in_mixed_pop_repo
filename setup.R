@@ -17,7 +17,7 @@ library(metR)
 
 ## Run all these lines (14-18) if you haven't already installed fonts 
 library(remotes)
-#remotes::install_version("Rttf2pt1", version = "1.3.8")
+remotes::install_version("Rttf2pt1", version = "1.3.8")
 library(extrafont)
 # font_import()
 loadfonts(device = "pdf", quiet = TRUE) # windows
@@ -35,6 +35,9 @@ mypurple <- "#950F73"
 mygray <- "#636363"
 mylightgray <- "#BDBDBD"
 myblack <- "#252525" #really dark gray
+
+mydarkgreen <- "#355D32"
+mylightgreen <- "#7EB87A"
 
 mygreen <- "#2A6543"
 myred <- "#8B0000"
@@ -61,9 +64,9 @@ onlyy_theme <- theme(axis.title.x = element_blank(),
 alllabels_theme <- theme(plot.title = element_text(face = "plain", family="Arial"),
                          legend.position = "none")
 
-theme_set(theme_minimal(base_size = 14))
-theme_update(text = element_text(family="Arial"),
-             plot.title = element_text(size = 14, hjust = 0.5, family="Arial"))
+theme_set(theme_minimal(base_size = 12))
+theme_update(text = element_text(family="Arial", size = 12),
+             plot.title = element_text(size = 12, hjust = 0.5, family="Arial"))
 
 my_linesize <- 1
 
