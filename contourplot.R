@@ -3,11 +3,6 @@
 
 source("setup.R") 
 
-# for Fig 4
-theme_set(theme_minimal(base_size = 12))
-theme_update(text = element_text(family="Arial"),
-             plot.title = element_text(size = 12, hjust = 0.5, family="Arial"))
-
 # _____________________________________________________________________
 # FIGURE 2: ####
 # Reff, % infections in the unvaccinated and % infections driven by the unvaccinated over phi and psi
@@ -17,7 +12,7 @@ theme_update(text = element_text(family="Arial"),
 # _____________________________________________________________________
 
 # Either read in the corresponding RDS file
-df <- readRDS("df_fig2_setupparams.RData")
+df <- readRDS("df_fig2_baseline.RData")
 #df <- readRDS("df_suppfig2_R06.RData")
 
 # or run the model 

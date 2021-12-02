@@ -25,7 +25,8 @@ for (i in 1){
     xlab("Time (days)") +
     scale_x_continuous(expand = c(0, 0), limits = c(0, 200)) + 
     scale_y_continuous(expand = c(0, 0), limits = c(0, 1000)) + # 2500 for R0 = 6
-    onlyy_theme 
+    onlyy_theme +
+    coord_fixed(1/5)
   
   #*  Panel D - transmission mode over time (i.e. who caused new daily cases) ####
   df <- data.frame(time = t)
@@ -53,7 +54,8 @@ for (i in 1){
     xlab("Time (days)") +
     scale_x_continuous(expand = c(0, 0), limits = c(0, 200)) + 
     scale_y_continuous(expand = c(0, 0), limits = c(0, 80)) + # C(0, 200) for R0 = 6
-    alllabels_theme
+    alllabels_theme +
+    coord_fixed(20/8)
   
   #* Panel C - total infections and breakthrough cases over phi ####
   df <- data.frame(phi = phi_vec)
