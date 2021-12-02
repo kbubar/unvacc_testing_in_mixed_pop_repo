@@ -147,14 +147,12 @@ for (i in 1){
 }
 
 # export as cairo_pdf,8x5.5in  
-ggarrange(B, NULL, C, NULL, NULL, NULL, D, NULL, E,
-          labels = c("b", NA, "c", NA, NA, NA, "d", NA, "e"),
-          #labels = c("a", NA, "b", NA, NA, NA, "c", NA, "d"), # for supp R0 = 6
-          nrow = 3,
+ggarrange(B, NULL, C, D, NULL, E,
+          labels = c("b", NA, "c", "d", NA, "e"),
+          nrow = 2,
           ncol = 3,
           align = "hv",
-          widths = c(1, 0, 1),
-          heights = c(1, -0.08, 1))
+          widths = c(1, -0.1, 1))
 
 # ggsave("Fig1.pdf", device = cairo_pdf, width = 8, height = 5.5)
 ggsave("Fig1.pdf", device = cairo_pdf, width = 6, height = 4.5)
@@ -275,7 +273,7 @@ ggarrange(A, NULL, B, NULL, C, D, NULL,
           widths = c(1.03,-.1, 1,-.1, 1., 1.03,0.1),
           heights = c(1, 1, 1, 1))
 
-ggsave("Fig4.pdf", device = cairo_pdf, width = 12, height = 3)
+ggsave("Fig4.pdf", device = cairo_pdf, width = 10, height = 3)
 
 
 
@@ -569,11 +567,11 @@ p_inf_transition <- ggplot() +
                  aes(x = VE, y = min_inf_transition*100), col = theta99_purple,
                  position = position_nudge(x = 0.025), size=2
   ) +
-  ylim(50, 100) +
   #scale_x_discrete("Waning","Baseline","Boosted") +
   ylab("Population vaccination rate (%)") +
+  scale_y_continuous(expand = c(0, 0), limits = c(48, 100))  +
   #xlab("Vaccine Effectiveness") +
-  ggtitle("Majority breakthrough infection threshold") +
+  ggtitle("Transition to majority\n breakthrough infections") +
   theme(legend.position = "none", panel.grid.major.y = element_blank(), 
         panel.grid.minor.y = element_blank(), panel.grid.minor.x = element_blank(), 
         axis.line = element_line(colour = "black"))
@@ -621,25 +619,25 @@ p_trnsmsn_transition <- ggplot() +
              aes(x = VE, y = min_trnsmsn_transition*100), col = theta99_purple,
              position = position_nudge(x = 0.025), size=2
   ) +
-  ylim(50, 100) +
   #scale_x_discrete("Waning","Baseline","Boosted") +
   ylab("Population vaccination rate (%)") +
+  scale_y_continuous(expand = c(0, 0), limits = c(48, 100))  +
   #xlab("Vaccine Effectiveness") +
-  ggtitle("Majority breakthrough transmission threshold") +
+  ggtitle("Transition to majority\n breakthrough transmission") +
   onlyx_theme +
   theme(panel.grid.major.y = element_blank(), panel.grid.minor.y = element_blank(), 
         panel.grid.minor.x = element_blank(), axis.line = element_line(colour = "black"))
 
 
-fig6 <- ggarrange(p_inf_transition, NULL, p_trnsmsn_transition,
-                  widths = c(1.02, -0.05, 1),
-                  labels = c('   a ', NA, '    b'),
-                  ncol = 3,
+fig6 <- ggarrange(p_inf_transition, NULL, p_trnsmsn_transition, NULL,
+                  widths = c(1.02, -0.05, 1, 0.2),
+                  labels = c('   a ', NA, '    b', NA),
+                  ncol = 4,
                   label.y = 0.96,
                   align = "hv")
 fig6
 
-ggsave("Fig6.pdf", fig6, device = cairo_pdf, width = 10, height = 4)
+ggsave("Fig6.pdf", fig6, device = cairo_pdf, width = 6.5, height = 3)
 
 
 
