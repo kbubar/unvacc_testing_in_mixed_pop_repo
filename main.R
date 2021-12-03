@@ -25,8 +25,7 @@ for (i in 1){
     xlab("Time (days)") +
     scale_x_continuous(expand = c(0, 0), limits = c(0, 200)) + 
     scale_y_continuous(expand = c(0, 0), limits = c(0, 1000)) + # 2500 for R0 = 6
-    onlyy_theme +
-    coord_fixed(1/5)
+    onlyy_theme 
   
   #*  Panel D - transmission mode over time (i.e. who caused new daily cases) ####
   df <- data.frame(time = t)
@@ -54,8 +53,7 @@ for (i in 1){
     xlab("Time (days)") +
     scale_x_continuous(expand = c(0, 0), limits = c(0, 200)) + 
     scale_y_continuous(expand = c(0, 0), limits = c(0, 80)) + # C(0, 200) for R0 = 6
-    alllabels_theme +
-    coord_fixed(20/8)
+    alllabels_theme
   
   #* Panel C - total infections and breakthrough cases over phi ####
   df <- data.frame(phi = phi_vec)
@@ -89,13 +87,12 @@ for (i in 1){
           axis.title.y.left = element_text(color = myblack),
           axis.title.x.bottom = element_blank(),
           axis.text.x.bottom = element_blank(),
-          plot.margin=unit(c(5.5, 2, 5.5, 2), "pt")) + 
-    coord_fixed(1) # top, right, bottom, left
+          plot.margin=unit(c(6, 2, 5.5, 2), "pt")) # top, right, bottom, left
   
   Reff_1 <- min(which(df$Reff <= 1),500) - 1 
   if (Reff_1 <= 100){
     # C <- C + geom_vline(xintercept = Reff_1, alpha = 0.5, linetype = "dashed", size = 0.5)
-    C <- C + geom_point(aes(x = Reff_1, y = 0), shape = 17)
+    C <- C + geom_point(aes(x = Reff_1, y = 0), shape = 20, size = 0.4)
   }
   inf_transition <- min(which(df$breakthrough >= 50)) - 1
   C <- C + geom_vline(xintercept = inf_transition, alpha = 1, linetype = "dashed", size = 0.5, col = mylightgreen) 
@@ -135,27 +132,28 @@ for (i in 1){
     scale_color_manual(values = c(mygray, mylightgray, mydarkteal, mylightteal, mylightorange,
                                   mydarkorange)) +
     #labels = c("v to v", "v to u", "u to v", "u to u")) + 
-    theme(legend.position = "none") + 
-    coord_fixed(1)
+    theme(legend.position = "none")
   
   if (Reff_1 <= 100){
     # E <- E + geom_vline(xintercept = Reff_1, alpha = 0.5, linetype = "dashed", size = 0.5)
-    E <- E + geom_point(aes(x = Reff_1, y = 0), shape = 17, color = "black")
+    E <- E + geom_point(aes(x = Reff_1, y = 0), shape = 20, size = 0.5, color = "black")
   }
   trans_transition <- min(which(df$total_by_u < df$total_by_v)) - 1
   E <- E + geom_vline(xintercept = trans_transition, alpha = 1, linetype = "dashed", size = 0.5, col = mydarkgreen) 
 }
 
 # export as cairo_pdf,8x5.5in  
-ggarrange(B, NULL, C, D, NULL, E,
-          labels = c("b", NA, "c", "d", NA, "e"),
-          nrow = 2,
+ggarrange(B, NULL, C, NULL, NULL, NULL, D, NULL, E,
+          labels = c("b", NA, "c", NA, NA, NA, "d", NA, "e"),
+          nrow = 3,
           ncol = 3,
           align = "hv",
-          widths = c(1, -0.1, 1))
+          widths = c(1, 0, 1),
+          heights = c(1, -0.1, 1),
+          label.y = 1.04)
 
 # ggsave("Fig1.pdf", device = cairo_pdf, width = 8, height = 5.5)
-ggsave("Fig1.pdf", device = cairo_pdf, width = 6, height = 4.5)
+ggsave("Fig1.pdf", device = cairo_pdf, width = 7, height = 4.5)
 
 
 # _____________________________________________________________________
