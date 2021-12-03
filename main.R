@@ -136,20 +136,26 @@ for (i in 1){
   
   if (Reff_1 <= 100){
     # E <- E + geom_vline(xintercept = Reff_1, alpha = 0.5, linetype = "dashed", size = 0.5)
-    E <- E + geom_point(aes(x = Reff_1, y = 0), shape = 20, size = 0.5, color = "black")
+    E <- E + geom_point(aes(x = Reff_1, y = 0), shape = 20, size = 0.4, color = "black")
   }
   trans_transition <- min(which(df$total_by_u < df$total_by_v)) - 1
   E <- E + geom_vline(xintercept = trans_transition, alpha = 1, linetype = "dashed", size = 0.5, col = mydarkgreen) 
 }
 
 # export as cairo_pdf,8x5.5in  
-ggarrange(B, NULL, C, NULL, NULL, NULL, D, NULL, E,
-          labels = c("b", NA, "c", NA, NA, NA, "d", NA, "e"),
-          nrow = 3,
-          ncol = 3,
+ggarrange(NULL, NULL, NULL, NULL, 
+          B, NULL, C, NULL, 
+          NULL, NULL, NULL, NULL,
+          D, NULL, E,
+          labels = c(rep(NA, 4), 
+                     "b", NA, "c", NA, 
+                     rep(NA, 4), 
+                     "d", NA, "e", NA),
+          nrow = 4,
+          ncol = 4,
           align = "hv",
-          widths = c(1, 0, 1),
-          heights = c(1, -0.1, 1),
+          widths = c(1, 0, 1, 0.05),
+          heights = c(0.05, 1, -0.1, 1),
           label.y = 1.04)
 
 # ggsave("Fig1.pdf", device = cairo_pdf, width = 8, height = 5.5)
