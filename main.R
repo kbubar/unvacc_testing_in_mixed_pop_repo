@@ -150,10 +150,10 @@ ggarrange(B, NULL, C, NULL, NULL, NULL, D, NULL, E,
           align = "hv",
           widths = c(1, 0, 1),
           heights = c(1, -0.1, 1),
-          label.y = 1.04)
+          label.y = 1.02)
 
 # ggsave("Fig1.pdf", device = cairo_pdf, width = 8, height = 5.5)
-ggsave("Fig1.pdf", device = cairo_pdf, width = 7, height = 4.5)
+ggsave("Fig1.pdf", device = cairo_pdf, width = 7, height = 5.5)
 
 
 # _____________________________________________________________________
@@ -635,7 +635,7 @@ fig6 <- ggarrange(p_inf_transition, NULL, p_trnsmsn_transition, NULL,
                   align = "hv")
 fig6
 
-ggsave("Fig6.pdf", fig6, device = cairo_pdf, width = 6.5, height = 3)
+ggsave("Fig6Supp.pdf", fig6, device = cairo_pdf, width = 6.5, height = 3)
 
 
 
