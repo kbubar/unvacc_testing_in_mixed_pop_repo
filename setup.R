@@ -83,22 +83,6 @@ phi_vec <- seq(0, 1, by = 0.01)
 this_phi <- 0.62  # fully vacc. in US as of 1/10
 this_psi <- 0.50  # CDC estimate 
 
-this_X_S <- 0.35 # Altarawneh. Gardner 2021 
-this_X_I <- 0.05 # Altarawneh, Gardner 2021
-
-baseline_VE_S <- 0.35 # best guess from lots of sources including Gardner 
-baseline_VE_I <- 0.05  # best guess from lots of sources including Eyre (UK) 
-
-baseline_H_S <- (1-this_X_S)*baseline_VE_S + this_X_S  # 0.87 for baseline scenario
-baseline_H_I <- (1-this_X_I)*baseline_VE_I + this_X_I  # 0.43 for baseline scenario
-
-# set default params as the baseline scenario
-this_VE_S <- baseline_VE_S
-this_VE_I <- baseline_VE_I
-
-this_H_S <- baseline_H_S
-this_H_I <- baseline_H_I
-
 # Simulation parameters - time span and homophily
 dt <- 1 
 t <- seq(from=1, to=270, by=dt)
@@ -119,15 +103,19 @@ ext_forcing <- 1 # ~ amount of daily imported cases
 R0 <- 4
 alpha <- R0*gamma/N # transmissibility
 
-# Vaccine effectiveness
-baseline_VE_S <- 0.65 # best guess from lots of sources including Gardner 
-baseline_VE_I <- 0.35  # best guess from lots of sources including Eyre (UK) 
+this_X_S <- 0.35 # Altarawneh. Gardner 2021 
+this_X_I <- 0.05 # Altarawneh, Gardner 2021
 
-# Hybrid immunity effectiveness
+baseline_VE_S <- 0.35 # best guess from lots of sources including Gardner 
+baseline_VE_I <- 0.05  # best guess from lots of sources including Eyre (UK) 
+
 baseline_H_S <- (1-this_X_S)*baseline_VE_S + this_X_S  # 0.87 for baseline scenario
 baseline_H_I <- (1-this_X_I)*baseline_VE_I + this_X_I  # 0.43 for baseline scenario
 
-# set default parameters as the baseline scenario
+#baseline_H_S <- max(c(baseline_VE_S,this_X_S))  
+#baseline_H_I <- max(c(baseline_VE_I,this_X_I))
+
+# set default params as the baseline scenario
 this_VE_S <- baseline_VE_S
 this_VE_I <- baseline_VE_I
 

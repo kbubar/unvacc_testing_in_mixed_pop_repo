@@ -24,7 +24,7 @@ for (i in 1){
     ylab("Infected (#)") +
     xlab("Time (days)") +
     scale_x_continuous(expand = c(0, 0), limits = c(0, 200)) +
-    scale_y_continuous(expand = c(0, 0), limits = c(0, 1000)) + # 2500 for R0 = 6
+    scale_y_continuous(expand = c(0, 0), limits = c(0, 2750)) + # 2500 for R0 = 6
     onlyy_theme
 
   #*  Panel D - transmission mode over time (i.e. who caused new daily cases) ####
@@ -52,7 +52,7 @@ for (i in 1){
     ylab("New daily infections (#) ") +
     xlab("Time (days)") +
     scale_x_continuous(expand = c(0, 0), limits = c(0, 200)) +
-    scale_y_continuous(expand = c(0, 0), limits = c(0, 80)) + # C(0, 200) for R0 = 6
+    scale_y_continuous(expand = c(0, 0), limits = c(0, 170)) + # C(0, 200) for R0 = 6
     alllabels_theme
 
   #* Panel C - total infections and breakthrough cases over phi ####
