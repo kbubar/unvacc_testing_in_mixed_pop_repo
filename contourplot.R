@@ -17,8 +17,8 @@ source("setup.R")
 
 # or run the model 
 ptm <- proc.time()
-phi_vec <- seq(0, 1, by = 0.01) # fine grid : by = 0.01 (~20 min)
-psi_vec <- seq(0, 1, by = 0.01)
+phi_vec <- seq(0, 1, by = 0.05) # fine grid : by = 0.01 (~20 min)
+psi_vec <- seq(0, 1, by = 0.05)
 df <- expand.grid(phi = phi_vec, psi = psi_vec)
 
 df$Reff <- NA
@@ -26,10 +26,10 @@ df$breakthrough <- NA
 df$dom_transmission <- NA
 df$tot_infections <- NA
 
-this_VE_I <- low_VE_I
-this_VE_S <- low_VE_S
-this_H_I  <- low_H_I
-this_H_S  <- low_H_S
+this_VE_I <- baseline_VE_I
+this_VE_S <- baseline_VE_S
+this_H_I  <- baseline_H_I
+this_H_S  <- baseline_H_S
 
 for (i in 1:dim(df)[1]){
   df$tot_infections[i] <- compute_tot_infections(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S,  
@@ -52,7 +52,7 @@ for (i in 1:dim(df)[1]){
                                                            H_I = this_H_I, H_S = this_H_S))*100
 }
 
-saveRDS(df,file="df_Fig2_waning.RData")
+saveRDS(df,file="df_Fig2_baseline.RData")
 
 proc.time() - ptm
 
@@ -136,8 +136,8 @@ fig2 <- arrangeGrob(plot_a, num_legend, plot_b, plot_c, percent_legend,
                     widths = c(1, 0.4, 1, 1, 0.4))
 
 
-ggsave("SuppFig2.pdf", fig2, device = cairo_pdf, width = 10, height = 3)
-ggsave("SuppFig2.svg", fig2, device = svg, width = 10, height = 3)
+ggsave("Fig2.pdf", fig2, device = cairo_pdf, width = 10, height = 3)
+ggsave("Fig2.svg", fig2, device = svg, width = 10, height = 3)
 
 # To find transition points:
 infection_transitions <- df[df$breakthrough >= 50,]  %>% group_by(psi) %>% summarize(phi=min(phi))
@@ -230,8 +230,8 @@ boosteddf <- readRDS("df_suppFig5_boosted_R06.RData")
 # or run the model
 ptm <- proc.time()
 
-phi_vec <- seq(0, 1, by = 0.01)
-psi_vec <- seq(0, 1, by = 0.01)
+phi_vec <- seq(0, 1, by = 0.05)
+psi_vec <- seq(0, 1, by = 0.05)
 df <- expand.grid(phi = phi_vec, psi = psi_vec)
 
 df$Reff <- NA
@@ -241,10 +241,10 @@ df$totinfections_notesting <- NA
 df$totinfections_99 <- NA
 df$totinfections_50 <- NA
 
-this_VE_I <- baseline_VE_I
-this_VE_S <- baseline_VE_S
-this_H_I  <- baseline_H_I
-this_H_S  <- baseline_H_S
+this_VE_I <- low_VE_I
+this_VE_S <- low_VE_S
+this_H_I  <- low_H_I
+this_H_S  <- low_H_S
 
 for (i in 1:dim(df)[1]){
   df$Reff[i] <- compute_Reff(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S,
@@ -356,5 +356,174 @@ fig5 <- arrangeGrob(panels, percent_legend, layout_matrix = lay,
              widths = c(3, 0.5), 
              left = c("Infection-acquired immunity (%)"))
 
-ggsave("suppFig5.pdf", fig5, device = cairo_pdf, width = 8, height = 5)
+ggsave("Fig5.pdf", fig5, device = cairo_pdf, width = 8, height = 5)
+ggsave("suppFig5.svg", fig5, device = svg, width = 8, height = 5)
+
+
+# _____________________________________________________________________
+# FIGURE 6: ####
+# Total infections averted and percent reduction in infections for 
+# baseline omicron scenarios assuming three testing
+# scenarios (weekly 50% and 99% compliance, twice weekly 99% compliance)
+#
+#*
+#* I: Get data ####
+# _____________________________________________________________________
+
+# Either read in the corresponding RDS file
+# waningdf <- readRDS("df_Fig5_waning.RData")
+# baselinedf <- readRDS("df_Fig5_baseline.RData")
+# boosteddf <- readRDS("df_Fig5_boosted.RData")
+
+this_X_S <- omicron_X_S
+this_X_I <- omicron_X_I
+this_VE_S <- omicron_VE_S
+this_VE_I <- omicron_VE_I
+this_H_S <- omicron_H_S
+this_H_I <- omicron_H_I
+
+waningdf <- readRDS("df_suppFig5_waning_R06.RData")
+baselinedf <- readRDS("df_suppFig5_baseline_R06.RData")
+boosteddf <- readRDS("df_suppFig5_boosted_R06.RData")
+
+# or run the model
+ptm <- proc.time()
+
+phi_vec <- seq(0, 1, by = 0.01)
+psi_vec <- seq(0, 1, by = 0.01)
+df <- expand.grid(phi = phi_vec, psi = psi_vec)
+
+df$Reff <- NA
+df$Reff_99 <- NA
+df$Reff_50 <- NA
+df$Reff_biwk <- NA
+df$totinfections_notesting <- NA
+df$totinfections_99 <- NA
+df$totinfections_50 <- NA
+df$totinfections_biwk <- NA
+
+this_VE_I <- baseline_VE_I
+this_VE_S <- baseline_VE_S
+this_H_I  <- baseline_H_I
+this_H_S  <- baseline_H_S
+
+for (i in 1:dim(df)[1]){
+  df$Reff[i] <- compute_Reff(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S,
+                             theta = 0, q = this_q,
+                             df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                             H_I = this_H_I, H_S = this_H_S)
+  
+  df$Reff_99[i] <- compute_Reff(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S,
+                                theta = theta_99, q = this_q,
+                                df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                H_I = this_H_I, H_S = this_H_S)
+  df$Reff_50[i] <- compute_Reff(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S,
+                                theta = theta_50, q = this_q,
+                                df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                H_I = this_H_I, H_S = this_H_S)
+  
+  df$Reff_biwk[i] <- compute_Reff(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S,
+                                theta = theta_99_biwk, q = this_q,
+                                df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                H_I = this_H_I, H_S = this_H_S)
+  
+  df$totinfections_notesting[i] <- compute_tot_infections(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S,
+                                                          theta = 0, q = this_q,
+                                                          df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                                          H_I = this_H_I, H_S = this_H_S) 
+  
+  df$totinfections_99[i] <- compute_tot_infections(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S,
+                                                   theta = theta_99, q = this_q,
+                                                   df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                                   H_I = this_H_I, H_S = this_H_S)
+  
+  df$totinfections_50[i] <- compute_tot_infections(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S,
+                                                   theta = theta_50, q = this_q,
+                                                   df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                                   H_I = this_H_I, H_S = this_H_S)
+  
+  df$totinfections_biwk[i] <- compute_tot_infections(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S,
+                                                   theta = theta_99_biwk, q = this_q,
+                                                   df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                                   H_I = this_H_I, H_S = this_H_S)
+}
+
+df$percent_reduc_inf_99 <- (df$totinfections_notesting - df$totinfections_99)/df$totinfections_notesting*100
+df$percent_reduc_inf_50 <- (df$totinfections_notesting - df$totinfections_50)/df$totinfections_notesting*100
+df$percent_reduc_inf_biwk <- (df$totinfections_notesting - df$totinfections_biwk)/df$totinfections_notesting*100
+
+proc.time() - ptm
+#saveRDS(df,file="df_Fig6_baseline.RData")
+
+#* II: Plot fig6 ####
+
+percentreduc50 <- ggplot(df, aes(x = phi*100, y = psi*100)) + #, colour = ..level..)) +
+  geom_tile(aes(fill = percent_reduc_inf_50)) +
+  geom_contour(aes(z = Reff_50), breaks = 1, size = 0.6, color = "white") +
+  geom_contour(aes(z = Reff), breaks = 1, size = 0.6, col = "white", linetype = "longdash") +
+  scale_y_continuous(expand = c(0, 0)) +
+  scale_x_continuous(expand = c(0, 0)) +
+  ylab("") +#"Infection-acquired immunity (%)") +
+  xlab("") +# xlab("Population vaccination rate (%)") +
+  ggtitle("") +
+  scale_fill_gradientn(colours = cet_pal(5, name = "inferno"), limits = c(0, 100)) +
+  coord_fixed(1) +
+  theme(legend.position = "none")
+
+percentreduc99 <- ggplot(df, aes(x = phi*100, y = psi*100)) + #, colour = ..level..)) +
+  geom_tile(aes(fill = percent_reduc_inf_99)) +
+  geom_contour(aes(z = Reff_99), breaks = 1, size = 0.6, col = "white") +
+  geom_contour(aes(z = Reff), breaks = 1, size = 0.6, col = "white", linetype = "longdash") +
+  scale_y_continuous(expand = c(0, 0)) +
+  scale_x_continuous(expand = c(0, 0)) +
+  ylab("Infection-acquired immunity (%)") +
+  xlab("") +# xlab("Population vaccination rate (%)") +
+  ggtitle("Weekly testing, 99% compliance", "% reduction in infections due to testing") +
+  scale_fill_gradientn(colours = cet_pal(5, name = "inferno"), limits = c(0, 100)) +
+  coord_fixed(1) +
+  labs(fill = "") +
+  theme(axis.title.y = element_blank(),
+        plot.title = element_blank(),
+        plot.subtitle = element_blank()) #element_text(hjust = 0.5))
+
+percentreducbiwk <- ggplot(df, aes(x = phi*100, y = psi*100)) + #, colour = ..level..)) +
+  geom_tile(aes(fill = percent_reduc_inf_biwk)) +
+  geom_contour(aes(z = Reff_biwk), breaks = 1, size = 0.6, col = "white") +
+  geom_contour(aes(z = Reff), breaks = 1, size = 0.6, col = "white", linetype = "longdash") +
+  scale_y_continuous(expand = c(0, 0)) +
+  scale_x_continuous(expand = c(0, 0)) +
+  ylab("Infection-acquired immunity (%)") +
+  xlab("") +# xlab("Population vaccination rate (%)") +
+  ggtitle("Biweekly testing, 99% compliance", "% reduction in infections due to testing") +
+  scale_fill_gradientn(colours = cet_pal(5, name = "inferno"), limits = c(0, 100)) +
+  coord_fixed(1) +
+  labs(fill = "") +
+  theme(axis.title.y = element_blank(),
+        plot.title = element_blank(),
+        plot.subtitle = element_blank()) #element_text(hjust = 0.5))
+
+percent_legend <- get_legend(percentreducbiwk)
+
+percentreduc50_baseline <- percentreduc50 + alllabels_theme + ggtitle("Weekly, 50% Compliance")
+percentreduc99_baseline <- percentreduc99 + onlyx_theme + 
+  theme(legend.position = "none") + ggtitle("Weekly, 99% Compliance") +
+  xlab("Population vaccination rate (%)")
+percentreducbiwk_baseline <- percentreducbiwk + onlyx_theme + ggtitle("Biweekly, 99% Compliance")
+
+panels <- ggarrange(percentreduc50_baseline, NULL,
+                    percentreduc99_baseline, NULL, 
+                    percentreducbiwk_baseline,
+                    nrow = 1, ncol = 5,
+                    align = "hv",
+                    widths = c(1, -0.05, 1, -0.05, 1),
+                    labels = c(" a", NA, "   b", NA,"  c"),
+                    label.y = 0.7)
+
+lay <- rbind(c(1, 2))
+
+fig6 <- arrangeGrob(panels, percent_legend, layout_matrix = lay,
+                    widths = c(3, 0.5), 
+                    left = c("Infection-acquired immunity (%)"))
+
+ggsave("Fig6.pdf", fig6, device = cairo_pdf, width = 8, height = 5)
 ggsave("suppFig5.svg", fig5, device = svg, width = 8, height = 5)
