@@ -45,6 +45,7 @@ mylightgreen <- "#7EB87A"
 
 theta99_purple <- "#CC069B"
 theta50_purple <- "#8C126E"
+thetabiwk_purple <- "#FF7ADE"
 
 nolabels_theme <- theme(axis.title.x =element_blank(),
                         axis.text.x = element_blank(),
@@ -103,17 +104,14 @@ ext_forcing <- 1 # ~ amount of daily imported cases
 R0 <- 4
 alpha <- R0*gamma/N # transmissibility
 
-this_X_S <- 0.35 # Altarawneh. Gardner 2021 
-this_X_I <- 0.05 # Altarawneh, Gardner 2021
+this_X_S <- 0.63 
+this_X_I <- 0.13
 
-baseline_VE_S <- 0.35 # best guess from lots of sources including Gardner 
-baseline_VE_I <- 0.05  # best guess from lots of sources including Eyre (UK) 
+baseline_VE_S <- 0.65 # best guess from lots of sources including Gardner 
+baseline_VE_I <- 0.35  # best guess from lots of sources including Eyre (UK) 
 
 baseline_H_S <- (1-this_X_S)*baseline_VE_S + this_X_S  # 0.87 for baseline scenario
 baseline_H_I <- (1-this_X_I)*baseline_VE_I + this_X_I  # 0.43 for baseline scenario
-
-#baseline_H_S <- max(c(baseline_VE_S,this_X_S))  
-#baseline_H_I <- max(c(baseline_VE_I,this_X_I))
 
 # set default params as the baseline scenario
 this_VE_S <- baseline_VE_S
@@ -123,22 +121,42 @@ this_H_S <- baseline_H_S
 this_H_I <- baseline_H_I
 
 # VE Uncertainty parameters
-boosted_VE_S <- 0.5
-boosted_VE_I <- 0.1
-boosted_H_S <- (1-this_X_S)*boosted_VE_S + this_X_S
-boosted_H_I <- (1-this_X_I)*boosted_VE_I + this_X_I
+boosted_VE_S <- 0.8
+boosted_VE_I <- 0.6
+boosted_H_S <- (1-this_X_S)*boosted_VE_S + this_X_S  # 0.87 for baseline scenario
+boosted_H_I <- (1-this_X_I)*boosted_VE_I + this_X_I  # 0.43 for baseline scenario
 
-low_VE_S <- 0.1
-low_VE_I <- 0.0
-low_H_S <- (1-this_X_S)*low_VE_S + this_X_S
-low_H_I <- (1-this_X_I)*low_VE_I + this_X_I
+low_VE_S <- 0.5
+low_VE_I <- 0.1
+low_H_S <- (1-this_X_S)*low_VE_S + this_X_S  # 0.87 for baseline scenario
+low_H_I <- (1-this_X_I)*low_VE_I + this_X_I  # 0.43 for baseline scenario
+
+# Omicron-specific parameters
+omicron_X_S <- 0.35 # Altarawneh. Gardner 2021 
+omicron_X_I <- 0.05 # Altarawneh, Gardner 2021
+
+omicron_VE_S <- 0.35 # Gardner 
+omicrom_VE_I <- 0.05 # Gardner
+omicron_H_S <-0.5
+omicron_H_I <-0.1
+
+omicron_boosted_VE_S <- 0.5
+omicron_boosted_VE_I <- 0.1
+omicron_boosted_H_S <- 0.6
+omicron_boosted_H_I <- 0.15
+
+omicron_low_VE_S <- 0.1
+omicron_low_VE_I <- 0.0
+omicron_low_H_S <- 0.4
+omicron_low_H_I <- 0.05
 
 # _____________________________________________________________________
 # Testing parameters ####
 # weekly testing, PCR, ref: Larremore 2021
 # _____________________________________________________________________
-theta_99 <- 0.473 # 99% compliance 
-theta_50 <- 0.242 # 50% compliance
+theta_99 <- 0.473 # 99% compliance once weekly 
+theta_50 <- 0.242 # 50% compliance once weekly
+theta_99_biwk <- 0.808 # 99% compliance twice weekly
 
 high_compliance <- 0.99
 low_compliance <- 0.50
