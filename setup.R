@@ -136,7 +136,7 @@ omicron_X_S <- 0.35 # Altarawneh. Gardner 2021
 omicron_X_I <- 0.05 # Altarawneh, Gardner 2021
 
 omicron_VE_S <- 0.35 # Gardner 
-omicrom_VE_I <- 0.05 # Gardner
+omicron_VE_I <- 0.05 # Gardner
 omicron_H_S <-0.5
 omicron_H_I <-0.1
 

@@ -298,11 +298,7 @@ phi_vec <- seq(0.5, 1, by = 0.01)
 psi_vec <- seq(0, 1, by = 0.01)
 
 for (i in 1){
-
-  baseline_VE_I = this_VE_I
-  baseline_H_I = this_H_I
-  baseline_VE_S = this_VE_S
-  baseline_H_S = this_H_S
+  
   baseline_df <- expand.grid(phi = phi_vec, psi = psi_vec)
   baseline_df$breakthroughs_notesting <- NA
   baseline_df$breakthroughs_99 <- NA
@@ -330,10 +326,6 @@ for (i in 1){
   lowVE_df$v_transmission_50 <- NA
   lowVE_df$VE <- "low"
   
-  omicron_VE_I = this_VE_I
-  omicron_H_I = this_H_I
-  omicron_VE_S = this_VE_S
-  omicron_H_S = this_H_S
   omicron_df <- expand.grid(phi = phi_vec, psi = psi_vec)
   omicron_df$breakthroughs_notesting <- NA
   omicron_df$breakthroughs_99 <- NA
@@ -765,4 +757,4 @@ fig7 <- ggarrange(p_inf_transition, NULL, p_trnsmsn_transition, NULL,
                   align = "hv")
 fig7
 
-ggsave("Fig7.pdf", fig7, device = cairo_pdf, width = 6.5, height = 3.5)
+ggsave("SuppFig7.pdf", fig7, device = cairo_pdf, width = 6.5, height = 3.5)

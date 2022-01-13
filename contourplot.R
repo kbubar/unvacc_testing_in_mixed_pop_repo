@@ -17,8 +17,8 @@ source("setup.R")
 
 # or run the model 
 ptm <- proc.time()
-phi_vec <- seq(0, 1, by = 0.05) # fine grid : by = 0.01 (~20 min)
-psi_vec <- seq(0, 1, by = 0.05)
+phi_vec <- seq(0, 1, by = 0.01) # fine grid : by = 0.01 (~20 min)
+psi_vec <- seq(0, 1, by = 0.01)
 df <- expand.grid(phi = phi_vec, psi = psi_vec)
 
 df$Reff <- NA
@@ -154,9 +154,10 @@ print(paste0("Transmission transition point: ",min(transmission_transitions$phi)
 # _____________________________________________________________________
 
 # Same df as figure 2
-baselinedf <- readRDS("df_fig2_setupparams.RData")
-waningdf <- readRDS("df_fig2_waning.RData")
+baselinedf <- readRDS("df_fig2_baseline.RData")
+waningdf <- readRDS("df_fig2_waning (1).RData")
 boosteddf <- readRDS("df_fig2_boosted.RData")
+omicrondf <- readRDS("df_fig2_omicron.RData")
 
 # _____________________________________________________________________
 #* II: Plot fig3 ####
@@ -200,10 +201,24 @@ p_boosted <- ggplot(boosteddf, aes(x = phi*100, y = psi*100))+ #, colour = ..lev
   theme(legend.position = "none", 
         axis.title.y = element_blank()) 
 
-fig3 <- ggarrange(p_waning, p_baseline, p_boosted,
+p_omicron <- ggplot(omicrondf, aes(x = phi*100, y = psi*100))+ #, colour = ..level..)) + 
+  geom_contour(aes(z = dom_transmission), breaks = 50, size = my_linesize, color = mydarkgreen) +
+  geom_contour(aes(z = breakthrough), breaks = 50, size = my_linesize, color = mylightgreen) +
+  geom_contour(aes(z = Reff),breaks = 1, size = my_linesize, color = "black") +
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 100)) +
+  scale_x_continuous(expand = c(0, 0), limits = c(0, 100)) +
+  ylab("") +
+  xlab("Population vaccination rate (%)") + 
+  ggtitle("Plausible Omicron") +
+  coord_fixed(1) + 
+  theme(legend.position = "none", 
+        axis.title.y = element_blank()) 
+
+fig3 <- ggarrange(p_waning, p_baseline, p_boosted, p_omicron,NULL,
                      nrow = 1,
                      align = "hv",
-                     labels = c("a", "b", "c"))
+                     labels = c("a", "b", "c", "d",NULL),
+                     widths = c(1,1,1,1,0.1))
 
 ggsave("Fig3.pdf", fig3, device = cairo_pdf, width = 10, height = 3)
 ggsave("Fig3.svg", fig3, device = svg, width = 10, height = 3)
@@ -361,9 +376,9 @@ ggsave("suppFig5.svg", fig5, device = svg, width = 8, height = 5)
 
 
 # _____________________________________________________________________
-# FIGURE 6: ####
+# FIGURE 6: #### -- for omicron
 # Total infections averted and percent reduction in infections for 
-# baseline omicron scenarios assuming three testing
+# baseline OMICRON scenarios assuming three testing
 # scenarios (weekly 50% and 99% compliance, twice weekly 99% compliance)
 #
 #*
@@ -401,11 +416,6 @@ df$totinfections_notesting <- NA
 df$totinfections_99 <- NA
 df$totinfections_50 <- NA
 df$totinfections_biwk <- NA
-
-this_VE_I <- baseline_VE_I
-this_VE_S <- baseline_VE_S
-this_H_I  <- baseline_H_I
-this_H_S  <- baseline_H_S
 
 for (i in 1:dim(df)[1]){
   df$Reff[i] <- compute_Reff(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S,
@@ -525,5 +535,5 @@ fig6 <- arrangeGrob(panels, percent_legend, layout_matrix = lay,
                     widths = c(3, 0.5), 
                     left = c("Infection-acquired immunity (%)"))
 
-ggsave("Fig6.pdf", fig6, device = cairo_pdf, width = 8, height = 5)
-ggsave("suppFig5.svg", fig5, device = svg, width = 8, height = 5)
+ggsave("suppFig6.pdf", fig6, device = cairo_pdf, width = 8, height = 5)
+ggsave("suppFig6.svg", fig6, device = svg, width = 8, height = 5)
