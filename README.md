@@ -1,16 +1,23 @@
 # Transmission and unvaccinated-only testing in populations of mixed vaccination status
 Github repo associated with the manuscript "Transmission and Unvaccinated-Only Testing in Populations of Mixed Vaccination Status"
 
+## Dependencies:
+R version 4.1.0 or higher is required. All package dependents can be found in **setup.R**. For initial font install, see line 13. 
+To install packages, use command 'install.packages("package_name")'. Installation of all dependencies will take approximately 1.5 hours.
+
 ## Code layout:
 
-setup.R - loads packages, plotting functions and initializes all the default parameter settings.
+**setup.R** loads packages, plotting functions, and initializes all the default parameter settings.
 
-main.R - calls set_up.R to initialize everything. Runs the model and generates the main text figures and table.
+**main.R** calls set_up.R to initialize everything. Runs the model and generates the main text figures and table.
 
-suppfig.R - runs the model and generates the supplemental figures.
+**suppfig.R** runs the model and generates the supplemental figures.
 
-helper_functions.R - defines functions used in main.R and suppfig.R.
+**helper_functions.R** defines functions used in main.R and suppfig.R.
 
+## Demo:
+Dataframes for each figure are included in the repository. To replicate manuscript figures, load dataframes using the 'readRDS(filename.RData)' command, then executre the following figure code. 
+Finely detailed contour plot data will take approximately 12 hours to generate on a standard machine. To improve runtime, increase the step size on lines 20 and 21 in **countourplot.R** with 'by=0.05'.
 
 
 ## Notes:
