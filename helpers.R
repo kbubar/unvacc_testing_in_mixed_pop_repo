@@ -69,13 +69,21 @@ calculate_derivatives_leaky <- function(t, x, parameters){
     dE_x  <- -dS_x - sigma*E_x
     dE_u  <- -dS_u - sigma*E_u
     
-    dI_v  <- sigma*E_v - gamma*I_v 
-    dI_h  <- sigma*E_h - gamma*I_h 
+    if (testing_everyone){
+      dI_v  <- sigma*E_v - (gamma/(1-theta))*I_v
+      dI_h  <- sigma*E_h - (gamma/(1-theta))*I_h
+      dR_v  <- (gamma/(1-theta))*I_v
+      dR_h  <- (gamma/(1-theta))*I_h
+    } else {
+      dI_v  <- sigma*E_v - gamma*I_v 
+      dI_h  <- sigma*E_h - gamma*I_h
+      dR_v  <- gamma*I_v
+      dR_h  <- gamma*I_h
+    }
+    
     dI_x  <- sigma*E_x - (gamma/(1-theta))*I_x
     dI_u  <- sigma*E_u - (gamma/(1-theta))*I_u
-    
-    dR_v  <- gamma*I_v
-    dR_h  <- gamma*I_h
+  
     dR_x  <- (gamma/(1-theta))*I_x 
     dR_u  <- (gamma/(1-theta))*I_u 
     
@@ -272,7 +280,12 @@ compute_Reff <- function(phi, VE_I, VE_S, theta=0, q=0, psi=0, X_I=0, X_S=0, H_I
                 byrow = TRUE)
   
   D_susceptibility <- diag(c(alpha*(1-VE_S), alpha*(1-H_S), alpha*(1-X_S), alpha))
-  D_infectiousness <- diag(c((1-VE_I)/gamma, (1-H_I)/gamma, (1-X_I)*(1-theta)/gamma, (1-theta)/gamma))
+  
+  if (testing_everyone){
+    D_infectiousness <- diag(c((1-VE_I)*(1-theta)/gamma, (1-H_I)*(1-theta)/gamma, (1-X_I)*(1-theta)/gamma, (1-theta)/gamma))
+  } else {
+    D_infectiousness <- diag(c((1-VE_I)/gamma, (1-H_I)/gamma, (1-X_I)*(1-theta)/gamma, (1-theta)/gamma))
+  }
   
   NGM <- D_susceptibility %*% C %*% D_infectiousness
   eigs <- eigen(NGM)$values

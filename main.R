@@ -1,11 +1,14 @@
-# Main.R - runs SEIR model and generates main text figures and table
+# Main.R - runs SEIR model
+#        - generates main text line figures (fig 1, 4, 7)
 # Written by: Kate Bubar and Casey Middleton
 
-# setup.R works correctly if you've already installed fonts. if not, go to setup.R line 13.
+# setup.R works correctly if you've already installed fonts. if not, go to setup.R line 22.
 source("setup.R")
 
+testing_everyone <- 0 # if 0, just testing unvacc. when implementing testing
+
 # _____________________________________________________________________
-# FIG1 - infections with no testing ####
+# FIGURE 1 - infections with no testing ####
 # _____________________________________________________________________
 # for loop to run fig 1
 for (i in 1){
@@ -24,7 +27,7 @@ for (i in 1){
     ylab("Infected (#)") +
     xlab("Time (days)") +
     scale_x_continuous(expand = c(0, 0), limits = c(0, 200)) +
-    scale_y_continuous(expand = c(0, 0), limits = c(0, 2750)) + # 2500 for R0 = 6
+    scale_y_continuous(expand = c(0, 0), limits = c(0, 1000)) + # 2500 for R0 = 6
     onlyy_theme
 
   #*  Panel D - transmission mode over time (i.e. who caused new daily cases) ####
@@ -52,7 +55,7 @@ for (i in 1){
     ylab("New daily infections (#) ") +
     xlab("Time (days)") +
     scale_x_continuous(expand = c(0, 0), limits = c(0, 200)) +
-    scale_y_continuous(expand = c(0, 0), limits = c(0, 170)) + # C(0, 200) for R0 = 6
+    scale_y_continuous(expand = c(0, 0), limits = c(0, 80)) + # C(0, 200) for R0 = 6
     alllabels_theme
 
   #* Panel C - total infections and breakthrough cases over phi ####
@@ -142,7 +145,7 @@ for (i in 1){
   E <- E + geom_vline(xintercept = trans_transition, alpha = 1, linetype = "dashed", size = 0.5, col = mydarkgreen)
 }
 
-# export as cairo_pdf,8x5.5in
+# export as cairo_pdf,7x5.5in
 ggarrange(NULL, NULL, NULL, NULL,
           B, NULL, C, NULL,
           NULL, NULL, NULL, NULL,
@@ -158,12 +161,11 @@ ggarrange(NULL, NULL, NULL, NULL,
           heights = c(0.05, 1, -0.1, 1),
           label.y = 1.04)
 
-# ggsave("Fig1.pdf", device = cairo_pdf, width = 8, height = 5.5)
 ggsave("Fig1.pdf", device = cairo_pdf, width = 7, height = 5.5)
 
 
 # _____________________________________________________________________
-# Fig 4 - giving intuition about testing's impact across vaccination rates #####
+# FIGURE 4 - giving intuition about the impact of testing across vaccination rates #####
 # Three time-series plots for regions 1, 2, and 3 with and without testing
 # Reff with and without testing over phi
 # _____________________________________________________________________
@@ -172,102 +174,101 @@ notesting_theta <- 0 # no testing scenario
 testing_theta <- theta_99
 this_q <- 0 # well-mixed
 
-for (i in 1){
-df <- data.frame(time = t)
-
-#* Panel A - infected over time for phi = 0.2 ####
-this_phi <- 0.25
-
-df_notesting_reg1 <- run_leaky_model(this_phi, this_VE_I, this_VE_S, notesting_theta, this_q,
-                        psi = this_psi, X_I = this_X_I, X_S = this_X_S,
-                        H_I = this_H_I, H_S = this_H_S)
-df$notesting_reg1 <- df_notesting_reg1$I_v + df_notesting_reg1$I_u + df_notesting_reg1$I_x + df_notesting_reg1$I_h
-
-df_testing_reg1 <- run_leaky_model(this_phi, this_VE_I, this_VE_S, testing_theta, this_q,
+for (i in 1) {
+  df <- data.frame(time = t)
+  
+  #* Panel A - infected over time for phi = 0.2 ####
+  this_phi <- 0.25
+  
+  df_notesting_reg1 <- run_leaky_model(this_phi, this_VE_I, this_VE_S, notesting_theta, this_q,
+                                       psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                                       H_I = this_H_I, H_S = this_H_S)
+  df$notesting_reg1 <- df_notesting_reg1$I_v + df_notesting_reg1$I_u + df_notesting_reg1$I_x + df_notesting_reg1$I_h
+  
+  df_testing_reg1 <- run_leaky_model(this_phi, this_VE_I, this_VE_S, testing_theta, this_q,
                                      psi = this_psi, X_I = this_X_I, X_S = this_X_S,
                                      H_I = this_H_I, H_S = this_H_S)
-df$testing_reg1 <- df_testing_reg1$I_v + df_testing_reg1$I_u + df_testing_reg1$I_x + df_testing_reg1$I_h
-
-A <- ggplot(df, aes(x = time)) +
-  geom_line(aes(y = testing_reg1), col = theta99_purple, size = my_linesize) +
-  geom_line(aes(y = notesting_reg1), col = "black", size = my_linesize) +
-  ylab("Infected (#)") +
-  xlab("Time (days)") +
-  scale_x_continuous(expand = c(0, 0), limits = c(0, 250)) +
-  scale_y_continuous(expand = c(0, 0), limits = c(0, 2500)) + # 2500 for R0 = 6
-  alllabels_theme
-
-#* Panel B - infected over time for phi = 0.75 ####
-this_phi <- 0.75
-
-df_notesting_reg2 <- run_leaky_model(this_phi, this_VE_I, this_VE_S, notesting_theta, this_q,
+  df$testing_reg1 <- df_testing_reg1$I_v + df_testing_reg1$I_u + df_testing_reg1$I_x + df_testing_reg1$I_h
+  
+  A <- ggplot(df, aes(x = time)) +
+    geom_line(aes(y = testing_reg1), col = theta99_purple, size = my_linesize) +
+    geom_line(aes(y = notesting_reg1), col = "black", size = my_linesize) +
+    ylab("Infected (#)") +
+    xlab("Time (days)") +
+    scale_x_continuous(expand = c(0, 0), limits = c(0, 250)) +
+    scale_y_continuous(expand = c(0, 0), limits = c(0, 2500)) + # 2500 for R0 = 6
+    alllabels_theme
+  
+  #* Panel B - infected over time for phi = 0.75 ####
+  this_phi <- 0.75
+  
+  df_notesting_reg2 <- run_leaky_model(this_phi, this_VE_I, this_VE_S, notesting_theta, this_q,
+                                       psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                                       H_I = this_H_I, H_S = this_H_S)
+  df$notesting_reg2 <- df_notesting_reg2$I_v + df_notesting_reg2$I_u + df_notesting_reg2$I_x + df_notesting_reg2$I_h
+  
+  df_testing_reg2 <- run_leaky_model(this_phi, this_VE_I, this_VE_S, testing_theta, this_q,
                                      psi = this_psi, X_I = this_X_I, X_S = this_X_S,
                                      H_I = this_H_I, H_S = this_H_S)
-df$notesting_reg2 <- df_notesting_reg2$I_v + df_notesting_reg2$I_u + df_notesting_reg2$I_x + df_notesting_reg2$I_h
-
-df_testing_reg2 <- run_leaky_model(this_phi, this_VE_I, this_VE_S, testing_theta, this_q,
-                                   psi = this_psi, X_I = this_X_I, X_S = this_X_S,
-                                   H_I = this_H_I, H_S = this_H_S)
-df$testing_reg2 <- df_testing_reg2$I_v + df_testing_reg2$I_u + df_testing_reg2$I_x + df_testing_reg2$I_h
-
-B <- ggplot(df, aes(x = time)) +
-  geom_line(aes(y = testing_reg2), col = theta99_purple, size = my_linesize) +
-  geom_line(aes(y = notesting_reg2), col = "black", size = my_linesize) +
-  ylab("Infected (#)") +
-  xlab("Time (days)") +
-  scale_x_continuous(expand = c(0, 0), limits = c(0, 250)) +
-  scale_y_continuous(expand = c(0, 0), limits = c(0, 2500)) +
-  onlyx_theme
-
-
-#* Panel C - infected over time for phi = 0.95 ####
-this_phi <- 0.95
-
-df_notesting_reg3 <- run_leaky_model(this_phi, this_VE_I, this_VE_S, notesting_theta, this_q,
+  df$testing_reg2 <- df_testing_reg2$I_v + df_testing_reg2$I_u + df_testing_reg2$I_x + df_testing_reg2$I_h
+  
+  B <- ggplot(df, aes(x = time)) +
+    geom_line(aes(y = testing_reg2), col = theta99_purple, size = my_linesize) +
+    geom_line(aes(y = notesting_reg2), col = "black", size = my_linesize) +
+    ylab("Infected (#)") +
+    xlab("Time (days)") +
+    scale_x_continuous(expand = c(0, 0), limits = c(0, 250)) +
+    scale_y_continuous(expand = c(0, 0), limits = c(0, 2500)) +
+    onlyx_theme
+  
+  
+  #* Panel C - infected over time for phi = 0.95 ####
+  this_phi <- 0.95
+  
+  df_notesting_reg3 <- run_leaky_model(this_phi, this_VE_I, this_VE_S, notesting_theta, this_q,
+                                       psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                                       H_I = this_H_I, H_S = this_H_S)
+  df$notesting_reg3 <- df_notesting_reg3$I_v + df_notesting_reg3$I_u + df_notesting_reg3$I_x + df_notesting_reg3$I_h
+  
+  df_testing_reg3 <- run_leaky_model(this_phi, this_VE_I, this_VE_S, testing_theta, this_q,
                                      psi = this_psi, X_I = this_X_I, X_S = this_X_S,
                                      H_I = this_H_I, H_S = this_H_S)
-df$notesting_reg3 <- df_notesting_reg3$I_v + df_notesting_reg3$I_u + df_notesting_reg3$I_x + df_notesting_reg3$I_h
-
-df_testing_reg3 <- run_leaky_model(this_phi, this_VE_I, this_VE_S, testing_theta, this_q,
-                                   psi = this_psi, X_I = this_X_I, X_S = this_X_S,
-                                   H_I = this_H_I, H_S = this_H_S)
-df$testing_reg3 <- df_testing_reg3$I_v + df_testing_reg3$I_u + df_testing_reg3$I_x + df_testing_reg3$I_h
-
-C <- ggplot(df, aes(x = time)) +
-  geom_line(aes(y = testing_reg3), col = theta99_purple, size = my_linesize) +
-  geom_line(aes(y = notesting_reg3), col = "black", size = my_linesize) +
-  ylab("Infected (#)") +
-  xlab("Time (days)") +
-  scale_x_continuous(expand = c(0, 0), limits = c(0, 250)) +
-  scale_y_continuous(expand = c(0, 0), limits = c(0, 2500)) +
-  onlyx_theme
-
-#* Panel D - Reff over phi ####
-df <- data.frame(phi = phi_vec)
-
-df$Reff_notesting <- sapply(phi_vec, compute_Reff,
-                  VE_I = this_VE_I, VE_S = this_VE_S,
-                  theta = notesting_theta, q = this_q,
-                  psi = this_psi, X_I = this_X_I, X_S = this_X_S,
-                  H_I = this_H_I, H_S = this_H_S)
-
-df$Reff_testing <- sapply(phi_vec, compute_Reff,
+  df$testing_reg3 <- df_testing_reg3$I_v + df_testing_reg3$I_u + df_testing_reg3$I_x + df_testing_reg3$I_h
+  
+  C <- ggplot(df, aes(x = time)) +
+    geom_line(aes(y = testing_reg3), col = theta99_purple, size = my_linesize) +
+    geom_line(aes(y = notesting_reg3), col = "black", size = my_linesize) +
+    ylab("Infected (#)") +
+    xlab("Time (days)") +
+    scale_x_continuous(expand = c(0, 0), limits = c(0, 250)) +
+    scale_y_continuous(expand = c(0, 0), limits = c(0, 2500)) +
+    onlyx_theme
+  
+  #* Panel D - Reff over phi ####
+  df <- data.frame(phi = phi_vec)
+  
+  df$Reff_notesting <- sapply(phi_vec, compute_Reff,
+                              VE_I = this_VE_I, VE_S = this_VE_S,
+                              theta = notesting_theta, q = this_q,
+                              psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                              H_I = this_H_I, H_S = this_H_S)
+  
+  df$Reff_testing <- sapply(phi_vec, compute_Reff,
                             VE_I = this_VE_I, VE_S = this_VE_S,
                             theta = testing_theta, q = this_q,
                             psi = this_psi, X_I = this_X_I, X_S = this_X_S,
                             H_I = this_H_I, H_S = this_H_S)
-
-D <- ggplot(df, aes(x = phi*100)) +
-  geom_line(aes(y = Reff_testing), col = theta99_purple, size = my_linesize) +
-  geom_line(aes(y = Reff_notesting), col = "black", size = my_linesize) +
-  geom_line(aes(y = 1), col = mylightgray, linetype = "dashed", size = my_linesize) +
-  ylab(expression(R[eff])) +
-  xlab("Population vaccination rate (%)") +
-  scale_x_continuous(expand = c(0, 0), limits = c(0, 100)) +
-  scale_y_continuous(expand = c(0, 0), limits = c(0, 3.5)) +
-  alllabels_theme
+  
+  D <- ggplot(df, aes(x = phi*100)) +
+    geom_line(aes(y = Reff_testing), col = theta99_purple, size = my_linesize) +
+    geom_line(aes(y = Reff_notesting), col = "black", size = my_linesize) +
+    geom_line(aes(y = 1), col = mylightgray, linetype = "dashed", size = my_linesize) +
+    ylab(expression(R[eff])) +
+    xlab("Population vaccination rate (%)") +
+    scale_x_continuous(expand = c(0, 0), limits = c(0, 100)) +
+    scale_y_continuous(expand = c(0, 0), limits = c(0, 3.5)) +
+    alllabels_theme
 }
-
 
 ggarrange(A, NULL, B, NULL, C, D, NULL,
           labels = c("a",NA,"     b",NA,"     c","  d",NA),
