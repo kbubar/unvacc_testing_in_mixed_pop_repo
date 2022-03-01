@@ -300,7 +300,49 @@ compute_tot_infections <- function(phi, VE_I, VE_S, theta = 0, q = 0, psi=0, X_I
   
   tot_infections <- lastrow$R_v + lastrow$R_h + lastrow$R_x + lastrow$R_u  - 
                     df$E_v[1] - df$E_h[1] - df$E_x[1] - df$E_u[1] -
-                    df$I_v[1] - df$I_h[1] - df$I_x[1] - df$I_v[1] 
+                    df$I_v[1] - df$I_h[1] - df$I_x[1] - df$I_u[1] 
+}
+
+compute_tot_hospitalizations <- function(phi, VE_I, VE_S, VE_P, infection_hosp_rate, theta = 0, q = 0, psi=0, X_I=0, X_S=0, X_P = 0, H_I=0, H_S=0, H_P = 0){
+  # OUTPUT: total number of infections at t_final (recovered - IC) including infections caused by external forcing
+  df <- run_leaky_model(phi, VE_I, VE_S, theta, q, psi, X_I, X_S, H_I, H_S)
+  lastrow <- df[length(df$R_v),]
+  
+  u_infections <- lastrow$R_u  - df$E_u[1] - df$I_u[1]
+  x_infections <- lastrow$R_x - df$E_x[1] - df$I_x[1]
+  v_infections <- lastrow$R_v - df$E_v[1] - df$I_v[1]
+  h_infections <- lastrow$R_h - df$E_h[1] - df$I_h[1]
+  
+  u_hosp <- u_infections*infection_hosp_rate
+  x_hosp <- x_infections*infection_hosp_rate*(1-X_P)
+  v_hosp <- v_infections*infection_hosp_rate*(1-VE_P)
+  h_hosp <- h_infections*infection_hosp_rate*(1-H_P)
+  
+  tot_hosp <- sum(u_hosp, x_hosp, v_hosp, h_hosp)
+}
+
+compute_hospitalizations <- function(phi, VE_I, VE_S, VE_P, infection_hosp_rate, theta = 0, q = 0, psi=0, X_I=0, X_S=0, X_P = 0, H_I=0, H_S=0, H_P = 0){
+  # OUTPUT: total number of infections at t_final (recovered - IC) including infections caused by external forcing
+  df <- run_leaky_model(phi, VE_I, VE_S, theta, q, psi, X_I, X_S, H_I, H_S)
+  lastrow <- df[length(df$R_v),]
+  
+  u_infections <- lastrow$R_u  - df$E_u[1] - df$I_u[1]
+  x_infections <- lastrow$R_x - df$E_x[1] - df$I_x[1]
+  v_infections <- lastrow$R_v - df$E_v[1] - df$I_v[1]
+  h_infections <- lastrow$R_h - df$E_h[1] - df$I_h[1]
+  
+  u_hosp <- u_infections*infection_hosp_rate
+  x_hosp <- x_infections*infection_hosp_rate*(1-X_P)
+  v_hosp <- v_infections*infection_hosp_rate*(1-VE_P)
+  h_hosp <- h_infections*infection_hosp_rate*(1-H_P)
+  
+  tot_hosp <- sum(u_hosp, x_hosp, v_hosp, h_hosp)
+  
+  list(tot_hosp = tot_hosp, 
+       u_hosp = u_hosp,
+       x_hosp = x_hosp, 
+       v_hosp = v_hosp, 
+       h_hosp = h_hosp)
 }
 
 compute_percent_breakthrough_infections <- function(phi, VE_I, VE_S, theta = 0, q = 0, 
@@ -311,10 +353,19 @@ compute_percent_breakthrough_infections <- function(phi, VE_I, VE_S, theta = 0, 
   
   tot_infections <- lastrow$R_v + lastrow$R_h + lastrow$R_x + lastrow$R_u  - 
     df$E_v[1] - df$E_h[1] - df$E_x[1] - df$E_u[1] -
-    df$I_v[1] - df$I_h[1] - df$I_x[1] - df$I_v[1]
+    df$I_v[1] - df$I_h[1] - df$I_x[1] - df$I_u[1]
   
   tot_v_infections <- lastrow$R_v + lastrow$R_h - df$E_v[1] - df$E_h[1] - df$I_v[1] - df$I_h[1]
   percent_breakthrough_infections <- tot_v_infections/tot_infections*100
+}
+
+compute_percent_breakthrough_hosp <- function(phi, VE_I, VE_S, VE_P, infection_hosp_rate, theta = 0, q = 0, psi=0,
+                                              X_I=0, X_S=0, X_P = 0, H_I=0, H_S=0, H_P = 0){
+  # OUTPUT: percent of total hosp in the vaccinated population
+  list_hosp <- compute_hospitalizations(phi, VE_I, VE_S, VE_P, infection_hosp_rate)
+  
+  tot_v_infections <- list_hosp$v_hosp + list_hosp$h_hosp
+  percent_breakthrough_infections <- tot_v_infections/list_hosp$tot_hosp*100
 }
 
 compute_u_infections <- function(phi, VE_I, VE_S, theta = 0, q = 0,
@@ -331,8 +382,8 @@ compute_v_infections <- function(phi, VE_I, VE_S, theta = 0, q = 0,
   df <- run_leaky_model(phi, VE_I, VE_S, theta, q, psi, X_I, X_S, H_I, H_S)
   lastrow <- df[length(df$R_v),]
   tot_v_infections <- lastrow$R_v + lastrow$R_h - df$E_v[1] - df$E_h[1] - df$I_v[1] - df$I_h[1]
-  tot_u_infections <- lastrow$R_x + lastrow$R_u - df$E_x[1] - df$E_u[1] - df$I_x[1] - df$I_u[1]
-  pct_v <- tot_v_infections / (tot_v_infections + tot_u_infections)
+  #tot_u_infections <- lastrow$R_x + lastrow$R_u - df$E_x[1] - df$E_u[1] - df$I_x[1] - df$I_u[1]
+  #pct_v <- tot_v_infections / (tot_v_infections + tot_u_infections)
 }
 
 compute_num_tests <- function(phi, VE_I, VE_S, theta = 0, freq, inf_period, compliance,

@@ -106,15 +106,16 @@ alpha <- R0*gamma/N # transmissibility
 
 this_X_S <- 0.63 # ref: Gardner, infection-acquired immunity effectiveness to decrease Susceptibility to infection
 this_X_I <- 0.13 # ref: Garnder, infection-acquired immunity effectiveness to decrease Infectiousness given infection
-this_X_P <- 0.94/2  # FIXME, infection-acquired immunity effectiveness to decrease disease Progression given infection
+this_X_P <- 0.54  # infection-acquired immunity effectiveness to decrease disease progression given infection
 
 baseline_VE_S <- 0.65 # best guess from lots of sources including Gardner 
 baseline_VE_I <- 0.35  # best guess from lots of sources including Eyre (UK) 
-baseline_VE_P <- 0.94 # FIXME - IHME for now
+baseline_VE_P <- 0.86 # best guess 2/28
 
+# Hybrid immunity
 baseline_H_S <- (1-this_X_S)*baseline_VE_S + this_X_S  # 0.87 for baseline scenario
 baseline_H_I <- (1-this_X_I)*baseline_VE_I + this_X_I  # 0.43 for baseline scenario
-baseline_H_P <- 0.97 # FIXME
+baseline_H_P <- (1-this_X_P)*baseline_VE_P + this_X_P # 0.936 for baseline scenario
 
 # set default parameters as the baseline scenario
 this_VE_S <- baseline_VE_S
@@ -126,46 +127,49 @@ this_H_I <- baseline_H_I
 this_H_P <- baseline_H_P
 
 # other VE scenarios: boosted and waning VE
-boosted_VE_S <- 0.8
-boosted_VE_I <- 0.6
-boosted_VE_P <- 0.97 # FIXME
+boosted_VE_S <- 0.80
+boosted_VE_I <- 0.60
+boosted_VE_P <- 0.90 
 boosted_H_S <- (1-this_X_S)*boosted_VE_S + this_X_S  # 0.87 for baseline scenario
 boosted_H_I <- (1-this_X_I)*boosted_VE_I + this_X_I  # 0.43 for baseline scenario
-boosted_H_P <- 0.99 # FIXME
+boosted_H_P <- (1-this_X_P)*boosted_VE_P + this_X_P
   
-low_VE_S <- 0.5
-low_VE_I <- 0.1
-low_VE_P <- 0.85 # FIXME
+low_VE_S <- 0.50
+low_VE_I <- 0.10
+low_VE_P <- 0.80 
 low_H_S <- (1-this_X_S)*low_VE_S + this_X_S  # 0.87 for baseline scenario
 low_H_I <- (1-this_X_I)*low_VE_I + this_X_I  # 0.43 for baseline scenario
-low_H_P <- 0.85 #FIXME
+low_H_P <- (1-this_X_P)*low_VE_P + this_X_P
 
 # Omicron-specific parameters
 omicron_X_S <- 0.35 # Altarawneh. Gardner 2021 
 omicron_X_I <- 0.05 # Altarawneh, Gardner 2021
-omicron_X_P <- 0.5 # FIXME
+omicron_X_P <- 0.74
   
 omicron_VE_S <- 0.35 # Gardner 
 omicron_VE_I <- 0.05 # Gardner
-omicron_VE_P <- 0.5 # FIXME
-omicron_H_S <- 0.50
-omicron_H_I <- 0.10
-omicron_H_P <- 0.5 # FIXME
+omicron_VE_P <- 0.77 # Best guess 2/28
+omicron_H_S <- (1-omicron_X_S)*omicron_VE_S + omicron_X_S
+omicron_H_I <- (1-omicron_X_I)*omicron_VE_I + omicron_X_I
+omicron_H_P <- (1-omicron_X_P)*omicron_VE_P + omicron_X_P
 
-omicron_boosted_VE_S <- 0.50
-omicron_boosted_VE_I <- 0.10
-omicron_boosted_VE_P <- 0.50 # FIXME
-omicron_boosted_H_S <- 0.60
-omicron_boosted_H_I <- 0.15
-omicron_boosted_H_P <- 0.50 # FIXME
+# omicron_boosted_VE_S <- 0.50
+# omicron_boosted_VE_I <- 0.10
+# omicron_boosted_VE_P <- 0.50 # FIXME
+# omicron_boosted_H_S <- 0.60
+# omicron_boosted_H_I <- 0.15
+# omicron_boosted_H_P <- 0.50 # FIXME
+# 
+# omicron_low_VE_S <- 0.10
+# omicron_low_VE_I <- 0.0
+# omicron_low_VE_P <- 0.50 # FIXME
+# omicron_low_H_S <- 0.40
+# omicron_low_H_I <- 0.05
+# omicron_low_H_P <- 0.50 # FIXME
 
-omicron_low_VE_S <- 0.10
-omicron_low_VE_I <- 0.0
-omicron_low_VE_P <- 0.50 # FIXME
-omicron_low_H_S <- 0.40
-omicron_low_H_I <- 0.05
-omicron_low_H_P <- 0.50 # FIXME
-
+# Rate of hospitalization for unvaccinated, naive
+infection_hosp_rate_delta <- 0.02 
+infection_hosp_rate_omicron <- 0.01
 
 # _____________________________________________________________________
 # Testing parameters ####

@@ -4,6 +4,7 @@
 
 source("setup.R") 
 
+
 # _____________________________________________________________________
 # FIGURE 2: ####
 # Reff, % infections in the unvaccinated and % infections driven by the unvaccinated over phi and psi
@@ -238,7 +239,7 @@ ggsave("Fig3.svg", fig3, device = svg, width = 10, height = 3)
 # Dataframes for main text figure 5
 # waningdf <- readRDS("df_Fig5_waning.RData")
 # baselinedf <- readRDS("df_Fig5_baseline.RData")
-# boosteddf <- readRDS("df_Fig5_boosted.RData")
+boosteddf <- readRDS("df_Fig5_boosted.RData")
 
 # Dataframes for supp text figure 5 - R0 = 6
 # waningdf <- readRDS("df_suppFig5_waning_R06.RData")

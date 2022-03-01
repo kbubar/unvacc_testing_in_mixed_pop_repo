@@ -11,6 +11,7 @@ testing_everyone <- 0 # if 0, just testing unvacc. when implementing testing
 # FIGURE 1 - infections with no testing ####
 # _____________________________________________________________________
 # for loop to run fig 1
+
 for (i in 1){
   #* Panel B - infected over time ####
   this_theta <- 0 # no testing
