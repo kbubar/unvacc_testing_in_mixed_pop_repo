@@ -21,7 +21,7 @@ source("helpers.R")
 
 ## Run all these lines (14-18) if you haven't already installed fonts 
 library(remotes)
-remotes::install_version("Rttf2pt1", version = "1.3.8")
+#remotes::install_version("Rttf2pt1", version = "1.3.8")
 library(extrafont)
 # font_import()
 loadfonts(device = "pdf", quiet = TRUE) # windows
@@ -42,6 +42,10 @@ myblack <- "#252525" #really dark gray
 
 mydarkgreen <- "#355D32"
 mylightgreen <- "#7EB87A"
+
+infcolor <- "#DE0D92"
+transmcolor <- "#44AF69"
+hospcolor <- "#360568"
 
 theta99_purple <- "#CC069B"
 theta50_purple <- "#8C126E"
@@ -115,7 +119,7 @@ baseline_VE_P <- 0.86 # best guess 2/28
 # Hybrid immunity
 baseline_H_S <- (1-this_X_S)*baseline_VE_S + this_X_S  # 0.87 for baseline scenario
 baseline_H_I <- (1-this_X_I)*baseline_VE_I + this_X_I  # 0.43 for baseline scenario
-baseline_H_P <- (1-this_X_P)*baseline_VE_P + this_X_P # 0.936 for baseline scenario
+baseline_H_P <- max(baseline_VE_P, this_X_P) 
 
 # set default parameters as the baseline scenario
 this_VE_S <- baseline_VE_S
@@ -132,14 +136,14 @@ boosted_VE_I <- 0.60
 boosted_VE_P <- 0.90 
 boosted_H_S <- (1-this_X_S)*boosted_VE_S + this_X_S  # 0.87 for baseline scenario
 boosted_H_I <- (1-this_X_I)*boosted_VE_I + this_X_I  # 0.43 for baseline scenario
-boosted_H_P <- (1-this_X_P)*boosted_VE_P + this_X_P
+boosted_H_P <- max(boosted_VE_P, this_X_P)
   
-low_VE_S <- 0.50
-low_VE_I <- 0.10
-low_VE_P <- 0.80 
-low_H_S <- (1-this_X_S)*low_VE_S + this_X_S  # 0.87 for baseline scenario
-low_H_I <- (1-this_X_I)*low_VE_I + this_X_I  # 0.43 for baseline scenario
-low_H_P <- (1-this_X_P)*low_VE_P + this_X_P
+waning_VE_S <- 0.50
+waning_VE_I <- 0.10
+waning_VE_P <- 0.80 
+waning_H_S <- (1-this_X_S)*waning_VE_S + this_X_S  # 0.87 for baseline scenario
+waning_H_I <- (1-this_X_I)*waning_VE_I + this_X_I  # 0.43 for baseline scenario
+waning_H_P <- max(waning_VE_P, this_X_P)
 
 # Omicron-specific parameters
 omicron_X_S <- 0.35 # Altarawneh. Gardner 2021 
@@ -151,7 +155,7 @@ omicron_VE_I <- 0.05 # Gardner
 omicron_VE_P <- 0.77 # Best guess 2/28
 omicron_H_S <- (1-omicron_X_S)*omicron_VE_S + omicron_X_S
 omicron_H_I <- (1-omicron_X_I)*omicron_VE_I + omicron_X_I
-omicron_H_P <- (1-omicron_X_P)*omicron_VE_P + omicron_X_P
+omicron_H_P <- max(omicron_VE_P,omicron_X_P)
 
 # omicron_boosted_VE_S <- 0.50
 # omicron_boosted_VE_I <- 0.10
@@ -160,12 +164,12 @@ omicron_H_P <- (1-omicron_X_P)*omicron_VE_P + omicron_X_P
 # omicron_boosted_H_I <- 0.15
 # omicron_boosted_H_P <- 0.50 # FIXME
 # 
-# omicron_low_VE_S <- 0.10
-# omicron_low_VE_I <- 0.0
-# omicron_low_VE_P <- 0.50 # FIXME
-# omicron_low_H_S <- 0.40
-# omicron_low_H_I <- 0.05
-# omicron_low_H_P <- 0.50 # FIXME
+# omicron_waning_VE_S <- 0.10
+# omicron_waning_VE_I <- 0.0
+# omicron_waning_VE_P <- 0.50 # FIXME
+# omicron_waning_H_S <- 0.40
+# omicron_waning_H_I <- 0.05
+# omicron_waning_H_P <- 0.50 # FIXME
 
 # Rate of hospitalization for unvaccinated, naive
 infection_hosp_rate_delta <- 0.02 
@@ -180,6 +184,6 @@ theta_50 <- 0.242 # 50% compliance once weekly
 theta_99_biwk <- 0.808 # 99% compliance twice weekly
 
 high_compliance <- 0.99
-low_compliance <- 0.50
+waning_compliance <- 0.50
 
 this_freq <- 7 # weekly testing

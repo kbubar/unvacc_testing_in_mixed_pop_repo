@@ -17,11 +17,11 @@ for (i in 1){
   this_theta <- 0 # no testing
   this_q <- 0 # well-mixed
 
-  df_B <- run_leaky_model(this_phi, this_VE_I, this_VE_S, this_theta, this_q,
+  df <- run_leaky_model(this_phi, this_VE_I, this_VE_S, this_theta, this_q,
                           psi = this_psi, X_I = this_X_I, X_S = this_X_S,
                           H_I = this_H_I, H_S = this_H_S)
 
-  B <- ggplot(df_B, aes(x = time)) +
+  B <- ggplot(df, aes(x = time)) +
     geom_line(aes(y = I_v + I_h), col = mylightgray, size = my_linesize) +
     geom_line(aes(y = I_u + I_x), col = mygray, size = my_linesize, linetype = "longdash")  +
     geom_line(aes(y = I_v + I_u + I_x + I_h), col = myblack, size = my_linesize) +
@@ -29,7 +29,27 @@ for (i in 1){
     xlab("Time (days)") +
     scale_x_continuous(expand = c(0, 0), limits = c(0, 200)) +
     scale_y_continuous(expand = c(0, 0), limits = c(0, 1000)) + # 2500 for R0 = 6
-    onlyy_theme
+    alllabels_theme
+  
+  
+  #* Panel C - hospitalized over time ####
+  # Assuming an 8 day lag between infection and hospitalization
+  df$hosp_u <- NA
+  df$hosp_v <- NA
+  df$hosp_u[1:7] <- 0
+  df$hosp_v[1:7] <- 0
+  df$hosp_u[8:length(t)] <- (df$I_u[1:(length(t)-7)] + df$I_x[1:(length(t)-7)]*(1-this_X_P))*infection_hosp_rate_delta
+  df$hosp_v[8:length(t)] <- (df$I_v[1:(length(t)-7)]*(1-this_VE_P) + df$I_h[1:(length(t)-7)]*(1-this_H_P))*infection_hosp_rate_delta
+  
+  C <- ggplot(df, aes(x = time)) +
+    geom_line(aes(y = hosp_v), col = mylightgray, size = my_linesize) +
+    geom_line(aes(y = hosp_u), col = mygray, size = my_linesize, linetype = "longdash")  +
+    geom_line(aes(y = hosp_u + hosp_v), col = myblack, size = my_linesize) +
+    ylab("Hospitalized (#)") +
+    xlab("Time (days)") +
+    scale_x_continuous(expand = c(0, 0), limits = c(0, 200)) +
+    scale_y_continuous(expand = c(0, 0), limits = c(0,12.5)) + # 2500 for R0 = 6
+    alllabels_theme
 
   #*  Panel D - transmission mode over time (i.e. who caused new daily cases) ####
   df <- data.frame(time = t)
@@ -58,9 +78,13 @@ for (i in 1){
     scale_x_continuous(expand = c(0, 0), limits = c(0, 200)) +
     scale_y_continuous(expand = c(0, 0), limits = c(0, 80)) + # C(0, 200) for R0 = 6
     alllabels_theme
-
-  #* Panel C - total infections and breakthrough cases over phi ####
+  
+  
+  #* Panel E - total infections and breakthrough cases over phi ####
   df <- data.frame(phi = phi_vec)
+  baseline_inf <- compute_tot_infections(phi = 0, this_VE_I, this_VE_S, this_theta, this_q,
+                                         psi = this_psi, X_I = this_X_I, X_S = this_X_S,
+                                         H_I = this_H_I, H_S = this_H_S )
   df$tot_infections <- sapply(phi_vec, compute_tot_infections,
                               VE_I = this_VE_I, VE_S = this_VE_S,
                               theta = this_theta, q = this_q,
@@ -78,32 +102,79 @@ for (i in 1){
                             theta = this_theta, q = this_q,
                             psi = this_psi, X_I = this_X_I, X_S = this_X_S,
                             H_I = this_H_I, H_S = this_H_S)
-
-  C <- ggplot(df, aes(x=phi*100)) +
+  
+  E <- ggplot(df, aes(x=phi*100)) +
     geom_line(aes(y=breakthrough), col = mylightgray, size = my_linesize) +
-    geom_line(aes(y=tot_infections/N*100), col = myblack, size = my_linesize) +
+    geom_line(aes(y=tot_infections/baseline_inf*100), col = myblack, size = my_linesize) +
     ylab("Percentage") +#"Total infected (%)") +
-    xlab("Population vaccination rate (%)") +
+    xlab("Population vacc. rate (%)") +
     scale_y_continuous(expand = c(0, 0), limits = c(0, 100)) +
                        # sec.axis = sec_axis(~., name="Breakthrough infections (%)")) +
     scale_x_continuous(expand = c(0, 0)) +
-    theme(axis.title.y.right = element_text(color = mylightgray),
-          axis.title.y.left = element_text(color = myblack),
-          axis.title.x.bottom = element_blank(),
-          axis.text.x.bottom = element_blank(),
+    alllabels_theme +
+    theme(#axis.title.y.right = element_text(color = mylightgray),
+          #axis.title.y.left = element_text(color = myblack),
+          #axis.title.x.bottom = element_blank(),
+          #axis.text.x.bottom = element_blank(),
           plot.margin=unit(c(6, 2, 5.5, 2), "pt")) # top, right, bottom, left
 
   Reff_1 <- min(which(df$Reff <= 1),500) - 1
   if (Reff_1 <= 100){
     # C <- C + geom_vline(xintercept = Reff_1, alpha = 0.5, linetype = "dashed", size = 0.5)
-    C <- C + geom_point(aes(x = Reff_1, y = 0), shape = 20, size = 0.4)
+    E <- E + geom_point(aes(x = Reff_1, y = 0), shape = 20, size = 0.4)
   }
   inf_transition <- min(which(df$breakthrough >= 50)) - 1
-  C <- C + geom_vline(xintercept = inf_transition, alpha = 1, linetype = "dashed", size = 0.5, col = mylightgreen)
+  E <- E + geom_vline(xintercept = inf_transition, alpha = 1, linetype = "dashed", size = 0.5, col = infcolor)
 
   print(paste0("Percentage of infections in unvaccinated population with 58% vaccination rate: ",100-df[df$phi==0.58,]$breakthrough))
 
-  #* Panel E - cumulative transmission mode over phi ####
+  #* Panel F - total infections and breakthrough cases over phi ####
+  baseline_hosp <- compute_tot_hospitalizations(phi = 0, this_VE_I, this_VE_S, this_VE_P, infection_hosp_rate_delta, 
+                                                this_theta, this_q,
+                                                psi = this_psi, X_I = this_X_I, X_S = this_X_S, X_P = this_X_P,
+                                                H_I = this_H_I, H_S = this_H_S, H_P = this_H_P)
+  df$tot_hosp <- sapply(phi_vec, compute_tot_hospitalizations,
+                        VE_I = this_VE_I, VE_S = this_VE_S, VE_P = this_VE_P,
+                        infection_hosp_rate = infection_hosp_rate_delta,
+                        theta = this_theta, q = this_q,
+                        psi = this_psi, X_I = this_X_I, X_S = this_X_S, X_P = this_X_P,
+                        H_I = this_H_I, H_S = this_H_S, H_P = this_H_P)
+  
+  df$breakthrough_hosp <- sapply(phi_vec, compute_percent_breakthrough_hosp,
+                                 VE_I = this_VE_I, VE_S = this_VE_S, VE_P = this_VE_P,
+                                 infection_hosp_rate = infection_hosp_rate_delta,
+                                 theta = this_theta, q = this_q,
+                                 psi = this_psi, X_I = this_X_I, X_S = this_X_S, X_P = this_X_P,
+                                 H_I = this_H_I, H_S = this_H_S, H_P = this_H_P)
+  
+  F <- ggplot(df, aes(x=phi*100)) +
+    geom_line(aes(y=breakthrough_hosp), col = mylightgray, size = my_linesize) +
+    geom_line(aes(y=tot_hosp/baseline_hosp*100), col = myblack, size = my_linesize) +
+    ylab("Percentage") +#"Total infected (%)") +
+    xlab("Population vacc. rate (%)") +
+    scale_y_continuous(expand = c(0, 0), limits = c(0, 100)) +
+    # sec.axis = sec_axis(~., name="Breakthrough infections (%)")) +
+    scale_x_continuous(expand = c(0, 0)) +
+    alllabels_theme +
+    theme(#axis.title.y.right = element_text(color = mylightgray),
+      #axis.title.y.left = element_text(color = myblack),
+      #axis.title.x.bottom = element_blank(),
+      #axis.text.x.bottom = element_blank(),
+      plot.margin=unit(c(6, 2, 5.5, 2), "pt")) # top, right, bottom, left
+  
+  Reff_1 <- min(which(df$Reff <= 1),500) - 1
+  if (Reff_1 <= 100){
+    # C <- C + geom_vline(xintercept = Reff_1, alpha = 0.5, linetype = "dashed", size = 0.5)
+    F <- F + geom_point(aes(x = Reff_1, y = 0), shape = 20, size = 0.4)
+  }
+  hosp_transition <- min(which(df$breakthrough_hosp >= 50)) - 1
+  F <- F + geom_vline(xintercept = hosp_transition, alpha = 1, linetype = "dashed", size = 0.5, col = hospcolor)
+  
+  print(paste0("Percentage of hospitalizations in unvaccinated population with 58% vaccination rate: ",
+               100-df[df$phi==0.58,]$breakthrough_hosp))
+  
+  
+  #* Panel G - cumulative transmission mode over phi ####
   df <- data.frame(phi = phi_vec)
 
   lists_who_caused <- lapply(phi_vec, compute_who_caused_cases_tot,
@@ -126,10 +197,10 @@ for (i in 1){
   df$total_by_v <- df$cases_in_u_by_v + df$cases_in_v_by_v
   df$total_by_u <- df$cases_in_u_by_u + df$cases_in_v_by_u
 
-  E <- ggplot(df_toplot, aes(x=phi*100, y=value*100, color = variable)) +
+  G <- ggplot(df_toplot, aes(x=phi*100, y=value*100, color = variable)) +
     geom_line(size = my_linesize) +
     ylab(paste("Transmission mode (%) ")) +
-    xlab(expression("Population vaccination rate (%)")) +
+    xlab(expression("Population vacc. rate (%)")) +
     labs(fill = "") +
     scale_y_continuous(expand = c(0, 0), limits = c(0, 100.1)) +
     scale_x_continuous(expand = c(0, 0)) +
@@ -140,29 +211,29 @@ for (i in 1){
 
   if (Reff_1 <= 100){
     # E <- E + geom_vline(xintercept = Reff_1, alpha = 0.5, linetype = "dashed", size = 0.5)
-    E <- E + geom_point(aes(x = Reff_1, y = 0), shape = 20, size = 0.4, color = "black")
+    G <- G + geom_point(aes(x = Reff_1, y = 0), shape = 20, size = 0.4, color = "black")
   }
   trans_transition <- min(which(df$total_by_u < df$total_by_v)) - 1
-  E <- E + geom_vline(xintercept = trans_transition, alpha = 1, linetype = "dashed", size = 0.5, col = mydarkgreen)
+  G <- G + geom_vline(xintercept = trans_transition, alpha = 1, linetype = "dashed", size = 0.5, col = transmcolor)
 }
 
 # export as cairo_pdf,7x5.5in
-ggarrange(NULL, NULL, NULL, NULL,
-          B, NULL, C, NULL,
+ggarrange(NULL, NULL, NULL, NULL, NULL, NULL,
+          B, NULL, C, NULL, D, NULL, NULL, NULL,
           NULL, NULL, NULL, NULL,
-          D, NULL, E,
-          labels = c(rep(NA, 4),
-                     "b", NA, "c", NA,
-                     rep(NA, 4),
-                     "d", NA, "e", NA),
+          E, NULL, F, NULL, G, NULL,
+          labels = c(rep(NA, 6),
+                     "b", NA, "c", NA, "d", NA,
+                     rep(NA, 6),
+                     "e", NA, "f", NA, "g", NA),
           nrow = 4,
-          ncol = 4,
+          ncol = 6,
           align = "hv",
-          widths = c(1, 0, 1, 0.05),
-          heights = c(0.05, 1, -0.1, 1),
+          widths = c(1, 0, 1, 0, 1, 0.05),
+          heights = c(0.05, 1, 0.05, 1),
           label.y = 1.04)
 
-ggsave("Fig1.pdf", device = cairo_pdf, width = 7, height = 5.5)
+ggsave("Fig1.pdf", device = cairo_pdf, width = 8, height = 5.5)
 
 
 # _____________________________________________________________________
@@ -289,15 +360,14 @@ ggsave("Fig4.pdf", device = cairo_pdf, width = 10, height = 3)
 # _____________________________________________________________________
 
 # read in data
-# lol I forked these up, so you have to click the three df_Fig6 files directly
 #baseline_df <- readRDS("df_Fig7_baseline.RData")
-#lowVE_df <- readRDS("df_Fig7_waning.RData")
+#waning_df <- readRDS("df_Fig7_waning.RData")
 #boosted_df <- readRDS("df_Fig7_boosted.RData")
 #omicron_df <- readRDS("df_Fig6_baseline.RData")
 
 # or run simulations
-phi_vec <- seq(0.5, 1, by = 0.01)
-psi_vec <- seq(0, 1, by = 0.01)
+phi_vec <- seq(0.5, 1, by = 0.05)
+psi_vec <- seq(0, 1, by = 0.05)
 
 for (i in 1){
   
@@ -308,25 +378,34 @@ for (i in 1){
   baseline_df$v_transmission_notesting <- NA
   baseline_df$v_transmission_99 <- NA
   baseline_df$v_transmission_50 <- NA
+  baseline_df$hosp_notesting <- NA
+  baseline_df$hosp_99 <- NA
+  baseline_df$hosp_50 <- NA
   baseline_df$VE <- "baseline"
 
-  boosted_df <- expand.grid(phi = phi_vec, psi = psi_vec)
+  
   boosted_df$breakthroughs_notesting <- NA
   boosted_df$breakthroughs_99 <- NA
   boosted_df$breakthroughs_50 <- NA
   boosted_df$v_transmission_notesting <- NA
   boosted_df$v_transmission_99 <- NA
   boosted_df$v_transmission_50 <- NA
+  boosted_df$hosp_notesting <- NA
+  boosted_df$hosp_99 <- NA
+  boosted_df$hosp_50 <- NA
   boosted_df$VE <- "boosted"
 
-  lowVE_df <- expand.grid(phi = phi_vec, psi = psi_vec)
-  lowVE_df$breakthroughs_notesting <- NA
-  lowVE_df$breakthroughs_99 <- NA
-  lowVE_df$breakthroughs_50 <- NA
-  lowVE_df$v_transmission_notesting <- NA
-  lowVE_df$v_transmission_99 <- NA
-  lowVE_df$v_transmission_50 <- NA
-  lowVE_df$VE <- "low"
+  waning_df <- expand.grid(phi = phi_vec, psi = psi_vec)
+  waning_df$breakthroughs_notesting <- NA
+  waning_df$breakthroughs_99 <- NA
+  waning_df$breakthroughs_50 <- NA
+  waning_df$v_transmission_notesting <- NA
+  waning_df$v_transmission_99 <- NA
+  waning_df$v_transmission_50 <- NA
+  waning_df$hosp_notesting <- NA
+  waning_df$hosp_99 <- NA
+  waning_df$hosp_50 <- NA
+  waning_df$VE <- "low"
   
   omicron_df <- expand.grid(phi = phi_vec, psi = psi_vec)
   omicron_df$breakthroughs_notesting <- NA
@@ -337,162 +416,239 @@ for (i in 1){
   omicron_df$v_transmission_99 <- NA
   omicron_df$v_transmission_50 <- NA
   omicron_df$v_transmission_biwk <- NA
+  omicron_df$hosp_notesting <- NA
+  omicron_df$hosp_99 <- NA
+  omicron_df$hosp_50 <- NA
+  omicron_df$hosp_biwk <- NA
   omicron_df$VE <- "omicron"
 
   for (i in 1:dim(omicron_df)[1]){
 
     # Baseline scenario
     baseline_df$breakthroughs_notesting[i] <- compute_percent_breakthrough_infections(baseline_df$phi[i],
-                                                                                      VE_I = baseline_VE_I, VE_S = baseline_VE_S,
-                                                                                      theta = 0, q = this_q,
-                                                                                      baseline_df$psi[i], X_I = this_X_I, X_S = this_X_S,
-                                                                                      H_I = baseline_H_I, H_S = baseline_H_S)
+                                                    VE_I = baseline_VE_I, VE_S = baseline_VE_S,
+                                                    theta = 0, q = this_q,
+                                                    baseline_df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                                    H_I = baseline_H_I, H_S = baseline_H_S)
     baseline_df$breakthroughs_99[i] <- compute_percent_breakthrough_infections(baseline_df$phi[i],
-                                                                               VE_I = baseline_VE_I, VE_S = baseline_VE_S,
-                                                                               theta = theta_99, q = this_q,
-                                                                               baseline_df$psi[i], X_I = this_X_I, X_S = this_X_S,
-                                                                               H_I = baseline_H_I, H_S = baseline_H_S)
+                                                   VE_I = baseline_VE_I, VE_S = baseline_VE_S,
+                                                   theta = theta_99, q = this_q,
+                                                   baseline_df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                                   H_I = baseline_H_I, H_S = baseline_H_S)
     baseline_df$breakthroughs_50[i] <- compute_percent_breakthrough_infections(baseline_df$phi[i],
-                                                                               VE_I = baseline_VE_I, VE_S = baseline_VE_S,
-                                                                               theta = theta_50, q = this_q,
-                                                                               baseline_df$psi[i], X_I = this_X_I, X_S = this_X_S,
-                                                                               H_I = baseline_H_I, H_S = baseline_H_S)
+                                                   VE_I = baseline_VE_I, VE_S = baseline_VE_S,
+                                                   theta = theta_50, q = this_q,
+                                                   baseline_df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                                   H_I = baseline_H_I, H_S = baseline_H_S)
 
     baseline_df$v_transmission_notesting[i] <- 100 - compute_dominant_transmission(baseline_df$phi[i],
-                                                                                   VE_I = baseline_VE_I, VE_S = baseline_VE_S,
-                                                                                   theta = 0, q = this_q,
-                                                                                   baseline_df$psi[i], X_I = this_X_I, X_S = this_X_S,
-                                                                                   H_I = baseline_H_I, H_S = baseline_H_S) * 100
+                                                   VE_I = baseline_VE_I, VE_S = baseline_VE_S,
+                                                   theta = 0, q = this_q,
+                                                   baseline_df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                                   H_I = baseline_H_I, H_S = baseline_H_S) * 100
     baseline_df$v_transmission_99[i] <- 100 - compute_dominant_transmission(baseline_df$phi[i],
-                                                                            VE_I = baseline_VE_I, VE_S = baseline_VE_S,
-                                                                            theta = theta_99, q = this_q,
-                                                                            baseline_df$psi[i], X_I = this_X_I, X_S = this_X_S,
-                                                                            H_I = baseline_H_I, H_S = baseline_H_S) * 100
+                                                  VE_I = baseline_VE_I, VE_S = baseline_VE_S,
+                                                  theta = theta_99, q = this_q,
+                                                  baseline_df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                                  H_I = baseline_H_I, H_S = baseline_H_S) * 100
     baseline_df$v_transmission_50[i] <- 100 - compute_dominant_transmission(baseline_df$phi[i],
-                                                                            VE_I = baseline_VE_I, VE_S = baseline_VE_S,
-                                                                            theta = theta_50, q = this_q,
-                                                                            baseline_df$psi[i], X_I = this_X_I, X_S = this_X_S,
-                                                                            H_I = baseline_H_I, H_S = baseline_H_S) * 100
+                                                  VE_I = baseline_VE_I, VE_S = baseline_VE_S,
+                                                  theta = theta_50, q = this_q,
+                                                  baseline_df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                                  H_I = baseline_H_I, H_S = baseline_H_S) * 100
+    
+    baseline_df$hosp_notesting[i] <- compute_percent_breakthrough_hosp(baseline_df$phi[i], VE_I = baseline_VE_I, VE_S = baseline_VE_S, VE_P = baseline_VE_P, 
+                                                  infection_hosp_rate = infection_hosp_rate_delta,
+                                                  theta = 0, q = this_q, 
+                                                  baseline_df$psi[i], X_I = this_X_I, X_S = this_X_S, X_P = this_X_P,
+                                                  H_I = baseline_H_I, H_S = baseline_H_S, H_P = baseline_H_P)
+    
+    baseline_df$hosp_99[i] <- compute_percent_breakthrough_hosp(baseline_df$phi[i], VE_I = baseline_VE_I, VE_S = baseline_VE_S, VE_P = baseline_VE_P, 
+                                                  infection_hosp_rate = infection_hosp_rate_delta,
+                                                  theta = theta_99, q = this_q, 
+                                                  baseline_df$psi[i], X_I = this_X_I, X_S = this_X_S, X_P = this_X_P,
+                                                  H_I = baseline_H_I, H_S = baseline_H_S, H_P = baseline_H_P)
+    baseline_df$hosp_50[i] <- compute_percent_breakthrough_hosp(baseline_df$phi[i],  VE_I = baseline_VE_I, VE_S = baseline_VE_S, VE_P = baseline_VE_P, 
+                                                  infection_hosp_rate = infection_hosp_rate_delta,
+                                                  theta = theta_50, q = this_q, 
+                                                  baseline_df$psi[i], X_I = this_X_I, X_S = this_X_S, X_P = this_X_P,
+                                                  H_I = baseline_H_I, H_S = baseline_H_S, H_P = baseline_H_P)
+    
 
     # Boosted scenario
     boosted_df$breakthroughs_notesting[i] <- compute_percent_breakthrough_infections(boosted_df$phi[i],
-                                                                                     VE_I = boosted_VE_I, VE_S = boosted_VE_S,
-                                                                                     theta = 0, q = this_q,
-                                                                                     boosted_df$psi[i], X_I = this_X_I, X_S = this_X_S,
-                                                                                     H_I = boosted_H_I, H_S = boosted_H_S)
+                                                 VE_I = boosted_VE_I, VE_S = boosted_VE_S,
+                                                 theta = 0, q = this_q,
+                                                 boosted_df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                                 H_I = boosted_H_I, H_S = boosted_H_S)
     boosted_df$breakthroughs_99[i] <- compute_percent_breakthrough_infections(boosted_df$phi[i],
-                                                                              VE_I = boosted_VE_I, VE_S = boosted_VE_S,
-                                                                              theta = theta_99, q = this_q,
-                                                                              boosted_df$psi[i], X_I = this_X_I, X_S = this_X_S,
-                                                                              H_I = boosted_H_I, H_S = boosted_H_S)
+                                                VE_I = boosted_VE_I, VE_S = boosted_VE_S,
+                                                theta = theta_99, q = this_q,
+                                                boosted_df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                                H_I = boosted_H_I, H_S = boosted_H_S)
     boosted_df$breakthroughs_50[i] <- compute_percent_breakthrough_infections(boosted_df$phi[i],
-                                                                              VE_I = boosted_VE_I, VE_S = boosted_VE_S,
-                                                                              theta = theta_50, q = this_q,
-                                                                              boosted_df$psi[i], X_I = this_X_I, X_S = this_X_S,
-                                                                              H_I = boosted_H_I, H_S = boosted_H_S)
+                                                VE_I = boosted_VE_I, VE_S = boosted_VE_S,
+                                                theta = theta_50, q = this_q,
+                                                boosted_df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                                H_I = boosted_H_I, H_S = boosted_H_S)
 
     boosted_df$v_transmission_notesting[i] <- 100 - compute_dominant_transmission(boosted_df$phi[i],
-                                                                                  VE_I = boosted_VE_I, VE_S = boosted_VE_S,
-                                                                                  theta = 0, q = this_q,
-                                                                                  boosted_df$psi[i], X_I = this_X_I, X_S = this_X_S,
-                                                                                  H_I = boosted_H_I, H_S = boosted_H_S) * 100
+                                                VE_I = boosted_VE_I, VE_S = boosted_VE_S,
+                                                theta = 0, q = this_q,
+                                                boosted_df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                                H_I = boosted_H_I, H_S = boosted_H_S) * 100
     boosted_df$v_transmission_99[i] <- 100 - compute_dominant_transmission(boosted_df$phi[i],
-                                                                           VE_I = boosted_VE_I, VE_S = boosted_VE_S,
-                                                                           theta = theta_99, q = this_q,
-                                                                           boosted_df$psi[i], X_I = this_X_I, X_S = this_X_S,
-                                                                           H_I = boosted_H_I, H_S = boosted_H_S) * 100
+                                               VE_I = boosted_VE_I, VE_S = boosted_VE_S,
+                                               theta = theta_99, q = this_q,
+                                               boosted_df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                               H_I = boosted_H_I, H_S = boosted_H_S) * 100
     boosted_df$v_transmission_50[i] <- 100 - compute_dominant_transmission(boosted_df$phi[i],
-                                                                           VE_I = boosted_VE_I, VE_S = boosted_VE_S,
-                                                                           theta = theta_50, q = this_q,
-                                                                           boosted_df$psi[i], X_I = this_X_I, X_S = this_X_S,
-                                                                           H_I = boosted_H_I, H_S = boosted_H_S) * 100
+                                               VE_I = boosted_VE_I, VE_S = boosted_VE_S,
+                                               theta = theta_50, q = this_q,
+                                               boosted_df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                               H_I = boosted_H_I, H_S = boosted_H_S) * 100
 
+    boosted_df$hosp_notesting[i] <- compute_percent_breakthrough_hosp(boosted_df$phi[i], VE_I = boosted_VE_I, VE_S = boosted_VE_S, VE_P = boosted_VE_P, 
+                                              infection_hosp_rate = infection_hosp_rate_delta,
+                                              theta = 0, q = this_q, 
+                                              boosted_df$psi[i], X_I = this_X_I, X_S = this_X_S, X_P = this_X_P,
+                                              H_I = boosted_H_I, H_S = boosted_H_S, H_P = boosted_H_P)
+    boosted_df$hosp_99[i] <- compute_percent_breakthrough_hosp(boosted_df$phi[i], VE_I = boosted_VE_I, VE_S = boosted_VE_S, VE_P = boosted_VE_P, 
+                                             infection_hosp_rate = infection_hosp_rate_delta,
+                                             theta = theta_99, q = this_q, 
+                                             boosted_df$psi[i], X_I = this_X_I, X_S = this_X_S, X_P = this_X_P,
+                                             H_I = boosted_H_I, H_S = boosted_H_S, H_P = boosted_H_P)
+    boosted_df$hosp_50[i] <- compute_percent_breakthrough_hosp(boosted_df$phi[i], VE_I = boosted_VE_I, VE_S = boosted_VE_S, VE_P = boosted_VE_P, 
+                                             infection_hosp_rate = infection_hosp_rate_delta,
+                                             theta = theta_50, q = this_q, 
+                                             boosted_df$psi[i], X_I = this_X_I, X_S = this_X_S, X_P = this_X_P,
+                                             H_I = boosted_H_I, H_S = boosted_H_S, H_P = boosted_H_P)
+    
     # Low VE scenario
-    lowVE_df$breakthroughs_notesting[i] <- compute_percent_breakthrough_infections(lowVE_df$phi[i],
-                                                                                   VE_I = low_VE_I, VE_S = low_VE_S,
-                                                                                   theta = 0, q = this_q,
-                                                                                   lowVE_df$psi[i], X_I = this_X_I, X_S = this_X_S,
-                                                                                   H_I = low_H_I, H_S = low_H_S)
-    lowVE_df$breakthroughs_99[i] <- compute_percent_breakthrough_infections(lowVE_df$phi[i],
-                                                                            VE_I = low_VE_I, VE_S = low_VE_S,
-                                                                            theta = theta_99, q = this_q,
-                                                                            lowVE_df$psi[i], X_I = this_X_I, X_S = this_X_S,
-                                                                            H_I = low_H_I, H_S = low_H_S)
-    lowVE_df$breakthroughs_50[i] <- compute_percent_breakthrough_infections(lowVE_df$phi[i],
-                                                                            VE_I = low_VE_I, VE_S = low_VE_S,
-                                                                            theta = theta_50, q = this_q,
-                                                                            lowVE_df$psi[i], X_I = this_X_I, X_S = this_X_S,
-                                                                            H_I = low_H_I, H_S = low_H_S)
+    waning_df$breakthroughs_notesting[i] <- compute_percent_breakthrough_infections(waning_df$phi[i],
+                                             VE_I = waning_VE_I, VE_S = waning_VE_S,
+                                             theta = 0, q = this_q,
+                                             waning_df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                             H_I = waning_H_I, H_S = waning_H_S)
+    waning_df$breakthroughs_99[i] <- compute_percent_breakthrough_infections(waning_df$phi[i],
+                                            VE_I = waning_VE_I, VE_S = waning_VE_S,
+                                            theta = theta_99, q = this_q,
+                                            waning_df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                            H_I = waning_H_I, H_S = waning_H_S)
+    waning_df$breakthroughs_50[i] <- compute_percent_breakthrough_infections(waning_df$phi[i],
+                                            VE_I = waning_VE_I, VE_S = waning_VE_S,                                
+                                            theta = theta_50, q = this_q,
+                                            waning_df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                            H_I = waning_H_I, H_S = waning_H_S)
 
-    lowVE_df$v_transmission_notesting[i] <- 100 - compute_dominant_transmission(lowVE_df$phi[i],
-                                                                                VE_I = low_VE_I, VE_S = low_VE_S,
-                                                                                theta = 0, q = this_q,
-                                                                                lowVE_df$psi[i], X_I = this_X_I, X_S = this_X_S,
-                                                                                H_I = low_H_I, H_S = low_H_S) * 100
-    lowVE_df$v_transmission_99[i] <- 100 - compute_dominant_transmission(lowVE_df$phi[i],
-                                                                         VE_I = low_VE_I, VE_S = low_VE_S,
-                                                                         theta = theta_99, q = this_q,
-                                                                         lowVE_df$psi[i], X_I = this_X_I, X_S = this_X_S,
-                                                                         H_I = low_H_I, H_S = low_H_S) * 100
-    lowVE_df$v_transmission_50[i] <- 100 - compute_dominant_transmission(lowVE_df$phi[i],
-                                                                         VE_I = low_VE_I, VE_S = low_VE_S,
-                                                                         theta = theta_50, q = this_q,
-                                                                         lowVE_df$psi[i], X_I = this_X_I, X_S = this_X_S,
-                                                                         H_I = low_H_I, H_S = low_H_S) * 100
+    waning_df$v_transmission_notesting[i] <- 100 - compute_dominant_transmission(waning_df$phi[i],
+                                            VE_I = waning_VE_I, VE_S = waning_VE_S,
+                                            theta = 0, q = this_q,
+                                            waning_df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                            H_I = waning_H_I, H_S = waning_H_S) * 100
+    waning_df$v_transmission_99[i] <- 100 - compute_dominant_transmission(waning_df$phi[i],
+                                             VE_I = waning_VE_I, VE_S = waning_VE_S,
+                                             theta = theta_99, q = this_q,
+                                             waning_df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                             H_I = waning_H_I, H_S = waning_H_S) * 100
+    waning_df$v_transmission_50[i] <- 100 - compute_dominant_transmission(waning_df$phi[i],
+                                             VE_I = waning_VE_I, VE_S = waning_VE_S,
+                                             theta = theta_50, q = this_q,
+                                             waning_df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                             H_I = waning_H_I, H_S = waning_H_S) * 100
+    
+    waning_df$hosp_notesting[i] <- compute_percent_breakthrough_hosp(waning_df$phi[i], VE_I = waning_VE_I, VE_S = waning_VE_S, VE_P = waning_VE_P, 
+                                             infection_hosp_rate = infection_hosp_rate_delta,
+                                             theta = 0, q = this_q, 
+                                             waning_df$psi[i], X_I = this_X_I, X_S = this_X_S, X_P = this_X_P,
+                                             H_I = waning_H_I, H_S = waning_H_S, H_P = waning_H_P)
+    waning_df$hosp_99[i] <- compute_percent_breakthrough_hosp(waning_df$phi[i], VE_I = waning_VE_I, VE_S = waning_VE_S, VE_P = waning_VE_P,  
+                                            infection_hosp_rate = infection_hosp_rate_delta,
+                                            theta = theta_99, q = this_q, 
+                                            waning_df$psi[i], X_I = this_X_I, X_S = this_X_S, X_P = this_X_P,
+                                            H_I = waning_H_I, H_S = waning_H_S, H_P = waning_H_P)
+    waning_df$hosp_50[i] <- compute_percent_breakthrough_hosp(waning_df$phi[i], VE_I = waning_VE_I, VE_S = waning_VE_S, VE_P = waning_VE_P,  
+                                            infection_hosp_rate = infection_hosp_rate_delta,
+                                            theta = theta_50, q = this_q, 
+                                            waning_df$psi[i], X_I = this_X_I, X_S = this_X_S, X_P = this_X_P,
+                                            H_I = waning_H_I, H_S = waning_H_S, H_P = waning_H_P)
     
     # Omicron scenario
     omicron_df$breakthroughs_notesting[i] <- compute_percent_breakthrough_infections(omicron_df$phi[i],
-                                                                                      VE_I = omicron_VE_I, VE_S = omicron_VE_S,
-                                                                                      theta = 0, q = this_q,
-                                                                                      omicron_df$psi[i], X_I = this_X_I, X_S = this_X_S,
-                                                                                      H_I = omicron_H_I, H_S = omicron_H_S)
+                                            VE_I = omicron_VE_I, VE_S = omicron_VE_S,
+                                            theta = 0, q = this_q,
+                                            omicron_df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                            H_I = omicron_H_I, H_S = omicron_H_S)
     omicron_df$breakthroughs_99[i] <- compute_percent_breakthrough_infections(omicron_df$phi[i],
-                                                                              VE_I = omicron_VE_I, VE_S = omicron_VE_S,
-                                                                              theta = theta_99, q = this_q,
-                                                                              omicron_df$psi[i], X_I = this_X_I, X_S = this_X_S,
-                                                                              H_I = omicron_H_I, H_S = omicron_H_S)
+                                            VE_I = omicron_VE_I, VE_S = omicron_VE_S,
+                                            theta = theta_99, q = this_q,
+                                            omicron_df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                            H_I = omicron_H_I, H_S = omicron_H_S)
     omicron_df$breakthroughs_50[i] <- compute_percent_breakthrough_infections(omicron_df$phi[i],
-                                                                              VE_I = omicron_VE_I, VE_S = omicron_VE_S,
-                                                                              theta = theta_50, q = this_q,
-                                                                              omicron_df$psi[i], X_I = this_X_I, X_S = this_X_S,
-                                                                              H_I = omicron_H_I, H_S = omicron_H_S)
+                                            VE_I = omicron_VE_I, VE_S = omicron_VE_S,
+                                            theta = theta_50, q = this_q,
+                                            omicron_df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                            H_I = omicron_H_I, H_S = omicron_H_S)
     omicron_df$breakthroughs_biwk[i] <- compute_percent_breakthrough_infections(omicron_df$phi[i],
-                                                                              VE_I = omicron_VE_I, VE_S = omicron_VE_S,
-                                                                              theta = theta_99_biwk, q = this_q,
-                                                                              omicron_df$psi[i], X_I = this_X_I, X_S = this_X_S,
-                                                                              H_I = omicron_H_I, H_S = omicron_H_S)
+                                            VE_I = omicron_VE_I, VE_S = omicron_VE_S,
+                                            theta = theta_99_biwk, q = this_q,
+                                            omicron_df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                            H_I = omicron_H_I, H_S = omicron_H_S)
     
     omicron_df$v_transmission_notesting[i] <- 100 - compute_dominant_transmission(omicron_df$phi[i],
-                                                                                  VE_I = omicron_VE_I, VE_S = omicron_VE_S,
-                                                                                  theta = 0, q = this_q,
-                                                                                  omicron_df$psi[i], X_I = this_X_I, X_S = this_X_S,
-                                                                                  H_I = omicron_H_I, H_S = omicron_H_S) * 100
+                                            VE_I = omicron_VE_I, VE_S = omicron_VE_S,
+                                            theta = 0, q = this_q,
+                                            omicron_df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                            H_I = omicron_H_I, H_S = omicron_H_S) * 100
     omicron_df$v_transmission_99[i] <- 100 - compute_dominant_transmission(omicron_df$phi[i],
-                                                                           VE_I = omicron_VE_I, VE_S = omicron_VE_S,
-                                                                           theta = theta_99, q = this_q,
-                                                                           omicron_df$psi[i], X_I = this_X_I, X_S = this_X_S,
-                                                                           H_I = omicron_H_I, H_S = omicron_H_S) * 100
+                                             VE_I = omicron_VE_I, VE_S = omicron_VE_S,
+                                             theta = theta_99, q = this_q,
+                                             omicron_df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                             H_I = omicron_H_I, H_S = omicron_H_S) * 100
     omicron_df$v_transmission_50[i] <- 100 - compute_dominant_transmission(omicron_df$phi[i],
-                                                                           VE_I = omicron_VE_I, VE_S = omicron_VE_S,
-                                                                           theta = theta_50, q = this_q,
-                                                                           omicron_df$psi[i], X_I = this_X_I, X_S = this_X_S,
-                                                                           H_I = omicron_H_I, H_S = omicron_H_S) * 100
+                                             VE_I = omicron_VE_I, VE_S = omicron_VE_S,
+                                             theta = theta_50, q = this_q,
+                                             omicron_df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                             H_I = omicron_H_I, H_S = omicron_H_S) * 100
     omicron_df$v_transmission_biwk[i] <- 100 - compute_dominant_transmission(omicron_df$phi[i],
-                                                                           VE_I = omicron_VE_I, VE_S = omicron_VE_S,
-                                                                           theta = theta_99_biwk, q = this_q,
-                                                                           omicron_df$psi[i], X_I = this_X_I, X_S = this_X_S,
-                                                                           H_I = omicron_H_I, H_S = omicron_H_S) * 100
+                                               VE_I = omicron_VE_I, VE_S = omicron_VE_S,
+                                               theta = theta_99_biwk, q = this_q,
+                                               omicron_df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                               H_I = omicron_H_I, H_S = omicron_H_S) * 100
+    
+    omicron_df$hosp_notesting[i] <- compute_percent_breakthrough_hosp(omicron_df$phi[i], VE_I = omicron_VE_I, VE_S = omicron_VE_S, VE_P = omicron_VE_P, 
+                                                infection_hosp_rate = infection_hosp_rate_delta,
+                                                theta = 0, q = this_q, 
+                                                omicron_df$psi[i], X_I = omicron_X_I, X_S = omicron_X_S, X_P = omicron_X_P,
+                                                H_I = omicron_H_I, H_S = omicron_H_S, H_P = omicron_H_P)
+    omicron_df$hosp_99[i] <- compute_percent_breakthrough_hosp(omicron_df$phi[i], VE_I = omicron_VE_I, VE_S = omicron_VE_S, VE_P = omicron_VE_P, 
+                                               infection_hosp_rate = infection_hosp_rate_delta,
+                                               theta = theta_99, q = this_q, 
+                                               omicron_df$psi[i], X_I = omicron_X_I, X_S = omicron_X_S, X_P = omicron_X_P,
+                                               H_I = omicron_H_I, H_S = omicron_H_S, H_P = omicron_H_P)
+    omicron_df$hosp_50[i] <- compute_percent_breakthrough_hosp(omicron_df$phi[i], VE_I = omicron_VE_I, VE_S = omicron_VE_S, VE_P = omicron_VE_P, 
+                                               infection_hosp_rate = infection_hosp_rate_delta,
+                                               theta = theta_50, q = this_q, 
+                                               omicron_df$psi[i], X_I = omicron_X_I, X_S = omicron_X_S, X_P = omicron_X_P,
+                                               H_I = omicron_H_I, H_S = omicron_H_S, H_P = omicron_H_P)
+    omicron_df$hosp_biwk[i] <- compute_percent_breakthrough_hosp(omicron_df$phi[i], VE_I = omicron_VE_I, VE_S = omicron_VE_S, VE_P = omicron_VE_P,  
+                                               infection_hosp_rate = infection_hosp_rate_delta,
+                                               theta = theta_50, q = this_q, 
+                                               omicron_df$psi[i], X_I = omicron_X_I, X_S = omicron_X_S, X_P = omicron_X_P,
+                                               H_I = omicron_H_I, H_S = omicron_H_S, H_P = omicron_H_P)
     
   }
 
   # compute summary statistics
-  VEs <- c(rep(baseline_VE_S,3),rep(boosted_VE_S,3),rep(low_VE_S,3),rep(omicron_VE_S,4))
+  VEs <- c(rep(baseline_VE_S,3),rep(boosted_VE_S,3),rep(waning_VE_S,3),rep(omicron_VE_S,4))
   df <- data.frame(VE = VEs)
   df$testing <- c(rep(c(0,50,99),3),c(0,50,99,299))
   df$max_inf_transition <- NA
   df$min_inf_transition <- NA
   df$max_trnsmsn_transition <- NA
   df$min_trnsmsn_transition <- NA
+  df$max_hosp_transition <- NA
+  df$min_hosp_transition <- NA
 
   # Baseline VE
   baseline_inf_transitions_notesting <- baseline_df[baseline_df$breakthroughs_notesting >= 50,] %>%
@@ -520,7 +676,19 @@ for (i in 1){
     group_by(psi) %>% summarize(phi=min(phi))
   df[df$testing==50 & df$VE==baseline_VE_S,]$min_trnsmsn_transition <- min(baseline_trnsmsn_transitions_50$phi)
   df[df$testing==50 & df$VE==baseline_VE_S,]$max_trnsmsn_transition <- max(baseline_trnsmsn_transitions_50$phi)
-
+  
+  baseline_hosp_transitions_notesting <- baseline_df[baseline_df$hosp_notesting >= 50,] %>%
+    group_by(psi) %>% summarize(phi=min(phi))
+  df[df$testing==0 & df$VE==baseline_VE_S,]$min_hosp_transition <- min(baseline_hosp_transitions_notesting$phi)
+  df[df$testing==0 & df$VE==baseline_VE_S,]$max_hosp_transition <-  max(baseline_hosp_transitions_notesting$phi)
+  baseline_hosp_transitions_99 <- baseline_df[baseline_df$hosp_99 >= 50,] %>%
+    group_by(psi) %>% summarize(phi=min(phi))
+  df[df$testing==99 & df$VE==baseline_VE_S,]$min_hosp_transition <- min(baseline_hosp_transitions_99$phi)
+  df[df$testing==99 & df$VE==baseline_VE_S,]$max_hosp_transition <- max(baseline_hosp_transitions_99$phi)
+  baseline_hosp_transitions_50 <- baseline_df[baseline_df$hosp_50 >= 50,] %>%
+    group_by(psi) %>% summarize(phi=min(phi))
+  df[df$testing==50 & df$VE==baseline_VE_S,]$min_hosp_transition <- min(baseline_hosp_transitions_50$phi)
+  df[df$testing==50 & df$VE==baseline_VE_S,]$max_hosp_transition <- max(baseline_hosp_transitions_50$phi)
 
   # Boosted VE
   boosted_inf_transitions_notesting <- boosted_df[boosted_df$breakthroughs_notesting >= 50,] %>%
@@ -538,7 +706,6 @@ for (i in 1){
 
   boosted_trnsmsn_transitions_notesting <- boosted_df[boosted_df$v_transmission_notesting >= 50,] %>%
     group_by(psi) %>% summarize(phi=min(phi))
-
   df[df$testing==0 & df$VE==boosted_VE_S,]$min_trnsmsn_transition <- min(boosted_trnsmsn_transitions_notesting$phi)
   df[df$testing==0 & df$VE==boosted_VE_S,]$max_trnsmsn_transition <- max(boosted_trnsmsn_transitions_notesting$phi)
   boosted_trnsmsn_transitions_99 <- boosted_df[boosted_df$v_transmission_99 >= 50,] %>%
@@ -550,32 +717,60 @@ for (i in 1){
   df[df$testing==50 & df$VE==boosted_VE_S,]$min_trnsmsn_transition <- min(boosted_trnsmsn_transitions_50$phi)
   df[df$testing==50 & df$VE==boosted_VE_S,]$max_trnsmsn_transition <- max(boosted_trnsmsn_transitions_50$phi)
 
+  boosted_hosp_transitions_notesting <- boosted_df[boosted_df$hosp_notesting >= 50,] %>%
+    group_by(psi) %>% summarize(phi=min(phi))
+  df[df$testing==0 & df$VE==boosted_VE_S,]$min_hosp_transition <- min(boosted_hosp_transitions_notesting$phi)
+  df[df$testing==0 & df$VE==boosted_VE_S,]$max_hosp_transition <- max(boosted_hosp_transitions_notesting$phi)
+  boosted_hosp_transitions_99 <- boosted_df[boosted_df$hosp_99 >= 50,] %>%
+    group_by(psi) %>% summarize(phi=min(phi))
+  df[df$testing==99 & df$VE==boosted_VE_S,]$min_hosp_transition <- min(boosted_hosp_transitions_99$phi)
+  df[df$testing==99 & df$VE==boosted_VE_S,]$max_hosp_transition <- max(boosted_hosp_transitions_99$phi)
+  boosted_hosp_transitions_50 <- boosted_df[boosted_df$hosp_50 >= 50,] %>%
+    group_by(psi) %>% summarize(phi=min(phi))
+  df[df$testing==50 & df$VE==boosted_VE_S,]$min_hosp_transition <- min(boosted_hosp_transitions_50$phi)
+  df[df$testing==50 & df$VE==boosted_VE_S,]$max_hosp_transition <- max(boosted_hosp_transitions_50$phi)
+  
+  
   # Low VE
-  lowVE_inf_transitions_notesting <- lowVE_df[lowVE_df$breakthroughs_notesting >= 50,] %>%
+  waning_inf_transitions_notesting <- waning_df[waning_df$breakthroughs_notesting >= 50,] %>%
     group_by(psi) %>% summarize(phi=min(phi))
-  df[df$testing==0 & df$VE==low_VE_S,]$min_inf_transition <- min(lowVE_inf_transitions_notesting$phi)
-  df[df$testing==0 & df$VE==low_VE_S,]$max_inf_transition <-  max(lowVE_inf_transitions_notesting$phi)
-  lowVE_inf_transitions_99 <- lowVE_df[lowVE_df$breakthroughs_99 >= 50,] %>%
+  df[df$testing==0 & df$VE==waning_VE_S,]$min_inf_transition <- min(waning_inf_transitions_notesting$phi)
+  df[df$testing==0 & df$VE==waning_VE_S,]$max_inf_transition <-  max(waning_inf_transitions_notesting$phi)
+  waning_inf_transitions_99 <- waning_df[waning_df$breakthroughs_99 >= 50,] %>%
     group_by(psi) %>% summarize(phi=min(phi))
-  df[df$testing==99 & df$VE==low_VE_S,]$min_inf_transition <- min(lowVE_inf_transitions_99$phi)
-  df[df$testing==99 & df$VE==low_VE_S,]$max_inf_transition <- max(lowVE_inf_transitions_99$phi)
-  lowVE_inf_transitions_50 <- lowVE_df[lowVE_df$breakthroughs_50 >= 50,] %>%
+  df[df$testing==99 & df$VE==waning_VE_S,]$min_inf_transition <- min(waning_inf_transitions_99$phi)
+  df[df$testing==99 & df$VE==waning_VE_S,]$max_inf_transition <- max(waning_inf_transitions_99$phi)
+  waning_inf_transitions_50 <- waning_df[waning_df$breakthroughs_50 >= 50,] %>%
     group_by(psi) %>% summarize(phi=min(phi))
-  df[df$testing==50 & df$VE==low_VE_S,]$min_inf_transition <- min(lowVE_inf_transitions_50$phi)
-  df[df$testing==50 & df$VE==low_VE_S,]$max_inf_transition <- max(lowVE_inf_transitions_50$phi)
+  df[df$testing==50 & df$VE==waning_VE_S,]$min_inf_transition <- min(waning_inf_transitions_50$phi)
+  df[df$testing==50 & df$VE==waning_VE_S,]$max_inf_transition <- max(waning_inf_transitions_50$phi)
 
-  lowVE_trnsmsn_transitions_notesting <- lowVE_df[lowVE_df$v_transmission_notesting >= 50,] %>%
+  waning_trnsmsn_transitions_notesting <- waning_df[waning_df$v_transmission_notesting >= 50,] %>%
     group_by(psi) %>% summarize(phi=min(phi))
-  df[df$testing==0 & df$VE==low_VE_S,]$min_trnsmsn_transition <- min(lowVE_trnsmsn_transitions_notesting$phi)
-  df[df$testing==0 & df$VE==low_VE_S,]$max_trnsmsn_transition <- max(lowVE_trnsmsn_transitions_notesting$phi)
-  lowVE_trnsmsn_transitions_99 <- lowVE_df[lowVE_df$v_transmission_99 >= 50,] %>%
+  df[df$testing==0 & df$VE==waning_VE_S,]$min_trnsmsn_transition <- min(waning_trnsmsn_transitions_notesting$phi)
+  df[df$testing==0 & df$VE==waning_VE_S,]$max_trnsmsn_transition <- max(waning_trnsmsn_transitions_notesting$phi)
+  waning_trnsmsn_transitions_99 <- waning_df[waning_df$v_transmission_99 >= 50,] %>%
     group_by(psi) %>% summarize(phi=min(phi))
-  df[df$testing==99 & df$VE==low_VE_S,]$min_trnsmsn_transition <- min(lowVE_trnsmsn_transitions_99$phi)
-  df[df$testing==99 & df$VE==low_VE_S,]$max_trnsmsn_transition <- max(lowVE_trnsmsn_transitions_99$phi)
-  lowVE_trnsmsn_transitions_50 <- lowVE_df[lowVE_df$v_transmission_50 >= 50,] %>%
+  df[df$testing==99 & df$VE==waning_VE_S,]$min_trnsmsn_transition <- min(waning_trnsmsn_transitions_99$phi)
+  df[df$testing==99 & df$VE==waning_VE_S,]$max_trnsmsn_transition <- max(waning_trnsmsn_transitions_99$phi)
+  waning_trnsmsn_transitions_50 <- waning_df[waning_df$v_transmission_50 >= 50,] %>%
     group_by(psi) %>% summarize(phi=min(phi))
-  df[df$testing==50 & df$VE==low_VE_S,]$min_trnsmsn_transition <- min(lowVE_trnsmsn_transitions_50$phi)
-  df[df$testing==50 & df$VE==low_VE_S,]$max_trnsmsn_transition <- max(lowVE_trnsmsn_transitions_50$phi)
+  df[df$testing==50 & df$VE==waning_VE_S,]$min_trnsmsn_transition <- min(waning_trnsmsn_transitions_50$phi)
+  df[df$testing==50 & df$VE==waning_VE_S,]$max_trnsmsn_transition <- max(waning_trnsmsn_transitions_50$phi)
+  
+  waning_hosp_transitions_notesting <- waning_df[waning_df$hosp_notesting >= 50,] %>%
+    group_by(psi) %>% summarize(phi=min(phi))
+  df[df$testing==0 & df$VE==waning_VE_S,]$min_hosp_transition <- min(waning_hosp_transitions_notesting$phi)
+  df[df$testing==0 & df$VE==waning_VE_S,]$max_hosp_transition <- max(waning_hosp_transitions_notesting$phi)
+  waning_hosp_transitions_99 <- waning_df[waning_df$hosp_99 >= 50,] %>%
+    group_by(psi) %>% summarize(phi=min(phi))
+  df[df$testing==99 & df$VE==waning_VE_S,]$min_hosp_transition <- min(waning_hosp_transitions_99$phi)
+  df[df$testing==99 & df$VE==waning_VE_S,]$max_hosp_transition <- max(waning_hosp_transitions_99$phi)
+  waning_hosp_transitions_50 <- waning_df[waning_df$hosp_50 >= 50,] %>%
+    group_by(psi) %>% summarize(phi=min(phi))
+  df[df$testing==50 & df$VE==waning_VE_S,]$min_hosp_transition <- min(waning_hosp_transitions_50$phi)
+  df[df$testing==50 & df$VE==waning_VE_S,]$max_hosp_transition <- max(waning_hosp_transitions_50$phi)
+  
 
   # Omicron VE
   omicron_inf_transitions_notesting <- omicron_df[omicron_df$breakthroughs_notesting >= 50,] %>%
@@ -612,8 +807,26 @@ for (i in 1){
   df[df$testing==299 & df$VE==omicron_VE_S,]$min_trnsmsn_transition <- min(omicron_trnsmsn_transitions_biwk$phi)
   df[df$testing==299 & df$VE==omicron_VE_S,]$max_trnsmsn_transition <- max(omicron_trnsmsn_transitions_biwk$phi)
   
+  omicron_hosp_transitions_notesting <- omicron_df[omicron_df$hosp_notesting >= 50,] %>%
+    group_by(psi) %>% summarize(phi=min(phi))
+  df[df$testing==0 & df$VE==omicron_VE_S,]$min_hosp_transition <- min(omicron_hosp_transitions_notesting$phi)
+  df[df$testing==0 & df$VE==omicron_VE_S,]$max_hosp_transition <-  max(omicron_hosp_transitions_notesting$phi)
+  omicron_hosp_transitions_99 <- omicron_df[omicron_df$hosp_99 >= 50,] %>%
+    group_by(psi) %>% summarize(phi=min(phi))
+  df[df$testing==99 & df$VE==omicron_VE_S,]$min_hosp_transition <- min(omicron_hosp_transitions_99$phi)
+  df[df$testing==99 & df$VE==omicron_VE_S,]$max_hosp_transition <- max(omicron_hosp_transitions_99$phi)
+  omicron_hosp_transitions_50 <- omicron_df[omicron_df$hosp_50 >= 50,] %>%
+    group_by(psi) %>% summarize(phi=min(phi))
+  df[df$testing==50 & df$VE==omicron_VE_S,]$min_hosp_transition <- min(omicron_hosp_transitions_50$phi)
+  df[df$testing==50 & df$VE==omicron_VE_S,]$max_hosp_transition <- max(omicron_hosp_transitions_50$phi)
+  omicron_hosp_transitions_biwk <- omicron_df[omicron_df$hosp_biwk >= 50,] %>%
+    group_by(psi) %>% summarize(phi=min(phi))
+  df[df$testing==299 & df$VE==omicron_VE_S,]$min_hosp_transition <- min(omicron_hosp_transitions_biwk$phi)
+  df[df$testing==299 & df$VE==omicron_VE_S,]$max_hosp_transition <- max(omicron_hosp_transitions_biwk$phi)
+  
+  
   df$labels <- NA
-  df[df$VE == low_VE_S,]$labels <- "Waning (Low VE)"
+  df[df$VE == waning_VE_S,]$labels <- "Waning (Low VE)"
   df[df$VE == baseline_VE_S,]$labels <- "Baseline VE"
   df[df$VE == boosted_VE_S,]$labels <- "Boosted (High VE)"
   df[df$VE == omicron_VE_S,]$labels <- "Omicron"
@@ -751,12 +964,76 @@ p_trnsmsn_transition <- ggplot() +
         panel.grid.minor.x = element_blank(), axis.line = element_line(colour = "black"))
 
 
-fig7 <- ggarrange(p_inf_transition, NULL, p_trnsmsn_transition, NULL,
-                  widths = c(1.02, -0.05, 1, 0.2),
-                  labels = c('   a ', NA, '    b', NA),
-                  ncol = 4,
+p_hosp_transition <- ggplot() +
+  coord_flip() +
+  geom_linerange(data = df[df$testing == 0,],
+                 aes(x = VE, ymin = min_hosp_transition*100, ymax = max_hosp_transition*100), col = "black",
+                 position = position_nudge(x = -0.025), size=1
+  ) +
+  geom_linerange(data = df[df$testing == 50,],
+                 aes(x = VE, ymin = min_hosp_transition*100, ymax = max_hosp_transition*100), col = theta50_purple,
+                 size=1
+  ) +
+  geom_linerange(data = df[df$testing == 99,],
+                 aes(x = VE, ymin = min_hosp_transition*100, ymax = max_hosp_transition*100), col = theta99_purple,
+                 position = position_nudge(x = 0.025), size=1
+  ) +
+  geom_linerange(data = df[df$testing == 299,],
+                 aes(x = VE, ymin = min_hosp_transition*100, ymax = max_hosp_transition*100), col = thetabiwk_purple,
+                 position = position_nudge(x = 0.05), size=1
+  ) +
+  # plot maxima
+  geom_point(data = df[df$testing == 0,],
+             aes(x = VE, y = max_hosp_transition*100),
+             position = position_nudge(x = -0.025),
+             shape = 21, colour = "black", fill = "white", size = 2, stroke=1
+  ) +
+  geom_point(data = df[df$testing == 50,],
+             aes(x = VE, y = max_hosp_transition*100),
+             shape = 21, colour = theta50_purple, fill = "white", size = 2, stroke=1
+  ) +
+  geom_point(data = df[df$testing == 99,],
+             aes(x = VE, y = max_hosp_transition*100),
+             position = position_nudge(x = 0.025),
+             shape = 21, colour = theta99_purple, fill = "white", size = 2, stroke=1
+  ) +
+  geom_point(data = df[df$testing == 299,],
+             aes(x = VE, y = max_hosp_transition*100),
+             position = position_nudge(x = 0.05),
+             shape = 21, colour = thetabiwk_purple, fill = "white", size = 2, stroke=1
+  ) +
+  # plot minima
+  geom_point(data = df[df$testing == 0,],
+             aes(x = VE, y = min_hosp_transition*100), col = "black",
+             position = position_nudge(x = -0.025), size=2
+  ) +
+  geom_point(data = df[df$testing == 50,],
+             aes(x = VE, y = min_hosp_transition*100), col = theta50_purple, size=2
+  ) +
+  geom_point(data = df[df$testing == 99,],
+             aes(x = VE, y = min_hosp_transition*100), col = theta99_purple,
+             position = position_nudge(x = 0.025), size=2
+  ) +
+  geom_point(data = df[df$testing == 299,],
+             aes(x = VE, y = min_hosp_transition*100), col = thetabiwk_purple,
+             position = position_nudge(x = 0.05), size=2
+  ) +
+  #scale_x_discrete("Waning","Baseline","Boosted") +
+  ylab("Population vaccination rate (%)") +
+  scale_y_continuous(expand = c(0, 0), limits = c(48, 102))  +
+  #xlab("Vaccine Effectiveness") +
+  ggtitle("Transition to majority\n breakthrough hospitalizations") +
+  onlyx_theme +
+  theme(panel.grid.major.y = element_blank(), panel.grid.minor.y = element_blank(),
+        panel.grid.minor.x = element_blank(), axis.line = element_line(colour = "black"))
+
+
+fig7 <- ggarrange(p_inf_transition, NULL, p_trnsmsn_transition, NULL, p_hosp_transition, NULL,
+                  widths = c(1.02, -0.05, 1, -0.05, 1, 0.1),
+                  labels = c('   a ', NA, '  b', NA, '  c', NA),
+                  ncol = 6,
                   label.y = 0.96,
                   align = "hv")
 fig7
 
-ggsave("SuppFig7.pdf", fig7, device = cairo_pdf, width = 6.5, height = 3.5)
+ggsave("Fig7.pdf", fig7, device = cairo_pdf, width = 7.5, height = 3.5)
