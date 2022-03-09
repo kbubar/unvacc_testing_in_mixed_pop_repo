@@ -41,6 +41,7 @@ for (s in scenarios){
   this_H_I  <- baseline_H_I
   this_H_S  <- baseline_H_S
   this_H_P  <- baseline_H_P
+  hosp_rate <- hosp_rate <- infection_hosp_rate_delta
   }
   if(s == "waning"){
     this_VE_I <- waning_VE_I
@@ -49,6 +50,7 @@ for (s in scenarios){
     this_H_I  <- waning_H_I
     this_H_S  <- waning_H_S
     this_H_P  <- waning_H_P
+    hosp_rate <- hosp_rate <- infection_hosp_rate_delta
   }
   if(s == "boosted"){
     this_VE_I <- boosted_VE_I
@@ -57,6 +59,7 @@ for (s in scenarios){
     this_H_I  <- boosted_H_I
     this_H_S  <- boosted_H_S
     this_H_P  <- boosted_H_P
+    hosp_rate <- hosp_rate <- infection_hosp_rate_delta
   }
   if(s == "omicron"){
     this_VE_I <- omicron_VE_I
@@ -65,6 +68,7 @@ for (s in scenarios){
     this_H_I  <- omicron_H_I
     this_H_S  <- omicron_H_S
     this_H_P  <- omicron_H_P
+    hosp_rate <- infection_hosp_rate_omicron
   }
   
   for (i in 1:dim(df)[1]){
@@ -90,13 +94,13 @@ for (s in scenarios){
                                                              H_I = this_H_I, H_S = this_H_S))*100
     
     df$tot_hosp[i] <- compute_tot_hospitalizations(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, VE_P = this_VE_P, 
-                                          infection_hosp_rate = infection_hosp_rate_omicron,
+                                          infection_hosp_rate = hosp_rate,
                                           theta = 0, q = this_q, 
                                           df$psi[i], X_I = this_X_I, X_S = this_X_S, X_P = this_X_P,
                                           H_I = this_H_I, H_S = this_H_S, H_P = this_H_P)
     
     df$breakthrough_hosp[i] <- compute_percent_breakthrough_hosp(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, VE_P = this_VE_P, 
-                                                                 infection_hosp_rate = infection_hosp_rate_omicron,
+                                                                 infection_hosp_rate = hosp_rate,
                                                                  theta = 0, q = this_q, 
                                                                  df$psi[i], X_I = this_X_I, X_S = this_X_S, X_P = this_X_P,
                                                                  H_I = this_H_I, H_S = this_H_S, H_P = this_H_P)
