@@ -590,32 +590,37 @@ for (i in 1:4){
   }
 }
 
-infections50 <- ggplot(df_timeseries, aes(x = time)) +
-  geom_line(aes(y = testing50), col = theta99_purple, size = my_linesize) +
-  geom_line(aes(y = notesting), col = "black", size = my_linesize) +
+plot_timeseries <- ggplot(df_timeseries, aes(x = time)) +
+  geom_line(aes(y = notesting/1000), col = "black", size = 0.8) +
+  geom_line(aes(y = testing50/1000), col = theta50_purple, size = 0.8) +
+  geom_line(aes(y = testing99/1000), col = theta99_purple, size = 0.8) +
+  geom_line(aes(y = testing99_biwk/1000), col = thetabiwk_purple, size = 0.8) +
+  ggtitle("\n") + # just for formatting
   ylab("Infected (#)") +
   xlab("Time (days)") +
-  scale_x_continuous(expand = c(0, 0), limits = c(0, 250)) +
-  scale_y_continuous(expand = c(0, 0), limits = c(0, 3500)) + # 2500 for R0 = 6
-  alllabels_theme
+  scale_x_continuous(expand = c(0, 0), limits = c(0, 200)) +
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 3500/1000)) + # 2500 for R0 = 6
+  alllabels_theme + 
+  coord_fixed(200/3.5) + 
+  theme(plot.margin = margin(10, 10, 10, 10))
 
-infections99 <- ggplot(df_timeseries, aes(x = time)) +
-  geom_line(aes(y = testing99), col = theta99_purple, size = my_linesize) +
-  geom_line(aes(y = notesting), col = "black", size = my_linesize) +
-  ylab("Infected (#)") +
-  xlab("Time (days)") +
-  scale_x_continuous(expand = c(0, 0), limits = c(0, 250)) +
-  scale_y_continuous(expand = c(0, 0), limits = c(0, 3500)) + # 2500 for R0 = 6
-  alllabels_theme
-
-infections99_biwk <- ggplot(df_timeseries, aes(x = time)) +
-  geom_line(aes(y = testing99_biwk), col = theta99_purple, size = my_linesize) +
-  geom_line(aes(y = notesting), col = "black", size = my_linesize) +
-  ylab("Infected (#)") +
-  xlab("Time (days)") +
-  scale_x_continuous(expand = c(0, 0), limits = c(0, 250)) +
-  scale_y_continuous(expand = c(0, 0), limits = c(0, 3500)) + # 2500 for R0 = 6
-  alllabels_theme
+# infections99 <- ggplot(df_timeseries, aes(x = time)) +
+#   geom_line(aes(y = testing99), col = theta99_purple, size = my_linesize) +
+#   geom_line(aes(y = notesting), col = "black", size = my_linesize) +
+#   ylab("Infected (#)") +
+#   xlab("Time (days)") +
+#   scale_x_continuous(expand = c(0, 0), limits = c(0, 250)) +
+#   scale_y_continuous(expand = c(0, 0), limits = c(0, 3500)) + # 2500 for R0 = 6
+#   alllabels_theme
+# 
+# infections99_biwk <- ggplot(df_timeseries, aes(x = time)) +
+#   geom_line(aes(y = testing99_biwk), col = theta99_purple, size = my_linesize) +
+#   geom_line(aes(y = notesting), col = "black", size = my_linesize) +
+#   ylab("Infected (#)") +
+#   xlab("Time (days)") +
+#   scale_x_continuous(expand = c(0, 0), limits = c(0, 250)) +
+#   scale_y_continuous(expand = c(0, 0), limits = c(0, 3500)) + # 2500 for R0 = 6
+#   alllabels_theme
 
 percentreduc50 <- ggplot(df, aes(x = phi*100, y = psi*100)) + #, colour = ..level..)) +
   geom_tile(aes(fill = percent_reduc_inf_50)) +
@@ -623,8 +628,8 @@ percentreduc50 <- ggplot(df, aes(x = phi*100, y = psi*100)) + #, colour = ..leve
   geom_contour(aes(z = Reff), breaks = 1, size = 0.6, col = "white", linetype = "longdash") +
   scale_y_continuous(expand = c(0, 0)) +
   scale_x_continuous(expand = c(0, 0)) +
-  geom_point(aes(x = 58, y = 35), color = "white") +
-  ylab("") +#"Infection-acquired immunity (%)") +
+  geom_point(aes(x = 58, y = 35), color = "white", size = 0.2) +
+  ylab("Infection-acquired immunity (%)") +
   xlab("") +# xlab("Population vaccination rate (%)") +
   ggtitle("") +
   scale_fill_gradientn(colours = cet_pal(5, name = "inferno"), limits = c(0, 100)) +
@@ -637,7 +642,7 @@ percentreduc99 <- ggplot(df, aes(x = phi*100, y = psi*100)) + #, colour = ..leve
   geom_contour(aes(z = Reff), breaks = 1, size = 0.6, col = "white", linetype = "longdash") +
   scale_y_continuous(expand = c(0, 0)) +
   scale_x_continuous(expand = c(0, 0)) +
-  geom_point(aes(x = 58, y = 35), color = "white") +
+  geom_point(aes(x = 58, y = 35), color = "white", size = 0.2) +
   ylab("Infection-acquired immunity (%)") +
   xlab("") +# xlab("Population vaccination rate (%)") +
   ggtitle("Weekly testing, 99% compliance", "% reduction in infections due to testing") +
@@ -654,7 +659,7 @@ percentreducbiwk <- ggplot(df, aes(x = phi*100, y = psi*100)) + #, colour = ..le
   geom_contour(aes(z = Reff), breaks = 1, size = 0.6, col = "white", linetype = "longdash") +
   scale_y_continuous(expand = c(0, 0)) +
   scale_x_continuous(expand = c(0, 0)) +
-  geom_point(aes(x = 58, y = 35), color = "white") +
+  geom_point(aes(x = 58, y = 35), color = "white", size = 0.2) +
   ylab("Infection-acquired immunity (%)") +
   xlab("") +# xlab("Population vaccination rate (%)") +
   ggtitle("Biweekly testing, 99% compliance", "% reduction in infections due to testing") +
@@ -663,15 +668,18 @@ percentreducbiwk <- ggplot(df, aes(x = phi*100, y = psi*100)) + #, colour = ..le
   labs(fill = "") +
   theme(axis.title.y = element_blank(),
         plot.title = element_blank(),
-        plot.subtitle = element_blank()) #element_text(hjust = 0.5))
+        plot.subtitle = element_blank()) + #element_text(hjust = 0.5))
+  guides(fill=guide_legend(title="% reduction\nin infections\ndue to testing"))
 
+percentreducbiwk <- addSmallLegend(percentreducbiwk)
 percent_legend <- get_legend(percentreducbiwk)
+percentreducbiwk
 
-percentreduc50_baseline <- percentreduc50 + alllabels_theme + ggtitle("Weekly, 50% Compliance")
+percentreduc50_baseline <- percentreduc50 + alllabels_theme + ggtitle("Weekly testing,\n50% Compliance")
 percentreduc99_baseline <- percentreduc99 + onlyx_theme + 
-  theme(legend.position = "none") + ggtitle("Weekly, 99% Compliance") +
+  theme(legend.position = "none") + ggtitle("Weekly testing,\n99% Compliance") +
   xlab("Population vaccination rate (%)")
-percentreducbiwk_baseline <- percentreducbiwk + onlyx_theme + ggtitle("Biweekly, 99% Compliance")
+percentreducbiwk_baseline <- percentreducbiwk + onlyx_theme + ggtitle("Biweekly testing,\n99% Compliance")
 
 # panels <- ggarrange(percentreduc50_baseline, NULL,
 #                     percentreduc99_baseline, NULL, 
@@ -681,25 +689,45 @@ percentreducbiwk_baseline <- percentreducbiwk + onlyx_theme + ggtitle("Biweekly,
 #                     widths = c(1, -0.05, 1, -0.05, 1),
 #                     labels = c(" a", NA, "   b", NA,"  c"),
 #                     label.y = 0.7)
+#lay <- rbind(c(1, 2))
 
-panels <- ggarrange(infections50, NULL,
-                    infections99, NULL,
-                    infections99_biwk,
-                    percentreduc50_baseline, NULL,
+# fig6 <- arrangeGrob(panels, percent_legend, layout_matrix = lay,
+#                     widths = c(3, 0.5), 
+#                     left = c("Infection-acquired immunity (%)"))
+# panels <- ggarrange(infections50, NULL,
+#                     infections99, NULL,
+#                     infections99_biwk,
+#                     percentreduc50_baseline, NULL,
+#                     percentreduc99_baseline, NULL, 
+#                     percentreducbiwk_baseline,
+#                     nrow = 2, ncol = 5,
+#                     align = "hv",
+#                     widths = c(1, -0.05, 1, -0.05, 1),
+#                     heights = c(0.4, 1))
+#                     #labels = c(" a", NA, "   b", NA,"  c"),
+#                     #label.y = 0.7)
+
+panels <- ggarrange(percentreduc50_baseline, NULL,
                     percentreduc99_baseline, NULL, 
                     percentreducbiwk_baseline,
-                    nrow = 2, ncol = 5,
+                    nrow = 1, ncol = 5,
                     align = "hv",
-                    widths = c(1, -0.05, 1, -0.05, 1),
-                    heights = c(0.4, 1))
-                    #labels = c(" a", NA, "   b", NA,"  c"),
-                    #label.y = 0.7)
+                    widths = c(1, -0.16, 1, -0.16, 1),
+                    heights = c(1),
+                    labels = c("    a", "b", NA,"c", NA),
+                    label.y = 1)
 
-lay <- rbind(c(1, 2))
+timeseries <- ggarrange(NULL, plot_timeseries, NULL,
+                        nrow = 1, ncol = 3,
+                        widths = c(0.2, 1, 0.2),
+                        heights = c(1),
+                        align = "hv",
+                        labels = c(NA, "d", NA))
 
-fig6 <- arrangeGrob(panels, percent_legend, layout_matrix = lay,
-                    widths = c(3, 0.5), 
-                    left = c("Infection-acquired immunity (%)"))
+lay <- rbind(c(1, 2, 3))
 
-ggsave("exampleFig6.pdf", fig6, device = cairo_pdf, width = 8, height = 5)
-ggsave("suppFig6.svg", fig6, device = svg, width = 8, height = 5)
+fig6 <- arrangeGrob(panels, percent_legend, plot_timeseries, layout_matrix = lay,
+                    widths = c(2.8, 0.2, 1))
+
+ggsave("example2Fig6.pdf", fig6, device = cairo_pdf, width = 8, height = 2.5)
+#ggsave("example2Fig6.svg", fig6, device = svg, width = 8, height = 2.5)

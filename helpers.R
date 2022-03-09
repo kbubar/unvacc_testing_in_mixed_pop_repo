@@ -225,6 +225,35 @@ compute_who_caused_daily_infections <- function(phi, VE_I, VE_S,
 }
 
 
+compute_new_daily_hosp <- function(phi, VE_I, VE_S, VE_P,
+                                   theta = 0, q = 0, 
+                                   psi = 0, X_I = 0, X_S = 0, X_P=0,
+                                   H_I = 0, H_S = 0, H_P=0){
+  # OUTPUT: Number of new daily hospitalizations
+  # calculated as number of new infections * any protection against progression * infection_hosp_rate
+
+  df <- run_leaky_model(phi, VE_I, VE_S, theta, q, psi, X_I, X_S, H_I, H_S)
+  S_u <- df$S_u
+  S_x <- df$S_x
+  S_h <- df$S_h
+  S_v <- df$S_v
+  
+  L <- length(S_u)
+  
+  new_daily_hosp_u <- ((S_u[1:(L-1)]-S_u[2:L]) +
+               (S_x[1:(L-1)]-S_x[2:L])*(1-X_P))*infection_hosp_rate_delta
+  
+  new_daily_hosp_v <- ((S_v[1:(L-1)]-S_v[2:L])*(1-VE_P) +
+                         (S_h[1:(L-1)]-S_h[2:L])*(1-H_P))*infection_hosp_rate_delta
+  
+  # Assuming an 8 day lag between infection and hospitalization
+  new_daily_hosp_u <- c(rep(0,7), new_daily_hosp_u[1:(length(t)-7)])
+  new_daily_hosp_v <- c(rep(0,7), new_daily_hosp_v[1:(length(t)-7)])
+  
+  list(new_daily_hosp_u, new_daily_hosp_v)
+}
+
+
 compute_who_caused_cases_tot <- function(phi, VE_I, VE_S, theta = 0,
                                          q = 0, psi = 0, X_I = 0, X_S = 0, H_I = 0, H_S = 0){
   # OUTPUT: Percent of who caused cases (U, V, external) over the entire simulation
@@ -441,4 +470,13 @@ get_legend = function(myggplot){
   leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
   legend <- tmp$grobs[[leg]]
   return(legend)
+}
+
+addSmallLegend <- function(myPlot, pointSize = 2, textSize = 8, spaceLegend = 0.8) {
+  myPlot +
+    guides(shape = guide_legend(override.aes = list(size = pointSize)),
+           color = guide_legend(override.aes = list(size = pointSize))) +
+    theme(legend.title = element_text(size = textSize), 
+          legend.text  = element_text(size = textSize),
+          legend.key.size = unit(spaceLegend, "lines"))
 }

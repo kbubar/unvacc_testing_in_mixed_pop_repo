@@ -31,26 +31,35 @@ for (i in 1){
     scale_y_continuous(expand = c(0, 0), limits = c(0, 1000)) + # 2500 for R0 = 6
     alllabels_theme
   
-  
   #* Panel C - hospitalized over time ####
   # Assuming an 8 day lag between infection and hospitalization
-  df$hosp_u <- NA
-  df$hosp_v <- NA
-  df$hosp_u[1:7] <- 0
-  df$hosp_v[1:7] <- 0
-  df$hosp_u[8:length(t)] <- (df$I_u[1:(length(t)-7)] + df$I_x[1:(length(t)-7)]*(1-this_X_P))*infection_hosp_rate_delta
-  df$hosp_v[8:length(t)] <- (df$I_v[1:(length(t)-7)]*(1-this_VE_P) + df$I_h[1:(length(t)-7)]*(1-this_H_P))*infection_hosp_rate_delta
+
+  # df$hosp_u <- NA
+  # df$hosp_v <- NA
+  # df$hosp_u[1:7] <- 0
+  # df$hosp_v[1:7] <- 0
+  # df$hosp_u[8:length(t)] <- (df$I_u[1:(length(t)-7)] + df$I_x[1:(length(t)-7)]*(1-this_X_P))*infection_hosp_rate_delta
+  # df$hosp_v[8:length(t)] <- (df$I_v[1:(length(t)-7)]*(1-this_VE_P) + df$I_h[1:(length(t)-7)]*(1-this_H_P))*infection_hosp_rate_delta
+  # 
+  list_hosp <- compute_new_daily_hosp(this_phi, this_VE_I, this_VE_S, this_VE_P,
+                                      this_theta, this_q,
+                                      this_psi, this_X_I, this_X_S, this_X_P,
+                                      this_H_I, this_H_S, this_H_P)
+  
+  df$hosp_u <- unlist(list_hosp[[1]])
+  df$hosp_v <- unlist(list_hosp[[2]])
   
   C <- ggplot(df, aes(x = time)) +
     geom_line(aes(y = hosp_v), col = mylightgray, size = my_linesize) +
     geom_line(aes(y = hosp_u), col = mygray, size = my_linesize, linetype = "longdash")  +
     geom_line(aes(y = hosp_u + hosp_v), col = myblack, size = my_linesize) +
-    ylab("Hospitalized (#)") +
+    ylab("New daily hosp. (#)") +
     xlab("Time (days)") +
     scale_x_continuous(expand = c(0, 0), limits = c(0, 200)) +
-    scale_y_continuous(expand = c(0, 0), limits = c(0,12.5)) + # 2500 for R0 = 6
+    scale_y_continuous(expand = c(0, 0), limits = c(0,2)) + # 2500 for R0 = 6
     alllabels_theme
-
+  
+  
   #*  Panel D - transmission mode over time (i.e. who caused new daily cases) ####
   df <- data.frame(time = t)
 
@@ -79,7 +88,7 @@ for (i in 1){
     scale_y_continuous(expand = c(0, 0), limits = c(0, 80)) + # C(0, 200) for R0 = 6
     alllabels_theme
   
-  
+
   #* Panel E - total infections and breakthrough cases over phi ####
   df <- data.frame(phi = phi_vec)
   baseline_inf <- compute_tot_infections(phi = 0, this_VE_I, this_VE_S, this_theta, this_q,
@@ -225,7 +234,7 @@ ggarrange(NULL, NULL, NULL, NULL, NULL, NULL,
           labels = c(rep(NA, 6),
                      "b", NA, "c", NA, "d", NA,
                      rep(NA, 6),
-                     "e", NA, "f", NA, "g", NA),
+                     "e", NA, " f", NA, "g", NA),
           nrow = 4,
           ncol = 6,
           align = "hv",

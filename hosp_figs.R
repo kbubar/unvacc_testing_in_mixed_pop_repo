@@ -1,7 +1,7 @@
 
 source("setup.R") 
 
-this_theta = 0
+this_theta <- 0
 testing_everyone <- 0 # if 0, just testing unvacc. when implementing testing
 
 list_hosp <- compute_hospitalizations(this_phi, this_VE_I, this_VE_S, this_VE_P, infection_hosp_rate_delta, this_theta, this_q,
