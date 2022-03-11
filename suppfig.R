@@ -525,37 +525,35 @@ for (m in megafig_scenarios){
     fill_99 <- sym(paste0(base,"hosp_99_testeveryone"))
     Reff_50 <- sym("Reff_50_everyone")
     Reff_99 <- sym("Reff_99_everyone")
+    print("hospitalizations - testing everyone")
     }
   if (m == "hosp_uonly"){ 
     fill_50 <- sym(paste0(base,"hosp_50_uonly"))
     fill_99 <- sym(paste0(base,"hosp_99_uonly"))
     Reff_50 <- sym("Reff_50_uonly")
     Reff_99 <- sym("Reff_99_uonly")
+    print("hospitalizations - testing unvaccinated")
     }
   if (m == "inf_testeveryone"){ 
     fill_50 <- sym(paste0(base,"inf_50_testeveryone"))
     fill_99 <- sym(paste0(base,"inf_99_testeveryone"))
     Reff_50 <- sym("Reff_50_everyone")
     Reff_99 <- sym("Reff_99_everyone")
+    print("infections - testing unvaccinated")
     }
   
   #* II: Plot suppfig5 ####
   for (i in 1:3) {
     if (i == 1) {
       df <- waningdf
+      print("Waning scenario")
     } else if (i==2) {
       df <- baselinedf
+      print("Baseline scenario")
     } else {
       df <- boosteddf
+      print("Boosted scenario")
     }
-    
-    ggplot(baselinedf, aes(x = phi*100, y = psi*100)) + #, colour = ..level..)) +
-      geom_contour(aes(z = Reff), breaks = 1, size = 0.6, color = "blue") 
-    
-    ggplot(katedf, aes(x = phi*100, y = psi*100)) + #, colour = ..level..)) +
-      geom_contour(aes(z = Reff), breaks = 1, size = 0.6, color = "blue") 
-    
-      
     
     percentreduc50 <- ggplot(df, aes(x = phi*100, y = psi*100)) + #, colour = ..level..)) +
       geom_tile(aes(fill = df[[fill_50]])) +
@@ -614,7 +612,7 @@ for (m in megafig_scenarios){
                                  "d", NA, "    e", NA, "    f"),
                       label.y = 0.88)
 
-  if (m == "hosp_testeveryone"){ hosp_everyone_panel <- panels }
+  if (m == "hosp_testeveryone"){ hosp_everyone_panel <- panels}
   if (m == "hosp_uonly"){ hosp_uonly_panel <- panels }
   if (m == "inf_testeveryone"){ inf_everyone_panel <- panels }
 }
