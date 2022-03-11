@@ -246,19 +246,19 @@ for (i in 1:dim(df)[1]){
                                 df$psi[i], X_I = this_X_I, X_S = this_X_S,
                                 H_I = this_H_I, H_S = this_H_S)
   
-  df$tothosp_notesting[i] <- compute_total_hospitalizations(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, VE_P = this_VE_P, 
+  df$tothosp_notesting[i] <- compute_tot_hospitalizations(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, VE_P = this_VE_P, 
                                         infection_hosp_rate = infection_hosp_rate_delta,
                                         theta = 0, q = this_q, 
                                         df$psi[i], X_I = this_X_I, X_S = this_X_S, X_P = this_X_P,
                                         H_I = this_H_I, H_S = this_H_S, H_P = this_H_P)
   
-  df$tothosp_99[i] <- compute_total_hospitalizations(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, VE_P = this_VE_P, 
+  df$tothosp_99[i] <- compute_tot_hospitalizations(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, VE_P = this_VE_P, 
                                                          infection_hosp_rate = infection_hosp_rate_delta,
                                                          theta = theta_99, q = this_q, 
                                                          df$psi[i], X_I = this_X_I, X_S = this_X_S, X_P = this_X_P,
                                                          H_I = this_H_I, H_S = this_H_S, H_P = this_H_P)
   
-  df$tothosp_50[i] <- compute_total_hospitalizations(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, VE_P = this_VE_P, 
+  df$tothosp_50[i] <- compute_tot_hospitalizations(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, VE_P = this_VE_P, 
                                                   infection_hosp_rate = infection_hosp_rate_delta,
                                                   theta = theta_50, q = this_q, 
                                                   df$psi[i], X_I = this_X_I, X_S = this_X_S, X_P = this_X_P,
