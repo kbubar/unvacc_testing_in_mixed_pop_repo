@@ -19,8 +19,8 @@ df <- readRDS("df_fig2_baseline.RData")
 
 # or run the model 
 ptm <- proc.time()
-phi_vec <- seq(0, 1, by = 0.05) # fine grid : by = 0.01 (~20 min)
-psi_vec <- seq(0, 1, by = 0.05)
+phi_vec <- seq(0, 1, by = 0.01) # fine grid : by = 0.01 (~20 min)
+psi_vec <- seq(0, 1, by = 0.01)
 df <- expand.grid(phi = phi_vec, psi = psi_vec)
 
 df$Reff <- NA

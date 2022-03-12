@@ -521,43 +521,37 @@ for (m in megafig_scenarios){
   
   base <- "percent_reduc_"
   if (m == "hosp_testeveryone"){ 
-    fill_50 <- sym(paste0(base,"hosp_50_testeveryone"))
-    fill_99 <- sym(paste0(base,"hosp_99_testeveryone"))
-    Reff_50 <- sym("Reff_50_everyone")
-    Reff_99 <- sym("Reff_99_everyone")
-    print("hospitalizations - testing everyone")
+    fill_50 <- paste0(base,"hosp_50_testeveryone")
+    fill_99 <- paste0(base,"hosp_99_testeveryone")
+    Reff_50 <- "Reff_50_everyone"
+    Reff_99 <- "Reff_99_everyone"
     }
   if (m == "hosp_uonly"){ 
-    fill_50 <- sym(paste0(base,"hosp_50_uonly"))
-    fill_99 <- sym(paste0(base,"hosp_99_uonly"))
-    Reff_50 <- sym("Reff_50_uonly")
-    Reff_99 <- sym("Reff_99_uonly")
-    print("hospitalizations - testing unvaccinated")
+    fill_50 <-"percent_reduc_hosp_50_uonly"
+    fill_99 <- "percent_reduc_hosp_99_uonly"
+    Reff_50 <- "Reff_50_uonly"
+    Reff_99 <- "Reff_99_uonly"
     }
   if (m == "inf_testeveryone"){ 
-    fill_50 <- sym(paste0(base,"inf_50_testeveryone"))
-    fill_99 <- sym(paste0(base,"inf_99_testeveryone"))
-    Reff_50 <- sym("Reff_50_everyone")
-    Reff_99 <- sym("Reff_99_everyone")
-    print("infections - testing unvaccinated")
+    fill_50 <- paste0(base,"inf_50_testeveryone")
+    fill_99 <- paste0(base,"inf_99_testeveryone")
+    Reff_50 <- "Reff_50_everyone"
+    Reff_99 <- "Reff_99_everyone"
     }
   
   #* II: Plot suppfig5 ####
   for (i in 1:3) {
     if (i == 1) {
       df <- waningdf
-      print("Waning scenario")
     } else if (i==2) {
       df <- baselinedf
-      print("Baseline scenario")
     } else {
       df <- boosteddf
-      print("Boosted scenario")
     }
     
     percentreduc50 <- ggplot(df, aes(x = phi*100, y = psi*100)) + #, colour = ..level..)) +
-      geom_tile(aes(fill = df[[fill_50]])) +
-      geom_contour(aes(z = df[[Reff_50]]), breaks = 1, size = 0.6, color = "white") +
+      geom_tile(aes_string(fill = fill_50)) +
+      geom_contour(aes_string(z = Reff_50), breaks = 1, size = 0.6, color = "white") +
       geom_contour(aes(z = Reff), breaks = 1, size = 0.6, col = "white", linetype = "longdash") +
       scale_y_continuous(expand = c(0, 0)) +
       scale_x_continuous(expand = c(0, 0)) +
@@ -569,14 +563,14 @@ for (m in megafig_scenarios){
       theme(legend.position = "none")
     
     percentreduc99 <- ggplot(df, aes(x = phi*100, y = psi*100)) + #, colour = ..level..)) +
-      geom_tile(aes(fill = df[[fill_99]])) +
-      geom_contour(aes(z = df[[Reff_99]]), breaks = 1, size = 0.6, col = "white") +
+      geom_tile(aes_string(fill = fill_99)) +
+      geom_contour(aes_string(z = Reff_99), breaks = 1, size = 0.6, col = "white") +
       geom_contour(aes(z = Reff), breaks = 1, size = 0.6, col = "white", linetype = "longdash") +
       scale_y_continuous(expand = c(0, 0)) +
       scale_x_continuous(expand = c(0, 0)) +
       ylab("Infection-acquired immunity (%)") +
       xlab("") +# xlab("Population vaccination rate (%)") +
-      ggtitle("Weekly testing, 99% compliance", "% reduction in infections due to testing") +
+      #ggtitle("Weekly testing, 99% compliance", "% reduction in infections due to testing") +
       scale_fill_gradientn(colours = cet_pal(5, name = "inferno"), limits = c(0, 100)) +
       coord_fixed(1) +
       labs(fill = "") +
@@ -587,49 +581,85 @@ for (m in megafig_scenarios){
     percent_legend <- get_legend(percentreduc99)
     
     if (i == 1){
-      percentreduc50_waning <- percentreduc50 + onlyy_theme + ggtitle("Waning/low VE")
-      percentreduc99_waning <- percentreduc99 + theme(legend.position = "none")
+      percentreduc50_waning <- percentreduc50 + onlyy_theme 
+      percentreduc99_waning <- percentreduc99 + theme(legend.position = "none") + onlyy_theme
+      if (m == "inf_testeveryone") { 
+        percentreduc50_waning <- percentreduc50_waning + ggtitle("Waning/low VE") }
+      if (m == "hosp_uonly") { 
+        percentreduc99_waning <- percentreduc99_waning + alllabels_theme }
+      
     } else if (i == 2){
-      percentreduc50_baseline <- percentreduc50 + nolabels_theme + ggtitle("Baseline VE")
-      percentreduc99_baseline <- percentreduc99 + onlyx_theme + 
-        theme(legend.position = "none", plot.title = element_blank()) + 
-        xlab("Population vaccination rate (%)")
+      percentreduc50_baseline <- percentreduc50 + nolabels_theme 
+      percentreduc99_baseline <- percentreduc99 + nolabels_theme + 
+        theme(legend.position = "none", plot.title = element_blank()) 
+      if (m == "inf_testeveryone") { 
+        percentreduc50_baseline <- percentreduc50_baseline + ggtitle("Baseline VE") }
+      if (m == "hosp_uonly") { 
+        percentreduc99_baseline <- percentreduc99_baseline + onlyx_theme +  xlab("Population vaccination rate (%)") }
     } else {
-      percentreduc50_boosted <- percentreduc50 + nolabels_theme + ggtitle("Boosted/high VE")
-      percentreduc99_boosted <- percentreduc99 + onlyx_theme + theme(legend.position = "none", plot.title = element_blank())
-    }
+      percentreduc50_boosted <- percentreduc50 + nolabels_theme 
+      percentreduc99_boosted <- percentreduc99 + nolabels_theme + theme(legend.position = "none", plot.title = element_blank())
+      if (m == "inf_testeveryone") { 
+        percentreduc50_boosted <- percentreduc50_boosted + ggtitle("Boosted/high VE") }
+      if (m == "hosp_uonly") { 
+        percentreduc99_boosted <- percentreduc99_boosted + onlyx_theme }
+    } 
   }
   
-  panels <- ggarrange(percentreduc50_waning, NULL, percentreduc50_baseline, NULL, percentreduc50_boosted,
-                      NULL, NULL, NULL, NULL, NULL,
-                      percentreduc99_waning, NULL, percentreduc99_baseline, NULL, percentreduc99_boosted,
-                      nrow = 3, ncol = 5,
-                      #align = "hv",
-                      widths = c(1, -0.14, 1, -0.14, 1),
-                      heights = c(1, -0.22, 1),
-                      labels = c("a", NA, "    b", NA,"    c",
-                                 NA, NA, NA, NA, NA,
-                                 "d", NA, "    e", NA, "    f"),
-                      label.y = 0.88)
+  if (m == "inf_testeveryone"){ 
+    inf_everyone_panel <- ggarrange(percentreduc50_waning, NULL, percentreduc50_baseline, NULL, percentreduc50_boosted,
+                                    NULL, NULL, NULL, NULL, NULL,
+                                    percentreduc99_waning, NULL, percentreduc99_baseline, NULL, percentreduc99_boosted,
+                                    nrow = 3, ncol = 5,
+                                    align = "hv",
+                                    widths = c(1, -0.14, 1, -0.14, 1),
+                                    heights = c(1, -0.22, 1),
+                                    labels = c("a", NA, "    b", NA,"    c",
+                                                NA, NA, NA, NA, NA,
+                                                "d", NA, "    e", NA, "    f"),
+                                    label.y = 0.88)
+  }
+  if (m == "hosp_testeveryone"){ 
+    hosp_everyone_panel <- ggarrange(percentreduc50_waning, NULL, percentreduc50_baseline, NULL, percentreduc50_boosted,
+                                    NULL, NULL, NULL, NULL, NULL,
+                                    percentreduc99_waning, NULL, percentreduc99_baseline, NULL, percentreduc99_boosted,
+                                    nrow = 3, ncol = 5,
+                                    align = "hv",
+                                    widths = c(1, -0.14, 1, -0.14, 1),
+                                    heights = c(1, -0.22, 1),
+                                    labels = c("g", NA, "    h", NA,"    i",
+                                               NA, NA, NA, NA, NA,
+                                               "j", NA, "    k", NA, "    l"),
+                                    label.y = 0.88)
+  }
+  if (m == "hosp_uonly"){ 
+    hosp_uonly_panel <-ggarrange(percentreduc50_waning, NULL, percentreduc50_baseline, NULL, percentreduc50_boosted,
+                                 NULL, NULL, NULL, NULL, NULL,
+                                 percentreduc99_waning, NULL, percentreduc99_baseline, NULL, percentreduc99_boosted,
+                                 nrow = 3, ncol = 5,
+                                 align = "hv",
+                                 widths = c(1, -0.14, 1, -0.14, 1),
+                                 heights = c(1, -0.22, 1),
+                                 labels = c("m", NA, "    n", NA,"    o",
+                                            NA, NA, NA, NA, NA,
+                                            "p", NA, "    q", NA, "    r"),
+                                 label.y = 0.88)
+  }
 
-  if (m == "hosp_testeveryone"){ hosp_everyone_panel <- panels}
-  if (m == "hosp_uonly"){ hosp_uonly_panel <- panels }
-  if (m == "inf_testeveryone"){ inf_everyone_panel <- panels }
+
 }
 
 
-lay <- rbind(c(1,1,1,1,NA),
-             c(2,2,2,2,3),
-             c(4,4,4,4,NA))
+lay <- rbind(c(rep(1,10),NA),
+             c(rep(2,10),3),
+             c(rep(4,10),NA))
 
-suppfig5 <- grid.arrange(inf_everyone_panel, hosp_everyone_panel, percent_legend, hosp_uonly_panel, layout_matrix = lay)
+suppfig5 <- grid.arrange(inf_everyone_panel, hosp_everyone_panel, percent_legend, hosp_uonly_panel, 
+                         layout_matrix = lay,
+                         left = c("Infection-acquired immunity (%)"),
+                         bottom = c("Vaccination rate (%)"))
 
-suppfig5 <- arrangeGrob(inf_everyone_panel, hosp_everyone_panel, hosp_uonly_panel, percent_legend, layout_matrix = lay,
-                    widths = c(3, 3, 3, 0.5), 
-                    heights = c(3, 3, 3, 0.5),
-                    left = c("Infection-acquired immunity (%)"))
-
-ggsave("suppFig5_megafig.pdf", suppfig5, device = cairo_pdf, width = 8, height = 12)
+ggsave("suppFig5_megafig.pdf", suppfig5, device = cairo_pdf, width = 6, height = 10)
 ggsave("suppFig5_megafig.svg", suppfig5, device = svg, width = 8, height = 12)
 
 

@@ -283,8 +283,8 @@ for (i in 1:3) {
   }
   
   percentreduc50 <- ggplot(df, aes(x = phi*100, y = psi*100)) + #, colour = ..level..)) +
-    geom_tile(aes(fill = percent_reduc_hosp_50)) +
-    geom_contour(aes(z = Reff_50), breaks = 1, size = 0.6, color = "white") +
+    geom_tile(aes(fill = percent_reduc_hosp_50_uonly)) +
+    geom_contour(aes(z = Reff_50_uonly), breaks = 1, size = 0.6, color = "white") +
     geom_contour(aes(z = Reff), breaks = 1, size = 0.6, col = "white", linetype = "longdash") +
     scale_y_continuous(expand = c(0, 0)) +
     scale_x_continuous(expand = c(0, 0)) +
@@ -296,8 +296,8 @@ for (i in 1:3) {
     theme(legend.position = "none")
   
   percentreduc99 <- ggplot(df, aes(x = phi*100, y = psi*100)) + #, colour = ..level..)) +
-    geom_tile(aes(fill = percent_reduc_hosp_99)) +
-    geom_contour(aes(z = Reff_99), breaks = 1, size = 0.6, col = "white") +
+    geom_tile(aes(fill = percent_reduc_hosp_99_uonly)) +
+    geom_contour(aes(z = Reff_99_uonly), breaks = 1, size = 0.6, col = "white") +
     geom_contour(aes(z = Reff), breaks = 1, size = 0.6, col = "white", linetype = "longdash") +
     scale_y_continuous(expand = c(0, 0)) +
     scale_x_continuous(expand = c(0, 0)) +
