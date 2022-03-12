@@ -372,8 +372,8 @@ VE_list = c("baseline","waning","boosted")
 
 for (v in VE_list){
   
-  phi_vec <- seq(0, 1, by = 0.05) # fine grain: by = 0.01
-  psi_vec <- seq(0, 1, by = 0.05)
+  phi_vec <- seq(0, 1, by = 0.01) # fine grain: by = 0.01
+  psi_vec <- seq(0, 1, by = 0.01)
   df <- expand.grid(phi = phi_vec, psi = psi_vec)
   
   df$Reff <- NA
@@ -582,27 +582,29 @@ for (m in megafig_scenarios){
     
     if (i == 1){
       percentreduc50_waning <- percentreduc50 + onlyy_theme 
-      percentreduc99_waning <- percentreduc99 + theme(legend.position = "none") + onlyy_theme
+      percentreduc99_waning <- percentreduc99 + theme(legend.position = "none", plot.title = element_blank())
       if (m == "inf_testeveryone") { 
         percentreduc50_waning <- percentreduc50_waning + ggtitle("Waning/low VE") }
       if (m == "hosp_uonly") { 
         percentreduc99_waning <- percentreduc99_waning + alllabels_theme }
+      else { percentreduc99_waning <- percentreduc99_waning + onlyy_theme }
       
     } else if (i == 2){
       percentreduc50_baseline <- percentreduc50 + nolabels_theme 
-      percentreduc99_baseline <- percentreduc99 + nolabels_theme + 
-        theme(legend.position = "none", plot.title = element_blank()) 
+      percentreduc99_baseline <- percentreduc99 + theme(legend.position = "none", plot.title = element_blank())
       if (m == "inf_testeveryone") { 
         percentreduc50_baseline <- percentreduc50_baseline + ggtitle("Baseline VE") }
       if (m == "hosp_uonly") { 
         percentreduc99_baseline <- percentreduc99_baseline + onlyx_theme +  xlab("Population vaccination rate (%)") }
+      else { percentreduc99_baseline <- percentreduc99_baseline + nolabels_theme }
     } else {
       percentreduc50_boosted <- percentreduc50 + nolabels_theme 
-      percentreduc99_boosted <- percentreduc99 + nolabels_theme + theme(legend.position = "none", plot.title = element_blank())
+      percentreduc99_boosted <- percentreduc99 + theme(legend.position = "none", plot.title = element_blank())
       if (m == "inf_testeveryone") { 
         percentreduc50_boosted <- percentreduc50_boosted + ggtitle("Boosted/high VE") }
       if (m == "hosp_uonly") { 
         percentreduc99_boosted <- percentreduc99_boosted + onlyx_theme }
+      else { percentreduc99_boosted <- percentreduc99_boosted + nolabels_theme }
     } 
   }
   
@@ -650,14 +652,14 @@ for (m in megafig_scenarios){
 }
 
 
-lay <- rbind(c(rep(1,10),NA),
-             c(rep(2,10),3),
-             c(rep(4,10),NA))
+lay <- rbind(c(rep(1,10),NA,NA),
+             c(rep(2,10),3,NA),
+             c(rep(4,10),NA,NA))
 
 suppfig5 <- grid.arrange(inf_everyone_panel, hosp_everyone_panel, percent_legend, hosp_uonly_panel, 
                          layout_matrix = lay,
-                         left = c("Infection-acquired immunity (%)"),
-                         bottom = c("Vaccination rate (%)"))
+                         heights = c(1,1,1.15),
+                         left = c("Infection-acquired immunity (%)"))
 
 ggsave("suppFig5_megafig.pdf", suppfig5, device = cairo_pdf, width = 6, height = 10)
 ggsave("suppFig5_megafig.svg", suppfig5, device = svg, width = 8, height = 12)
