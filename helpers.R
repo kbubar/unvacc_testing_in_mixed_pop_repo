@@ -391,7 +391,8 @@ compute_percent_breakthrough_infections <- function(phi, VE_I, VE_S, theta = 0, 
 compute_percent_breakthrough_hosp <- function(phi, VE_I, VE_S, VE_P, infection_hosp_rate, theta = 0, q = 0, psi=0,
                                               X_I=0, X_S=0, X_P = 0, H_I=0, H_S=0, H_P = 0){
   # OUTPUT: percent of total hosp in the vaccinated population
-  list_hosp <- compute_hospitalizations(phi, VE_I, VE_S, VE_P, infection_hosp_rate)
+  list_hosp <- compute_hospitalizations(phi, VE_I, VE_S, VE_P, infection_hosp_rate,
+                                        theta, q, psi, X_I, X_S, X_P, H_I, H_S, H_P)
   
   tot_v_hosp <- list_hosp$v_hosp + list_hosp$h_hosp
   percent_breakthrough_hosp <- tot_v_hosp/list_hosp$tot_hosp*100

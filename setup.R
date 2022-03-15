@@ -107,10 +107,9 @@ ext_forcing <- 1 # ~ amount of daily imported cases
 
 R0 <- 4
 alpha <- R0*gamma/N # transmissibility
-
-this_X_S <- 0.63 # ref: Gardner, infection-acquired immunity effectiveness to decrease Susceptibility to infection
-this_X_I <- 0.13 # ref: Garnder, infection-acquired immunity effectiveness to decrease Infectiousness given infection
-this_X_P <- 0.54  # infection-acquired immunity effectiveness to decrease disease progression given infection
+delta_X_S <- 0.63 # ref: Gardner, infection-acquired immunity effectiveness to decrease Susceptibility to infection
+delta_X_I <- 0.13 # ref: Garnder, infection-acquired immunity effectiveness to decrease Infectiousness given infection
+delta_X_P <- 0.54  # infection-acquired immunity effectiveness to decrease disease progression given infection
 
 baseline_VE_S <- 0.65 # best guess from lots of sources including Gardner 
 baseline_VE_I <- 0.35  # best guess from lots of sources including Eyre (UK) 
@@ -122,6 +121,10 @@ baseline_H_I <- (1-this_X_I)*baseline_VE_I + this_X_I  # 0.43 for baseline scena
 baseline_H_P <- max(baseline_VE_P, this_X_P) 
 
 # set default parameters as the baseline scenario
+this_X_S <- delta_X_S
+this_X_I <- delta_X_I
+this_X_P <- delta_X_P
+
 this_VE_S <- baseline_VE_S
 this_VE_I <- baseline_VE_I
 this_VE_P <- baseline_VE_P
@@ -156,20 +159,6 @@ omicron_VE_P <- 0.77 # Best guess 2/28
 omicron_H_S <- (1-omicron_X_S)*omicron_VE_S + omicron_X_S
 omicron_H_I <- (1-omicron_X_I)*omicron_VE_I + omicron_X_I
 omicron_H_P <- max(omicron_VE_P,omicron_X_P)
-
-# omicron_boosted_VE_S <- 0.50
-# omicron_boosted_VE_I <- 0.10
-# omicron_boosted_VE_P <- 0.50 # FIXME
-# omicron_boosted_H_S <- 0.60
-# omicron_boosted_H_I <- 0.15
-# omicron_boosted_H_P <- 0.50 # FIXME
-# 
-# omicron_waning_VE_S <- 0.10
-# omicron_waning_VE_I <- 0.0
-# omicron_waning_VE_P <- 0.50 # FIXME
-# omicron_waning_H_S <- 0.40
-# omicron_waning_H_I <- 0.05
-# omicron_waning_H_P <- 0.50 # FIXME
 
 # Rate of hospitalization for unvaccinated, naive
 infection_hosp_rate_delta <- 0.02 
