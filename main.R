@@ -369,14 +369,15 @@ ggsave("Fig4.pdf", device = cairo_pdf, width = 10, height = 3)
 # _____________________________________________________________________
 
 # read in data
-#baseline_df <- readRDS("df_Fig7_baseline.RData")
-#waning_df <- readRDS("df_Fig7_waning.RData")
-#boosted_df <- readRDS("df_Fig7_boosted.RData")
-#omicron_df <- readRDS("df_Fig6_baseline.RData")
+baseline_df <- readRDS("df_Fig7_baseline.RData")
+waning_df <- readRDS("df_Fig7_waning.RData")
+boosted_df <- readRDS("df_Fig7_boosted.RData")
+omicron_df <- readRDS("df_Fig7_omicron.RData")
 
 # or run simulations
-phi_vec <- seq(0.5, 1, by = 0.05)
-psi_vec <- seq(0, 1, by = 0.05)
+phi_vec <- seq(0.5, 1, by = 0.01)
+psi_vec <- seq(0, 1, by = 0.01)
+testing_everyone <- 0 # unvaccinated only testing
 
 for (i in 1){
   
@@ -392,7 +393,7 @@ for (i in 1){
   baseline_df$hosp_50 <- NA
   baseline_df$VE <- "baseline"
 
-  
+  boosted_df <- expand.grid(phi = phi_vec, psi = psi_vec)
   boosted_df$breakthroughs_notesting <- NA
   boosted_df$breakthroughs_99 <- NA
   boosted_df$breakthroughs_50 <- NA
@@ -842,7 +843,7 @@ for (i in 1){
 
 }
 
-# Plot Figure 6
+# Plot Figure 7
 
 p_inf_transition <- ggplot() +
   coord_flip() +

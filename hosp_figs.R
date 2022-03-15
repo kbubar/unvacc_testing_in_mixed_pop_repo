@@ -246,19 +246,19 @@ for (i in 1:dim(df)[1]){
                                 df$psi[i], X_I = this_X_I, X_S = this_X_S,
                                 H_I = this_H_I, H_S = this_H_S)
   
-  df$tothosp_notesting[i] <- compute_total_hospitalizations(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, VE_P = this_VE_P, 
+  df$tothosp_notesting[i] <- compute_tot_hospitalizations(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, VE_P = this_VE_P, 
                                         infection_hosp_rate = infection_hosp_rate_delta,
                                         theta = 0, q = this_q, 
                                         df$psi[i], X_I = this_X_I, X_S = this_X_S, X_P = this_X_P,
                                         H_I = this_H_I, H_S = this_H_S, H_P = this_H_P)
   
-  df$tothosp_99[i] <- compute_total_hospitalizations(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, VE_P = this_VE_P, 
+  df$tothosp_99[i] <- compute_tot_hospitalizations(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, VE_P = this_VE_P, 
                                                          infection_hosp_rate = infection_hosp_rate_delta,
                                                          theta = theta_99, q = this_q, 
                                                          df$psi[i], X_I = this_X_I, X_S = this_X_S, X_P = this_X_P,
                                                          H_I = this_H_I, H_S = this_H_S, H_P = this_H_P)
   
-  df$tothosp_50[i] <- compute_total_hospitalizations(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, VE_P = this_VE_P, 
+  df$tothosp_50[i] <- compute_tot_hospitalizations(df$phi[i], VE_I = this_VE_I, VE_S = this_VE_S, VE_P = this_VE_P, 
                                                   infection_hosp_rate = infection_hosp_rate_delta,
                                                   theta = theta_50, q = this_q, 
                                                   df$psi[i], X_I = this_X_I, X_S = this_X_S, X_P = this_X_P,
@@ -283,8 +283,8 @@ for (i in 1:3) {
   }
   
   percentreduc50 <- ggplot(df, aes(x = phi*100, y = psi*100)) + #, colour = ..level..)) +
-    geom_tile(aes(fill = percent_reduc_hosp_50)) +
-    geom_contour(aes(z = Reff_50), breaks = 1, size = 0.6, color = "white") +
+    geom_tile(aes(fill = percent_reduc_hosp_50_uonly)) +
+    geom_contour(aes(z = Reff_50_uonly), breaks = 1, size = 0.6, color = "white") +
     geom_contour(aes(z = Reff), breaks = 1, size = 0.6, col = "white", linetype = "longdash") +
     scale_y_continuous(expand = c(0, 0)) +
     scale_x_continuous(expand = c(0, 0)) +
@@ -296,8 +296,8 @@ for (i in 1:3) {
     theme(legend.position = "none")
   
   percentreduc99 <- ggplot(df, aes(x = phi*100, y = psi*100)) + #, colour = ..level..)) +
-    geom_tile(aes(fill = percent_reduc_hosp_99)) +
-    geom_contour(aes(z = Reff_99), breaks = 1, size = 0.6, col = "white") +
+    geom_tile(aes(fill = percent_reduc_hosp_99_uonly)) +
+    geom_contour(aes(z = Reff_99_uonly), breaks = 1, size = 0.6, col = "white") +
     geom_contour(aes(z = Reff), breaks = 1, size = 0.6, col = "white", linetype = "longdash") +
     scale_y_continuous(expand = c(0, 0)) +
     scale_x_continuous(expand = c(0, 0)) +
