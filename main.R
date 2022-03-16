@@ -373,6 +373,7 @@ baseline_df <- readRDS("df_Fig7_baseline.RData")
 waning_df <- readRDS("df_Fig7_waning.RData")
 boosted_df <- readRDS("df_Fig7_boosted.RData")
 omicron_df <- readRDS("df_Fig7_omicron.RData")
+df <- readRDS("df_Fig7_R04.RData")
 
 # or run simulations
 phi_vec <- seq(0.5, 1, by = 0.01)
@@ -587,43 +588,43 @@ for (i in 1){
     omicron_df$breakthroughs_notesting[i] <- compute_percent_breakthrough_infections(omicron_df$phi[i],
                                             VE_I = omicron_VE_I, VE_S = omicron_VE_S,
                                             theta = 0, q = this_q,
-                                            omicron_df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                            omicron_df$psi[i], X_I = omicron_X_I, X_S = omicron_X_S,
                                             H_I = omicron_H_I, H_S = omicron_H_S)
     omicron_df$breakthroughs_99[i] <- compute_percent_breakthrough_infections(omicron_df$phi[i],
                                             VE_I = omicron_VE_I, VE_S = omicron_VE_S,
                                             theta = theta_99, q = this_q,
-                                            omicron_df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                            omicron_df$psi[i], X_I = omicron_X_I, X_S = omicron_X_S,
                                             H_I = omicron_H_I, H_S = omicron_H_S)
     omicron_df$breakthroughs_50[i] <- compute_percent_breakthrough_infections(omicron_df$phi[i],
                                             VE_I = omicron_VE_I, VE_S = omicron_VE_S,
                                             theta = theta_50, q = this_q,
-                                            omicron_df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                            omicron_df$psi[i], X_I = omicron_X_I, X_S = omicron_X_S,
                                             H_I = omicron_H_I, H_S = omicron_H_S)
     omicron_df$breakthroughs_biwk[i] <- compute_percent_breakthrough_infections(omicron_df$phi[i],
                                             VE_I = omicron_VE_I, VE_S = omicron_VE_S,
                                             theta = theta_99_biwk, q = this_q,
-                                            omicron_df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                            omicron_df$psi[i], X_I = omicron_X_I, X_S = omicron_X_S,
                                             H_I = omicron_H_I, H_S = omicron_H_S)
     
     omicron_df$v_transmission_notesting[i] <- 100 - compute_dominant_transmission(omicron_df$phi[i],
                                             VE_I = omicron_VE_I, VE_S = omicron_VE_S,
                                             theta = 0, q = this_q,
-                                            omicron_df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                            omicron_df$psi[i], X_I = omicron_X_I, X_S = omicron_X_S,
                                             H_I = omicron_H_I, H_S = omicron_H_S) * 100
     omicron_df$v_transmission_99[i] <- 100 - compute_dominant_transmission(omicron_df$phi[i],
                                              VE_I = omicron_VE_I, VE_S = omicron_VE_S,
                                              theta = theta_99, q = this_q,
-                                             omicron_df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                             omicron_df$psi[i], X_I = omicron_X_I, X_S = omicron_X_S,
                                              H_I = omicron_H_I, H_S = omicron_H_S) * 100
     omicron_df$v_transmission_50[i] <- 100 - compute_dominant_transmission(omicron_df$phi[i],
                                              VE_I = omicron_VE_I, VE_S = omicron_VE_S,
                                              theta = theta_50, q = this_q,
-                                             omicron_df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                             omicron_df$psi[i], X_I = omicron_X_I, X_S = omicron_X_S,
                                              H_I = omicron_H_I, H_S = omicron_H_S) * 100
     omicron_df$v_transmission_biwk[i] <- 100 - compute_dominant_transmission(omicron_df$phi[i],
                                                VE_I = omicron_VE_I, VE_S = omicron_VE_S,
                                                theta = theta_99_biwk, q = this_q,
-                                               omicron_df$psi[i], X_I = this_X_I, X_S = this_X_S,
+                                               omicron_df$psi[i], X_I = omicron_X_I, X_S = omicron_X_S,
                                                H_I = omicron_H_I, H_S = omicron_H_S) * 100
     
     omicron_df$hosp_notesting[i] <- compute_percent_breakthrough_hosp(omicron_df$phi[i], VE_I = omicron_VE_I, VE_S = omicron_VE_S, VE_P = omicron_VE_P, 
@@ -648,6 +649,12 @@ for (i in 1){
                                                H_I = omicron_H_I, H_S = omicron_H_S, H_P = omicron_H_P)
     
   }
+  
+  # save dateframes
+  saveRDS(waning_df,"df_Fig7_waning.RData")
+  saveRDS(baseline_df,"df_Fig7_baseline.RData")
+  saveRDS(boosted_df,"df_Fig7_boosted.RData")
+  saveRDS(omicron_df,"df_Fig7_omicron.RData")
 
   # compute summary statistics
   VEs <- c(rep(baseline_VE_S,3),rep(boosted_VE_S,3),rep(waning_VE_S,3),rep(omicron_VE_S,4))
@@ -840,6 +847,9 @@ for (i in 1){
   df[df$VE == baseline_VE_S,]$labels <- "Baseline VE"
   df[df$VE == boosted_VE_S,]$labels <- "Boosted (High VE)"
   df[df$VE == omicron_VE_S,]$labels <- "Omicron"
+  
+  # save final dataframe
+  saveRDS(df,"df_Fig7.RData")
 
 }
 
