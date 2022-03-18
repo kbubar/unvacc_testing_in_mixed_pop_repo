@@ -30,8 +30,8 @@ omicrondf <- readRDS("df_Fig2_omicron.RData")
 
 # or run the model
 ptm <- proc.time()
-phi_vec <- seq(0, 1, by = 0.1) # fine grid : by = 0.01 (~2 hr)
-psi_vec <- seq(0, 1, by = 0.1)
+phi_vec <- seq(0, 1, by = 0.01) # fine grid : by = 0.01 (~2 hr)
+psi_vec <- seq(0, 1, by = 0.01)
 df <- expand.grid(phi = phi_vec, psi = psi_vec)
 
 df$Reff <- NA
@@ -143,6 +143,7 @@ for (s in scenarios){
   }
 
 }
+ 
 saveRDS(baselinedf,file="df_Fig2_baseline.RData")
 saveRDS(waningdf,file="df_Fig2_waning.RData")
 saveRDS(boosteddf,file="df_Fig2_boosted.RData")
@@ -296,10 +297,10 @@ print(paste0("Transmission transition point: ",min(transmission_transitions$phi)
 # _____________________________________________________________________
 
 # Same df as figure 2
-baselinedf <- readRDS("df_Fig2_baseline.RData")
-waningdf <- readRDS("df_Fig2_waning.RData")
-boosteddf <- readRDS("df_Fig2_boosted.RData")
-omicrondf <- readRDS("df_Fig2_omicron.RData")
+baselinedf <- readRDS("df_Fig2_baseline_R06.RData")
+waningdf <- readRDS("df_Fig2_waning_R06.RData")
+boosteddf <- readRDS("df_Fig2_boosted_R06.RData")
+omicrondf <- readRDS("df_Fig2_omicron_R06.RData")
 
 # _____________________________________________________________________
 #* II: Plot fig3 ####
@@ -309,7 +310,7 @@ p_waning <- ggplot(waningdf, aes(x = phi*100, y = psi*100))+ #, colour = ..level
   geom_contour(aes(z = dom_transmission), breaks = 50, size = my_linesize, color = transmcolor) +
   geom_contour(aes(z = breakthrough), breaks = 50, size = my_linesize, color = infcolor) +
   geom_contour(aes(z = breakthrough_hosp), breaks = 50, size = my_linesize, color = hospcolor) +
-  geom_contour(aes(z = Reff),breaks = 1, size = my_linesize, color = "black") +
+  geom_contour(aes(z = Reff),breaks = 1, size = my_linesize/2, color = "black") +
   scale_y_continuous(expand = c(0, 0), limits = c(0, 100)) +
   scale_x_continuous(expand = c(0, 0), limits = c(0, 100)) +
   ylab("Infection-acquired immunity (%)") +
@@ -322,7 +323,7 @@ p_baseline <- ggplot(baselinedf, aes(x = phi*100, y = psi*100))+ #, colour = ..l
   geom_contour(aes(z = dom_transmission), breaks = 50, size = my_linesize, color = transmcolor) +
   geom_contour(aes(z = breakthrough), breaks = 50, size = my_linesize, color = infcolor) +
   geom_contour(aes(z = breakthrough_hosp), breaks = 50, size = my_linesize, color = hospcolor) +
-  geom_contour(aes(z = Reff),breaks = 1, size = my_linesize, color = "black") +
+  geom_contour(aes(z = Reff),breaks = 1, size = my_linesize/2, color = "black") +
   scale_y_continuous(expand = c(0, 0), limits = c(0, 100)) +
   scale_x_continuous(expand = c(0, 0), limits = c(0, 100)) +
   ylab("") +
@@ -336,7 +337,7 @@ p_boosted <- ggplot(boosteddf, aes(x = phi*100, y = psi*100))+ #, colour = ..lev
   geom_contour(aes(z = dom_transmission), breaks = 50, size = my_linesize, color = transmcolor) +
   geom_contour(aes(z = breakthrough), breaks = 50, size = my_linesize, color = infcolor) +
   geom_contour(aes(z = breakthrough_hosp), breaks = 50, size = my_linesize, color = hospcolor) +
-  geom_contour(aes(z = Reff),breaks = 1, size = my_linesize, color = "black") +
+  geom_contour(aes(z = Reff),breaks = 1, size = my_linesize/2, color = "black") +
   scale_y_continuous(expand = c(0, 0), limits = c(0, 100)) +
   scale_x_continuous(expand = c(0, 0), limits = c(0, 100)) +
   ylab("") +
@@ -350,7 +351,7 @@ p_omicron <- ggplot(omicrondf, aes(x = phi*100, y = psi*100))+ #, colour = ..lev
   geom_contour(aes(z = dom_transmission), breaks = 50, size = my_linesize, color = transmcolor) +
   geom_contour(aes(z = breakthrough), breaks = 50, size = my_linesize, color = infcolor) +
   geom_contour(aes(z = breakthrough_hosp), breaks = 50, size = my_linesize, color = hospcolor) +
-  geom_contour(aes(z = Reff),breaks = 1, size = my_linesize, color = "black") +
+  geom_contour(aes(z = Reff),breaks = 1, size = my_linesize/2, color = "black") +
   scale_y_continuous(expand = c(0, 0), limits = c(0, 100)) +
   scale_x_continuous(expand = c(0, 0), limits = c(0, 100)) +
   ylab("") +
