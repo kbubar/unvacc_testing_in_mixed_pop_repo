@@ -115,16 +115,16 @@ baseline_VE_S <- 0.65 # best guess from lots of sources including Gardner
 baseline_VE_I <- 0.35  # best guess from lots of sources including Eyre (UK) 
 baseline_VE_P <- 0.86 # best guess 2/28
 
+this_X_S <- delta_X_S
+this_X_I <- delta_X_I
+this_X_P <- delta_X_P
+
 # Hybrid immunity
 baseline_H_S <- (1-delta_X_S)*baseline_VE_S + delta_X_S  # 0.87 for baseline scenario
 baseline_H_I <- (1-delta_X_I)*baseline_VE_I + delta_X_I  # 0.43 for baseline scenario
 baseline_H_P <- max(baseline_VE_P, delta_X_P) 
 
 # set default parameters as the baseline scenario
-this_X_S <- delta_X_S
-this_X_I <- delta_X_I
-this_X_P <- delta_X_P
-
 this_VE_S <- baseline_VE_S
 this_VE_I <- baseline_VE_I
 this_VE_P <- baseline_VE_P
