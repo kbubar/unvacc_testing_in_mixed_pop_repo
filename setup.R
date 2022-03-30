@@ -19,7 +19,7 @@ library(dplyr)
 library(metR)
 source("helpers.R")
 
-## Run all these lines (14-18) if you haven't already installed fonts 
+## Run all these lines (23-29) if you haven't already installed fonts 
 library(remotes)
 #remotes::install_version("Rttf2pt1", version = "1.3.8")
 library(extrafont)

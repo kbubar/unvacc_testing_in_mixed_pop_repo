@@ -363,10 +363,9 @@ ggsave("suppFig5.svg", fig5, device = svg, width = 8, height = 5)
 
 # Either read in the corresponding RDS file
 # Dataframes for supplementary mega figure 5
-# waningdf <- readRDS("dataframes/df_suppFig5_waning_testeveryone_hosp.RData")
-# baselinedf <- readRDS("dataframes/df_suppFig5_baseline_testeveryone_hosp.RData")
-# boosteddf <- readRDS("dataframes/df_suppFig5_boosted_testeveryone_hosp.RData")
-
+waningdf <- readRDS("dataframes/df_suppFig5_waning_R04_testeveryone_hosp.RData")
+baselinedf <- readRDS("dataframes/df_suppFig5_baseline_R04_testeveryone_hosp.RData")
+boosteddf <- readRDS("dataframes/df_suppFig5_boosted_R04_testeveryone_hosp.RData")
 
 # or run the model
 ptm <- proc.time()
@@ -664,7 +663,7 @@ suppfig5 <- grid.arrange(inf_everyone_panel, hosp_everyone_panel, percent_legend
                          heights = c(1,1,1.15),
                          left = c("Infection-acquired immunity (%)"))
 
-ggsave("suppFig5_megafig.pdf", suppfig5, device = cairo_pdf, width = 6, height = 10)
+ggsave("suppFig5_megafig_2.pdf", suppfig5, device = cairo_pdf, width = 6, height = 10)
 ggsave("suppFig5_megafig.svg", suppfig5, device = svg, width = 8, height = 12)
 
 
