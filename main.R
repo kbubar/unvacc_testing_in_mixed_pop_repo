@@ -360,11 +360,11 @@ ggsave("Fig4.pdf", device = cairo_pdf, width = 10, height = 3)
 # _____________________________________________________________________
 
 # read in data
-baseline_df <- readRDS("df_Fig7_baseline.RData")
-waning_df <- readRDS("df_Fig7_waning.RData")
-boosted_df <- readRDS("df_Fig7_boosted.RData")
-omicron_df <- readRDS("df_Fig7_omicron.RData")
-df <- readRDS("df_Fig7_R04.RData")
+baseline_df <- readRDS("dataframes/df_Fig7_baseline.RData")
+waning_df <- readRDS("dataframes/df_Fig7_waning.RData")
+boosted_df <- readRDS("dataframes/df_Fig7_boosted.RData")
+omicron_df <- readRDS("dataframes/df_Fig7_omicron.RData")
+df <- readRDS("dataframes/df_Fig7_R04.RData")
 
 # or run simulations
 phi_vec <- seq(0.5, 1, by = 0.01)

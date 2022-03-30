@@ -10,13 +10,13 @@ theme_update(text = element_text(family="Arial", size = 11),
 
 for (thisrow in 1:2){
   if (thisrow == 1){
-    baselinedf <- readRDS("df_fig2_baseline.RData")
-    waningdf <- readRDS("df_fig2_waning.RData")
-    boosteddf <- readRDS("df_fig2_boosted.RData")
+    baselinedf <- readRDS("dataframes/df_fig2_baseline.RData")
+    waningdf <- readRDS("dataframes/df_fig2_waning.RData")
+    boosteddf <- readRDS("dataframes/df_fig2_boosted.RData")
   } else {
-    baselinedf <- readRDS("df_suppfig2_baseline_R06.RData")
-    waningdf <- readRDS("df_suppfig2_waning_R06.RData")
-    boosteddf <- readRDS("df_suppfig2_boosted_R06.RData")
+    baselinedf <- readRDS("dataframes/df_suppfig2_baseline_R06.RData")
+    waningdf <- readRDS("dataframes/df_suppfig2_waning_R06.RData")
+    boosteddf <- readRDS("dataframes/df_suppfig2_boosted_R06.RData")
   }
   
   R0 <- 6
@@ -116,9 +116,9 @@ ggsave("SuppFig1.svg", suppfig1, device = svg, width = 8, height = 5)
 # Either read in the corresponding RDS file
 
 # Dataframes for supp text figure 5 - R0 = 4, testing everyone
-waningdf <- readRDS("df_suppFig5_waning_R04_testeveryone.RData")
-baselinedf <- readRDS("df_suppFig5_baseline_R04_testeveryone.RData")
-boosteddf <- readRDS("df_suppFig5_boosted_R04_testeveryone.RData")
+waningdf <- readRDS("dataframes/df_suppFig5_waning_R04_testeveryone.RData")
+baselinedf <- readRDS("dataframes/df_suppFig5_baseline_R04_testeveryone.RData")
+boosteddf <- readRDS("dataframes/df_suppFig5_boosted_R04_testeveryone.RData")
 
 # or run the model
 ptm <- proc.time()
@@ -353,7 +353,7 @@ ggsave("suppFig5.svg", fig5, device = svg, width = 8, height = 5)
 
 
 # _____________________________________________________________________
-# Mega supplementary Figure 5 ####
+# Supplementary Figure 6 : meadheatmap ####
 # Same as Figure 5, but with:
 # 1. % of infections averted testing everyone, 
 # 2. % hospitalizations averted testing everyone, 
@@ -363,9 +363,9 @@ ggsave("suppFig5.svg", fig5, device = svg, width = 8, height = 5)
 
 # Either read in the corresponding RDS file
 # Dataframes for supplementary mega figure 5
-# waningdf <- readRDS("df_suppFig5_waning_testeveryone_hosp.RData")
-# baselinedf <- readRDS("df_suppFig5_baseline_testeveryone_hosp.RData")
-# boosteddf <- readRDS("df_suppFig5_boosted_testeveryone_hosp.RData")
+# waningdf <- readRDS("dataframes/df_suppFig5_waning_testeveryone_hosp.RData")
+# baselinedf <- readRDS("dataframes/df_suppFig5_baseline_testeveryone_hosp.RData")
+# boosteddf <- readRDS("dataframes/df_suppFig5_boosted_testeveryone_hosp.RData")
 
 
 # or run the model

@@ -15,15 +15,15 @@ testing_everyone <- 0 # if 0, just testing unvacc. when implementing testing
 # _____________________________________________________________________
 
 # Either read in the corresponding RDS file
-baselinedf <- readRDS("df_Fig2_baseline.RData")
-waningdf <- readRDS("df_Fig2_waning.RData")
-boosteddf <- readRDS("df_Fig2_boosted.RData")
-omicrondf <- readRDS("df_Fig2_omicron.RData")
+baselinedf <- readRDS("dataframes/df_Fig2_baseline.RData")
+waningdf <- readRDS("dataframes/df_Fig2_waning.RData")
+boosteddf <- readRDS("dataframes/df_Fig2_boosted.RData")
+omicrondf <- readRDS("dataframes/df_Fig2_omicron.RData")
 
-baselinedf <- readRDS("df_SuppFig2_baseline_R06.RData")
-waningdf <- readRDS("df_SuppFig2_waning_R06.RData")
-boosteddf <- readRDS("df_SuppFig2_boosted_R06.RData")
-omicrondf <- readRDS("df_SuppFig2_omicron_R06.RData")
+baselinedf <- readRDS("dataframes/df_SuppFig2_baseline_R06.RData")
+waningdf <- readRDS("dataframes/df_SuppFig2_waning_R06.RData")
+boosteddf <- readRDS("dataframes/df_SuppFig2_boosted_R06.RData")
+omicrondf <- readRDS("dataframes/df_SuppFig2_omicron_R06.RData")
 
 
 # or run the model
@@ -284,10 +284,10 @@ print(paste0("Transmission transition point: ",min(transmission_transitions$phi)
 # _____________________________________________________________________
 
 # Same df as figure 2
-baselinedf <- readRDS("df_Fig2_baseline_R06.RData")
-waningdf <- readRDS("df_Fig2_waning_R06.RData")
-boosteddf <- readRDS("df_Fig2_boosted_R06.RData")
-omicrondf <- readRDS("df_Fig2_omicron_R06.RData")
+baselinedf <- readRDS("dataframes/df_Fig2_baseline_R06.RData")
+waningdf <- readRDS("dataframes/df_Fig2_waning_R06.RData")
+boosteddf <- readRDS("dataframes/df_Fig2_boosted_R06.RData")
+omicrondf <- readRDS("dataframes/df_Fig2_omicron_R06.RData")
 
 # _____________________________________________________________________
 #* II: Plot fig3 ####
@@ -369,19 +369,19 @@ ggsave("Fig3.svg", fig3, device = svg, width = 10, height = 3)
 
 # Either read in the corresponding RDS file
 # Dataframes for main text figure 5
-waningdf <- readRDS("df_Fig5_waning.RData")
-baselinedf <- readRDS("df_Fig5_baseline.RData")
-boosteddf <- readRDS("df_Fig5_boosted.RData")
+waningdf <- readRDS("dataframes/df_Fig5_waning.RData")
+baselinedf <- readRDS("dataframes/df_Fig5_baseline.RData")
+boosteddf <- readRDS("dataframes/df_Fig5_boosted.RData")
 
 # Dataframes for supp text figure 5 - R0 = 6
-waningdf <- readRDS("df_suppFig5_waning_R06.RData")
-baselinedf <- readRDS("df_suppFig5_baseline_R06.RData")
-boosteddf <- readRDS("df_suppFig5_boosted_R06.RData")
+waningdf <- readRDS("dataframes/df_suppFig5_waning_R06.RData")
+baselinedf <- readRDS("dataframes/df_suppFig5_baseline_R06.RData")
+boosteddf <- readRDS("dataframes/df_suppFig5_boosted_R06.RData")
 
 # Dataframes for supp text figure 5 - R0 = 4, testing everyone
-# waningdf <- readRDS("df_suppFig5_waning_R04_testeveryone.RData")
-# baselinedf <- readRDS("df_suppFig5_baseline_R04_testeveryone.RData")
-# boosteddf <- readRDS("df_suppFig5_boosted_R04_testeveryone.RData")
+# waningdf <- readRDS("dataframes/df_suppFig5_waning_R04_testeveryone.RData")
+# baselinedf <- readRDS("dataframes/df_suppFig5_baseline_R04_testeveryone.RData")
+# boosteddf <- readRDS("dataframes/df_suppFig5_boosted_R04_testeveryone.RData")
 
 # or run the model
 ptm <- proc.time()
@@ -534,17 +534,17 @@ this_H_S <- omicron_H_S
 this_H_I <- omicron_H_I
 
 # Either read in the corresponding RDS file
-df <- readRDS("df_Fig6.RData")
+df <- readRDS("dataframes/df_Fig6.RData")
 
 # Dataframe for supp text figure 4 - R0 = 6
-df <- readRDS("df_SuppFig6_R06.RData")
+df <- readRDS("dataframes/df_SuppFig6_R06.RData")
 testing_everyone <- 0
 R0 <- 6
 alpha <- R0*gamma/N # transmissibility
 
 
 # Dataframe for supp text figure 5 - R0 = 4, testing everyone
-df <- readRDS("df_SuppFig6_testeveryone.RData")
+df <- readRDS("dataframes/df_SuppFig6_testeveryone.RData")
 testing_everyone <- 1 
 
 # or run the model
