@@ -1,5 +1,5 @@
 # Transmission and unvaccinated-only testing in populations of mixed vaccination status
-Github repo associated with the manuscript "Transmission and Unvaccinated-Only Testing in Populations of Mixed Vaccination Status"
+Github repo associated with the manuscript "SARS-CoV-2 Transmission and Impacts of Unvaccinated-Only Screening in Populations of Mixed Vaccination Status"
 
 ## Dependencies:
 R version 4.1.0 or higher is required. All package dependents can be found in **setup.R**. For initial font install, see line 13. 
@@ -9,24 +9,26 @@ To install packages, use command 'install.packages("package_name")'. Installatio
 
 **setup.R** loads packages, plotting functions, and initializes all the default parameter settings.
 
-**main.R** calls set_up.R to initialize everything. Runs the model and generates the main text figures and table.
+**helpers.R** defines functions to run model and compute necessary data for figures. 
+
+**main.R** runs the model and generates the main text line plots and table.
+
+**contourplot.R** runs the model and generates the heatmap figures. 
 
 **suppfig.R** runs the model and generates the supplemental figures.
 
-**helper_functions.R** defines functions used in main.R and suppfig.R.
-
 ## Demo:
-Dataframes for each figure are included in the repository. To replicate manuscript figures, load dataframes using the 'readRDS(filename.RData)' command, then executre the following figure code. 
-Finely detailed contour plot data will take approximately 12 hours to generate on a standard machine. To improve runtime, increase the step size on lines 20 and 21 in **countourplot.R** with 'by=0.05'.
+Dataframes for each figure are included in the _dataframes_ folder of the repository. To replicate manuscript figures, load dataframes using the 'readRDS(filename.RData)' command, then execute the figure code in the appropriate file. 
+Finely detailed heatmap data (in countourplot.R) will take approximately 12 hours to generate on a standard machine. To improve runtime, increase the step size on lines 31 and 32 in **countourplot.R** with 'by=0.05'.
 
 
 ## Notes:
 
--If you do not have fonts installed in R, see line 13 in set_up.R to configure this correctly. Else any line that specifies family="Arial" will return an error.
+- If you do not have fonts installed in R, see line 22 in set_up.R to configure this correctly. Otherwise any line that specifies family="Arial" will return an error.
 
--Exporting a cairo_pdf embeds the text in figures correctly on Windows. But, if you are a Mac user, this file format may not be compatible. We recommend exporting a png instead.
+- Exporting a cairo_pdf embeds the text in figures correctly on Windows. But, if you are a Mac user, this file format may not be compatible. We recommend exporting a png instead.
 
--We recommend using the document outline to navigate
+- We recommend using the document outline (on the right-hand side) to navigate each file. 
 
 
 # License
