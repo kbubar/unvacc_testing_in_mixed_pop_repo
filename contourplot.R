@@ -534,20 +534,20 @@ this_H_S <- omicron_H_S
 this_H_I <- omicron_H_I
 
 # Either read in the corresponding RDS file
+## Dataframe for main text figure 6
 df <- readRDS("dataframes/df_Fig6.RData")
 
-# Dataframe for supp text figure 4 - R0 = 6
-df <- readRDS("dataframes/df_SuppFig6_R06.RData")
-testing_everyone <- 0
-R0 <- 6
-alpha <- R0*gamma/N # transmissibility
+## Dataframe for supp text figure 4 - R0 = 6
+# df <- readRDS("dataframes/df_SuppFig6_R06.RData")
+# testing_everyone <- 0
+# R0 <- 6
+# alpha <- R0*gamma/N # transmissibility
 
+## Dataframe for supp text figure 5 - R0 = 4, testing everyone
+# df <- readRDS("dataframes/df_SuppFig6_testeveryone.RData")
+# testing_everyone <- 1 
 
-# Dataframe for supp text figure 5 - R0 = 4, testing everyone
-df <- readRDS("dataframes/df_SuppFig6_testeveryone.RData")
-testing_everyone <- 1 
-
-# or run the model
+# Or run the model
 ptm <- proc.time()
 
 phi_vec <- seq(0, 1, by = 0.01)
@@ -646,8 +646,8 @@ plot_timeseries <- ggplot(df_timeseries, aes(x = time)) +
   scale_x_continuous(expand = c(0, 0), limits = c(0, 200)) +
   scale_y_continuous(expand = c(0, 0), limits = c(0, 5000/1000)) + # 5000 for R0 = 6
   alllabels_theme +
-  coord_fixed(200/3.5) +
-  #coord_fixed(200/5) + # for R0 = 6
+  #coord_fixed(200/3.5) +
+  coord_fixed(200/5) + # for R0 = 6
   theme(plot.margin = margin(10, 10, 10, 10))
 
 percentreduc50 <- ggplot(df, aes(x = phi*100, y = psi*100)) + #, colour = ..level..)) +
@@ -731,4 +731,4 @@ fig6 <- arrangeGrob(panels, percent_legend, plot_timeseries, layout_matrix = lay
                     widths = c(2.8, 0.2, 1))
 
 ggsave("Fig6.pdf", fig6, device = cairo_pdf, width = 8, height = 2.5)
-ggsave("SuppFig6.svg", fig6, device = svg, width = 8, height = 2.5)
+ggsave("Fig6.svg", fig6, device = svg, width = 8, height = 2.5)
