@@ -32,15 +32,6 @@ for (i in 1){
     alllabels_theme
   
   #* Panel C - hospitalized over time ####
-  # Assuming an 8 day lag between infection and hospitalization
-
-  # df$hosp_u <- NA
-  # df$hosp_v <- NA
-  # df$hosp_u[1:7] <- 0
-  # df$hosp_v[1:7] <- 0
-  # df$hosp_u[8:length(t)] <- (df$I_u[1:(length(t)-7)] + df$I_x[1:(length(t)-7)]*(1-this_X_P))*infection_hosp_rate_delta
-  # df$hosp_v[8:length(t)] <- (df$I_v[1:(length(t)-7)]*(1-this_VE_P) + df$I_h[1:(length(t)-7)]*(1-this_H_P))*infection_hosp_rate_delta
-  # 
   list_hosp <- compute_new_daily_hosp(this_phi, this_VE_I, this_VE_S, this_VE_P,
                                       this_theta, this_q,
                                       this_psi, this_X_I, this_X_S, this_X_P,

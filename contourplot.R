@@ -20,13 +20,11 @@ waningdf <- readRDS("df_Fig2_waning.RData")
 boosteddf <- readRDS("df_Fig2_boosted.RData")
 omicrondf <- readRDS("df_Fig2_omicron.RData")
 
-# baselinedf <- readRDS("df_Fig2_baseline_R06.RData")
-# waningdf <- readRDS("df_Fig2_waning_R06.RData")
-# boosteddf <- readRDS("df_Fig2_boosted_R06.RData")
-# omicrondf <- readRDS("df_Fig2_omicron_R06.RData")
+baselinedf <- readRDS("df_SuppFig2_baseline_R06.RData")
+waningdf <- readRDS("df_SuppFig2_waning_R06.RData")
+boosteddf <- readRDS("df_SuppFig2_boosted_R06.RData")
+omicrondf <- readRDS("df_SuppFig2_omicron_R06.RData")
 
-
-#df <- readRDS("df_suppfig2_baseline_R06.RData")
 
 # or run the model
 ptm <- proc.time()
@@ -159,7 +157,7 @@ theme_update(text = element_text(family="Arial", size = 11),
 
 # plot Reff with number of infections
 p_Reff_inf <- ggplot(baselinedf, aes(x = phi*100, y = psi*100, z = Reff))+ #, colour = ..level..)) +
-  geom_tile(aes(fill = tot_infections)) +
+  geom_raster(aes(fill = tot_infections)) +
   geom_contour(breaks = 1:R0, size = 0.4, color = "white") +
   #geom_text_contour(breaks = 1:R0, color = "white", rotate = FALSE, skip = 0) +
   scale_y_continuous(expand = c(0, 0)) +
@@ -176,7 +174,7 @@ p_Reff_inf <- ggplot(baselinedf, aes(x = phi*100, y = psi*100, z = Reff))+ #, co
 
 # plot Reff with number of hospitalizations
 p_Reff_hosp <- ggplot(baselinedf, aes(x = phi*100, y = psi*100, z = Reff))+ #, colour = ..level..)) +
-  geom_tile(aes(fill = tot_hosp)) +
+  geom_raster(aes(fill = tot_hosp)) +
   geom_contour(breaks = 1:R0, size = 0.4, color = "white") +
   #geom_text_contour(breaks = 1:R0, color = "white", rotate = FALSE, skip = 0) +
   scale_y_continuous(expand = c(0, 0)) +
@@ -193,7 +191,7 @@ p_Reff_hosp <- ggplot(baselinedf, aes(x = phi*100, y = psi*100, z = Reff))+ #, c
 
 # plot % infections in the unvaccinated
 p_infection <- ggplot(baselinedf, aes(x = phi*100, y = psi*100, z = breakthrough)) +
-  geom_tile(aes(fill = 100 - breakthrough)) +
+  geom_raster(aes(fill = 100 - breakthrough)) +
   stat_contour(breaks = c(50), size = 0.4, col = "white") +
   scale_y_continuous(expand = c(0,0)) +
   scale_x_continuous(expand = c(0,0)) +
@@ -207,7 +205,7 @@ p_infection <- ggplot(baselinedf, aes(x = phi*100, y = psi*100, z = breakthrough
 
 # plot dominant transmission
 p_transmission <- ggplot(baselinedf, aes(x = phi*100, y = psi*100, z = dom_transmission)) +
-  geom_tile(aes(fill = dom_transmission)) +
+  geom_raster(aes(fill = dom_transmission)) +
   stat_contour(breaks = c(50), size = 0.4, color = "white") +
   scale_y_continuous(expand = c(0,0)) +
   scale_x_continuous(expand = c(0,0)) +
@@ -224,7 +222,7 @@ p_transmission <- ggplot(baselinedf, aes(x = phi*100, y = psi*100, z = dom_trans
 
 # plot % hospitalizations in the unvaccinated
 p_hospitalization <- ggplot(baselinedf, aes(x = phi*100, y = psi*100, z = breakthrough_hosp)) +
-  geom_tile(aes(fill = 100 - breakthrough_hosp)) +
+  geom_raster(aes(fill = 100 - breakthrough_hosp)) +
   stat_contour(breaks = c(50), size = 0.4, col = "white") +
   scale_y_continuous(expand = c(0,0)) +
   scale_x_continuous(expand = c(0,0)) +
@@ -266,17 +264,6 @@ lay <- cbind(c(1, 2))
 
 fig2 <- arrangeGrob(fig2top, fig2bottom, layout_matrix = lay,
                     heights = c(1, 1))
-# fig2 <- ggarrange(p_Reff_inf, NULL, inf_legend, NULL, NULL, p_Reff_hosp, NULL, hosp_legend,
-#                   p_infection, NULL, NULL, p_transmission, NULL, p_hospitalization, percent_legend, NULL,
-#                   labels = c("a", NA, NA, NA, "b", NA, NA, NA,
-#                              "c", NA, NA, "d", "e", NA, NA, NA),
-#                   nrow = 2,
-#                   ncol = 8,
-#                   align = "hv",
-#                   widths = c(1, 0.2, 0.1, 1, 0.01, 1, 0.2, 0.05),
-#                   heights = c(1, 1),
-#                   label.y = 0.98)
-
 
 ggsave("Fig2.pdf", fig2, device = cairo_pdf, width = 8, height = 5)
 ggsave("Fig2.png", fig2, device = png, width = 8, height = 5)
@@ -382,19 +369,19 @@ ggsave("Fig3.svg", fig3, device = svg, width = 10, height = 3)
 
 # Either read in the corresponding RDS file
 # Dataframes for main text figure 5
-# waningdf <- readRDS("df_Fig5_waning.RData")
-# baselinedf <- readRDS("df_Fig5_baseline.RData")
+waningdf <- readRDS("df_Fig5_waning.RData")
+baselinedf <- readRDS("df_Fig5_baseline.RData")
 boosteddf <- readRDS("df_Fig5_boosted.RData")
 
 # Dataframes for supp text figure 5 - R0 = 6
-# waningdf <- readRDS("df_suppFig5_waning_R06.RData")
-# baselinedf <- readRDS("df_suppFig5_baseline_R06.RData")
-# boosteddf <- readRDS("df_suppFig5_boosted_R06.RData")
+waningdf <- readRDS("df_suppFig5_waning_R06.RData")
+baselinedf <- readRDS("df_suppFig5_baseline_R06.RData")
+boosteddf <- readRDS("df_suppFig5_boosted_R06.RData")
 
 # Dataframes for supp text figure 5 - R0 = 4, testing everyone
-waningdf <- readRDS("df_suppFig5_waning_R04_testeveryone.RData")
-baselinedf <- readRDS("df_suppFig5_baseline_R04_testeveryone.RData")
-boosteddf <- readRDS("df_suppFig5_boosted_R04_testeveryone.RData")
+# waningdf <- readRDS("df_suppFig5_waning_R04_testeveryone.RData")
+# baselinedf <- readRDS("df_suppFig5_baseline_R04_testeveryone.RData")
+# boosteddf <- readRDS("df_suppFig5_boosted_R04_testeveryone.RData")
 
 # or run the model
 ptm <- proc.time()
@@ -463,7 +450,7 @@ for (i in 1:3) {
   }
 
   percentreduc50 <- ggplot(df, aes(x = phi*100, y = psi*100)) + #, colour = ..level..)) +
-    geom_tile(aes(fill = percent_reduc_inf_50)) +
+    geom_raster(aes(fill = percent_reduc_inf_50)) +
     geom_contour(aes(z = Reff_50), breaks = 1, size = 0.6, color = "white") +
     geom_contour(aes(z = Reff), breaks = 1, size = 0.6, col = "white", linetype = "longdash") +
     scale_y_continuous(expand = c(0, 0)) +
@@ -476,7 +463,7 @@ for (i in 1:3) {
     theme(legend.position = "none")
 
   percentreduc99 <- ggplot(df, aes(x = phi*100, y = psi*100)) + #, colour = ..level..)) +
-    geom_tile(aes(fill = percent_reduc_inf_99)) +
+    geom_raster(aes(fill = percent_reduc_inf_99)) +
     geom_contour(aes(z = Reff_99), breaks = 1, size = 0.6, col = "white") +
     geom_contour(aes(z = Reff), breaks = 1, size = 0.6, col = "white", linetype = "longdash") +
     scale_y_continuous(expand = c(0, 0)) +
@@ -525,8 +512,8 @@ fig5 <- arrangeGrob(panels, percent_legend, layout_matrix = lay,
              widths = c(3, 0.5),
              left = c("Infection-acquired immunity (%)"))
 
-ggsave("suppFig5_R04_testeveryone.pdf", fig5, device = cairo_pdf, width = 8, height = 5)
-ggsave("suppFig5.svg", fig5, device = svg, width = 8, height = 5)
+ggsave("Fig5.pdf", fig5, device = cairo_pdf, width = 8, height = 5)
+ggsave("SuppFig3.svg", fig5, device = svg, width = 8, height = 5)
 
 
 # _____________________________________________________________________
@@ -549,8 +536,16 @@ this_H_I <- omicron_H_I
 # Either read in the corresponding RDS file
 df <- readRDS("df_Fig6.RData")
 
-#df <- readRDS("df_SuppFig6_R06.RData")
+# Dataframe for supp text figure 4 - R0 = 6
+df <- readRDS("df_SuppFig6_R06.RData")
+testing_everyone <- 0
+R0 <- 6
+alpha <- R0*gamma/N # transmissibility
 
+
+# Dataframe for supp text figure 5 - R0 = 4, testing everyone
+df <- readRDS("df_SuppFig6_testeveryone.RData")
+testing_everyone <- 1 
 
 # or run the model
 ptm <- proc.time()
@@ -649,14 +644,14 @@ plot_timeseries <- ggplot(df_timeseries, aes(x = time)) +
   ylab("Infected (#)") +
   xlab("Time (days)") +
   scale_x_continuous(expand = c(0, 0), limits = c(0, 200)) +
-  scale_y_continuous(expand = c(0, 0), limits = c(0, 3500/1000)) + # 5000 for R0 = 6
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 5000/1000)) + # 5000 for R0 = 6
   alllabels_theme +
   coord_fixed(200/3.5) +
   #coord_fixed(200/5) + # for R0 = 6
   theme(plot.margin = margin(10, 10, 10, 10))
 
 percentreduc50 <- ggplot(df, aes(x = phi*100, y = psi*100)) + #, colour = ..level..)) +
-  geom_tile(aes(fill = percent_reduc_inf_50)) +
+  geom_raster(aes(fill = percent_reduc_inf_50)) +
   geom_contour(aes(z = Reff_50), breaks = 1, size = 0.6, color = "white") +
   geom_contour(aes(z = Reff), breaks = 1, size = 0.6, col = "white", linetype = "longdash") +
   scale_y_continuous(expand = c(0, 0)) +
@@ -670,7 +665,7 @@ percentreduc50 <- ggplot(df, aes(x = phi*100, y = psi*100)) + #, colour = ..leve
   theme(legend.position = "none")
 
 percentreduc99 <- ggplot(df, aes(x = phi*100, y = psi*100)) + #, colour = ..level..)) +
-  geom_tile(aes(fill = percent_reduc_inf_99)) +
+  geom_raster(aes(fill = percent_reduc_inf_99)) +
   geom_contour(aes(z = Reff_99), breaks = 1, size = 0.6, col = "white") +
   geom_contour(aes(z = Reff), breaks = 1, size = 0.6, col = "white", linetype = "longdash") +
   scale_y_continuous(expand = c(0, 0)) +
@@ -687,12 +682,12 @@ percentreduc99 <- ggplot(df, aes(x = phi*100, y = psi*100)) + #, colour = ..leve
         plot.subtitle = element_blank()) #element_text(hjust = 0.5))
 
 percentreducbiwk <- ggplot(df, aes(x = phi*100, y = psi*100)) + #, colour = ..level..)) +
-  geom_tile(aes(fill = percent_reduc_inf_biwk)) +
+  geom_raster(aes(fill = percent_reduc_inf_biwk)) +
   geom_contour(aes(z = Reff_biwk), breaks = 1, size = 0.6, col = "white") +
   geom_contour(aes(z = Reff), breaks = 1, size = 0.6, col = "white", linetype = "longdash") +
   scale_y_continuous(expand = c(0, 0)) +
   scale_x_continuous(expand = c(0, 0)) +
-  geom_point(aes(x = 58, y = 35), color = "black", size = 0.2) +
+  geom_point(aes(x = 58, y = 35), color = "white", size = 0.2) +
   ylab("Infection-acquired immunity (%)") +
   xlab("") +# xlab("Population vaccination rate (%)") +
   ggtitle("Biweekly testing, 99% compliance", "% reduction in infections due to testing") +
@@ -735,5 +730,5 @@ lay <- rbind(c(1, 2, 3))
 fig6 <- arrangeGrob(panels, percent_legend, plot_timeseries, layout_matrix = lay,
                     widths = c(2.8, 0.2, 1))
 
-ggsave("SuppFig6_testeveryone.pdf", fig6, device = cairo_pdf, width = 8, height = 2.5)
-ggsave("SuppFig6_testeveryone.svg", fig6, device = svg, width = 8, height = 2.5)
+ggsave("Fig6.pdf", fig6, device = cairo_pdf, width = 8, height = 2.5)
+ggsave("SuppFig6.svg", fig6, device = svg, width = 8, height = 2.5)

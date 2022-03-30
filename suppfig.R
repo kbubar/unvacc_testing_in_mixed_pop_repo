@@ -1,15 +1,11 @@
 source("setup.R")
 
+theme_set(theme_minimal(base_size = 11))
+theme_update(text = element_text(family="Arial", size = 11),
+             plot.title = element_text(size = 11, hjust = 0.5, family="Arial"))
 
 # _____________________________________________________________________
-# SUPP FIG1 - same as Fig 2 with R0 = 6 ####
-# _____________________________________________________________________
-
-# Run in contourplot.R
-
-
-# _____________________________________________________________________
-# SUPP FIG2 - heatmaps of total infections and Reff contours, R0 = 4,6 ####
+# SUPP FIG1 - heatmaps of total infections and Reff contours, R0 = 4,6 ####
 # _____________________________________________________________________
 
 for (thisrow in 1:2){
@@ -23,8 +19,9 @@ for (thisrow in 1:2){
     boosteddf <- readRDS("df_suppfig2_boosted_R06.RData")
   }
   
+  R0 <- 6
   p_waning <- ggplot(waningdf, aes(x = phi*100, y = psi*100, z = Reff))+ 
-    geom_tile(aes(fill = tot_infections)) +
+    geom_raster(aes(fill = tot_infections)) +
     geom_contour(breaks = 1:R0, size = 0.4, color = "white") +
     geom_text_contour(breaks = 1:R0, color = "white", rotate = FALSE, nudge_y = 1, nudge_x = 2, skip = 0)+
     scale_y_continuous(expand = c(0, 0)) +
@@ -37,7 +34,7 @@ for (thisrow in 1:2){
           axis.title.y = element_blank()) 
   
   p_baseline <- ggplot(baselinedf, aes(x = phi*100, y = psi*100, z = Reff))+ #, colour = ..level..)) + 
-    geom_tile(aes(fill = tot_infections)) +
+    geom_raster(aes(fill = tot_infections)) +
     geom_contour(breaks = 1:R0, size = 0.4, color = "white") +
     geom_text_contour(breaks = 1:R0, color = "white", rotate = FALSE, nudge_y = 1, nudge_x = 2, skip = 0)+
     scale_y_continuous(expand = c(0, 0)) +
@@ -50,7 +47,7 @@ for (thisrow in 1:2){
           axis.title.y = element_blank()) 
   
   p_boosted <- ggplot(boosteddf, aes(x = phi*100, y = psi*100, z = Reff))+ #, colour = ..level..)) + 
-    geom_tile(aes(fill = tot_infections)) +
+    geom_raster(aes(fill = tot_infections)) +
     geom_contour(breaks = 1:R0, size = 0.4, color = "white") +
     geom_text_contour(breaks = 1:R0, color = "white", rotate = FALSE, nudge_y = 1, nudge_x = 2, skip = 0)+
     scale_y_continuous(expand = c(0, 0)) +
@@ -92,12 +89,18 @@ panels <- ggarrange(p_waning_R04, NULL, p_baseline_R04, NULL, p_boosted_R04,
 
 lay <- rbind(c(1, 2))
 
-suppfig2 <- arrangeGrob(panels, num_legend, layout_matrix = lay,
+suppfig1 <- arrangeGrob(panels, num_legend, layout_matrix = lay,
                     widths = c(3, 0.5), 
                     left = c("Infection-acquired immunity (%)"))
 
-ggsave("SuppFig2.pdf", suppfig2, device = cairo_pdf, width = 8, height = 5)
-ggsave("SuppFig2.svg", suppfig2, device = svg, width = 8, height = 5)
+ggsave("SuppFig1.pdf", suppfig1, device = cairo_pdf, width = 8, height = 5)
+ggsave("SuppFig1.svg", suppfig1, device = svg, width = 8, height = 5)
+
+# _____________________________________________________________________
+# SUPP FIG2 - same as Fig 2 with R0 = 6 ####
+# _____________________________________________________________________
+
+# Run in contourplot.R
 
 
 # _____________________________________________________________________
@@ -227,7 +230,7 @@ proc.time() - ptm
 #* II: Plot fig5 ####
 
 percentreduc50_waning <- ggplot(waningdf, aes(x = phi*100, y = psi*100)) + #, colour = ..level..)) +
-  geom_tile(aes(fill = percent_reduc_hosp_50)) +
+  geom_raster(aes(fill = percent_reduc_hosp_50)) +
   geom_contour(aes(z = Reff_50), breaks = 1, size = 0.6, color = "white") +
   geom_contour(aes(z = Reff), breaks = 1, size = 0.6, col = "white", linetype = "longdash") +
   scale_y_continuous(expand = c(0, 0)) +
@@ -240,7 +243,7 @@ percentreduc50_waning <- ggplot(waningdf, aes(x = phi*100, y = psi*100)) + #, co
   theme(legend.position = "none")
 
 percentreduc50_baseline <- ggplot(baselinedf, aes(x = phi*100, y = psi*100)) + #, colour = ..level..)) +
-  geom_tile(aes(fill = percent_reduc_hosp_50)) +
+  geom_raster(aes(fill = percent_reduc_hosp_50)) +
   geom_contour(aes(z = Reff_50), breaks = 1, size = 0.6, color = "white") +
   geom_contour(aes(z = Reff), breaks = 1, size = 0.6, col = "white", linetype = "longdash") +
   scale_y_continuous(expand = c(0, 0)) +
@@ -253,7 +256,7 @@ percentreduc50_baseline <- ggplot(baselinedf, aes(x = phi*100, y = psi*100)) + #
   theme(legend.position = "none")
 
 percentreduc50_boosted <- ggplot(boosteddf, aes(x = phi*100, y = psi*100)) + #, colour = ..level..)) +
-  geom_tile(aes(fill = percent_reduc_hosp_50)) +
+  geom_raster(aes(fill = percent_reduc_hosp_50)) +
   geom_contour(aes(z = Reff_50), breaks = 1, size = 0.6, color = "white") +
   geom_contour(aes(z = Reff), breaks = 1, size = 0.6, col = "white", linetype = "longdash") +
   scale_y_continuous(expand = c(0, 0)) +
@@ -266,7 +269,7 @@ percentreduc50_boosted <- ggplot(boosteddf, aes(x = phi*100, y = psi*100)) + #, 
   theme(legend.position = "none")
 
 percentreduc99_waning <- ggplot(waningdf, aes(x = phi*100, y = psi*100)) + #, colour = ..level..)) +
-  geom_tile(aes(fill = percent_reduc_hosp_99)) +
+  geom_raster(aes(fill = percent_reduc_hosp_99)) +
   geom_contour(aes(z = Reff_99), breaks = 1, size = 0.6, col = "white") +
   geom_contour(aes(z = Reff), breaks = 1, size = 0.6, col = "white", linetype = "longdash") +
   scale_y_continuous(expand = c(0, 0)) +
@@ -282,7 +285,7 @@ percentreduc99_waning <- ggplot(waningdf, aes(x = phi*100, y = psi*100)) + #, co
         plot.subtitle = element_blank()) #element_text(hjust = 0.5))
 
 percentreduc99_baseline <- ggplot(baselinedf, aes(x = phi*100, y = psi*100)) + #, colour = ..level..)) +
-  geom_tile(aes(fill = percent_reduc_hosp_99)) +
+  geom_raster(aes(fill = percent_reduc_hosp_99)) +
   geom_contour(aes(z = Reff_99), breaks = 1, size = 0.6, col = "white") +
   geom_contour(aes(z = Reff), breaks = 1, size = 0.6, col = "white", linetype = "longdash") +
   scale_y_continuous(expand = c(0, 0)) +
@@ -298,7 +301,7 @@ percentreduc99_baseline <- ggplot(baselinedf, aes(x = phi*100, y = psi*100)) + #
         plot.subtitle = element_blank()) #element_text(hjust = 0.5))
 
 percentreduc99_boosted <- ggplot(boosteddf, aes(x = phi*100, y = psi*100)) + #, colour = ..level..)) +
-  geom_tile(aes(fill = percent_reduc_hosp_99)) +
+  geom_raster(aes(fill = percent_reduc_hosp_99)) +
   geom_contour(aes(z = Reff_99), breaks = 1, size = 0.6, col = "white") +
   geom_contour(aes(z = Reff), breaks = 1, size = 0.6, col = "white", linetype = "longdash") +
   scale_y_continuous(expand = c(0, 0)) +
@@ -550,7 +553,7 @@ for (m in megafig_scenarios){
     }
     
     percentreduc50 <- ggplot(df, aes(x = phi*100, y = psi*100)) + #, colour = ..level..)) +
-      geom_tile(aes_string(fill = fill_50)) +
+      geom_raster(aes_string(fill = fill_50)) +
       geom_contour(aes_string(z = Reff_50), breaks = 1, size = 0.6, color = "white") +
       geom_contour(aes(z = Reff), breaks = 1, size = 0.6, col = "white", linetype = "longdash") +
       scale_y_continuous(expand = c(0, 0)) +
@@ -563,7 +566,7 @@ for (m in megafig_scenarios){
       theme(legend.position = "none")
     
     percentreduc99 <- ggplot(df, aes(x = phi*100, y = psi*100)) + #, colour = ..level..)) +
-      geom_tile(aes_string(fill = fill_99)) +
+      geom_raster(aes_string(fill = fill_99)) +
       geom_contour(aes_string(z = Reff_99), breaks = 1, size = 0.6, col = "white") +
       geom_contour(aes(z = Reff), breaks = 1, size = 0.6, col = "white", linetype = "longdash") +
       scale_y_continuous(expand = c(0, 0)) +
