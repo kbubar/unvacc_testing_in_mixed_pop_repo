@@ -1,4 +1,4 @@
-# Transmission and unvaccinated-only testing in populations of mixed vaccination status
+# Transmission and unvaccinated-only screening in populations of mixed vaccination status
 Github repo associated with the manuscript "SARS-CoV-2 Transmission and Impacts of Unvaccinated-Only Screening in Populations of Mixed Vaccination Status"
 
 ## Dependencies:
@@ -19,7 +19,7 @@ To install packages, use command 'install.packages("package_name")'. Installatio
 
 ## Demo:
 Dataframes for each figure are included in the _dataframes_ folder of the repository. To replicate manuscript figures, load dataframes using the 'readRDS(filename.RData)' command, then execute the figure code in the appropriate file. 
-Finely detailed heatmap data (in countourplot.R) will take approximately 12 hours to generate on a standard machine. To improve runtime, increase the step size on lines 31 and 32 in **countourplot.R** with 'by=0.05'.
+Finely detailed heatmap data (in countourplot.R) will take approximately 2 hours for most heatmaps or 12 hours for Fig 7 to generate on a standard machine. To improve runtime, increase the step size on lines 31 and 32 in **countourplot.R** with 'by=0.05'.
 
 
 ## Notes:
