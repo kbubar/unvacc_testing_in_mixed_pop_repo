@@ -176,3 +176,5 @@ high_compliance <- 0.99
 waning_compliance <- 0.50
 
 this_freq <- 7 # weekly testing
+
+testing_everyone <- 0 # if 0, just testing unvacc. when implementing testing
