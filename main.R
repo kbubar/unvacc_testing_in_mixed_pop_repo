@@ -353,7 +353,6 @@ ggarrange(A, NULL, B, NULL, C, D, NULL,
 ggsave("Fig4.pdf", device = cairo_pdf, width = 10, height = 3)
 
 
-
 # _____________________________________________________________________
 # FIGURE 7 - transition points ####
 # Show uncertainty in transition points over VE and testing scenarios
