@@ -7,20 +7,13 @@ To install packages, use command 'install.packages("package_name")'. Installatio
 
 ## Code layout:
 
-**setup.R** loads packages, plotting functions, and initializes all the default parameter settings.
+**setup.R** loads packages, model and plotting functions, and initializes all the default parameter settings.
 
-**helpers.R** defines functions to run model and compute necessary data for figures. 
+**helpers.R** defines functions to run model, compute necessary data for figures and plotting related functions. 
 
-**main.R** runs the model and generates the main text line plots and table.
+**Demo.R** example code for how to run the model and plot infection and hospitalization curves. 
 
-**contourplot.R** runs the model and generates the heatmap figures. 
-
-**suppfig.R** runs the model and generates the supplemental figures.
-
-## Demo:
-Dataframes for each figure are included in the _dataframes_ folder of the repository. To replicate manuscript figures, load dataframes using the 'readRDS(filename.RData)' command, then execute the figure code in the appropriate file. 
-Finely detailed heatmap data (in countourplot.R) will take approximately 2 hours for most heatmaps or 12 hours for Fig 7 to generate on a standard machine. To improve runtime, increase the step size on lines 31 and 32 in **countourplot.R** with 'by=0.05'.
-
+**Fig.R and SuppFig.R** scripts to recreate manuscript figures. Includes code to generate relevant data frames or use pre-generated dataframes saved in the dataframes folder.
 
 ## Notes:
 
@@ -29,6 +22,8 @@ Finely detailed heatmap data (in countourplot.R) will take approximately 2 hours
 - Exporting a cairo_pdf embeds the text in figures correctly on Windows. But, if you are a Mac user, this file format may not be compatible. We recommend exporting a png instead.
 
 - We recommend using the document outline (on the right-hand side) to navigate each file. 
+
+- Finely detailed heatmap data (e.g., Figure 5) will take approximately 2 hours with a fine grid (psi and phi by 0.01) to generate on a standard machine. To improve runtime, increase the step size when initializating the dataframe to 'by=0.05'.
 
 
 # License
